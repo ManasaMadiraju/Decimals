@@ -36,9 +36,10 @@ class LearnPage2 extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Center( child:  Text(
               'Place Values in Decimals',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
             ),
             const SizedBox(height: 20),
             const Text(
@@ -47,22 +48,32 @@ class LearnPage2 extends StatelessWidget {
               style: TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 20),
-            Image.asset(
+            Center(
+
+            child: Image.asset(
               'assets/decimal2.png', // Add your own image path
               width: 200,
               height: 100,
               fit: BoxFit.cover,
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ReadingDecimalScreen()),
-                );
-              },
-              child: const Text('Next Page'),
             ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end, // Aligns the button to the left
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ReadingDecimalScreen()),
+                    );
+                  },
+                  child: const Text('Next Page'),
+                ),
+              ],
+            ),
+
+
           ],
         ),
       ),
