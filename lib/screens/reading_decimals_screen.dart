@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+
 
 class ReadingDecimalScreen extends StatelessWidget {
   const ReadingDecimalScreen({super.key});
@@ -66,16 +68,24 @@ class ReadingDecimalScreen extends StatelessWidget {
     );
   }
 }
-
 class ExampleItem extends StatelessWidget {
   final String number;
   final String description;
 
-  const ExampleItem({
+  ExampleItem({
     required this.number,
     required this.description,
     super.key,
   });
+
+  final FlutterTts _flutterTts = FlutterTts();
+
+
+  Future<void> _speak(String text) async {
+    await _flutterTts.setLanguage("en-US");
+    await _flutterTts.setPitch(1.0);
+    await _flutterTts.speak(text);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +94,7 @@ class ExampleItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+
           Expanded(
             flex: 3,
             child: Column(
@@ -105,10 +116,10 @@ class ExampleItem extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
+
+          // Audio button
           IconButton(
-            onPressed: () {
-              // Add your audio functionality here
-            },
+            onPressed: () => _speak(number),
             icon: const Icon(Icons.volume_up),
             color: Colors.orange,
             iconSize: 32,

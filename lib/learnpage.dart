@@ -35,9 +35,11 @@ class LearnPage extends StatelessWidget {
          child: Column(
            crossAxisAlignment: CrossAxisAlignment.start,
            children: [
-             const Text(
+             Center(
+             child:  Text(
                'What are Decimals?',
-               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+             ),
              ),
              const SizedBox(height: 20),
              const Text(
@@ -50,22 +52,29 @@ class LearnPage extends StatelessWidget {
                '0.1 means one-tenth, 0.01 means one-hundredth, and so on.',
                style: TextStyle(fontSize: 18),
              ),
-             const SizedBox(height: 30),  
-             Image.asset(
-               'assets/decimal1.png', 
-               width: 200, 
-               height: 100,  
+             const SizedBox(height: 30),
+              Center(
+              child: Image.asset(
+               'assets/decimal1.png',
+               width: 200,
+               height: 100,
                fit: BoxFit.cover,
              ),
+              ),
              const SizedBox(height: 20),
-             ElevatedButton(
-               onPressed: () {
-                 Navigator.push(
-                   context,
-                   MaterialPageRoute(builder: (context) => LearnPage2()),
-                 );
-               },
-               child: const Text('Next Page'),
+             Row(
+               mainAxisAlignment: MainAxisAlignment.end, // Aligns the button to the left
+               children: [
+                 ElevatedButton(
+                   onPressed: () {
+                     Navigator.push(
+                       context,
+                       MaterialPageRoute(builder: (context) =>  LearnPage2()),
+                     );
+                   },
+                   child: const Text('Next Page'),
+                 ),
+               ],
              ),
            ],
          ),
