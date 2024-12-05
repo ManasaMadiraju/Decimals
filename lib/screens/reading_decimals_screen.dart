@@ -119,7 +119,7 @@ class ExampleItem extends StatelessWidget {
 
           // Audio button
           IconButton(
-            onPressed: () => _speak(number),
+            onPressed: () => _speak(description),
             icon: const Icon(Icons.volume_up),
             color: Colors.orange,
             iconSize: 32,
