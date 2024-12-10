@@ -18,7 +18,7 @@ class LearnPage2 extends StatelessWidget {
                  context,
                  MaterialPageRoute(
                      builder: (context) =>
-                         const ReadingDecimalScreen()),  
+                         ReadingDecimalScreen()),  
                );
              },
            ),
@@ -36,8 +36,7 @@ class LearnPage2 extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center ( 
-              child:  Text(
+            Center( child:  Text(
               'Place Values in Decimals',
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
@@ -48,16 +47,17 @@ class LearnPage2 extends StatelessWidget {
               'Example : In 0.25, 2 is in the tenths place, and 5 is in the hundredths place.',
               style: TextStyle(fontSize: 18),
             ),
-            const SizedBox(height: 100),
-            Center (
+            const SizedBox(height: 20),
+            Center(
+
             child: Image.asset(
               'assets/decimal2.png', // Add your own image path
-              width: 300,
-              height: 200,
+              width: 200,
+              height: 100,
               fit: BoxFit.cover,
             ),
-            // const SizedBox(height: 20),
             ),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end, // Aligns the button to the left
               children: [
@@ -72,6 +72,8 @@ class LearnPage2 extends StatelessWidget {
                 ),
               ],
             ),
+
+
           ],
         ),
       ),
