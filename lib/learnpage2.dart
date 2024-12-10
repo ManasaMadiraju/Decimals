@@ -18,7 +18,7 @@ class LearnPage2 extends StatelessWidget {
                  context,
                  MaterialPageRoute(
                      builder: (context) =>
-                         ReadingDecimalScreen()),  
+                         const ReadingDecimalScreen()),  
                );
              },
            ),
@@ -36,7 +36,7 @@ class LearnPage2 extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center( child:  Text(
+            const Center( child:  Text(
               'Place Values in Decimals',
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
@@ -65,7 +65,7 @@ class LearnPage2 extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ReadingDecimalScreen()),
+                      MaterialPageRoute(builder: (context) => const ReadingDecimalScreen()),
                     );
                   },
                   child: const Text('Next Page'),

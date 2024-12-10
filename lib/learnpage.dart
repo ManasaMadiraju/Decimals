@@ -18,7 +18,7 @@ class LearnPage extends StatelessWidget {
                  context,
                  MaterialPageRoute(
                      builder: (context) =>
-                         LearnPage2()),  
+                         const LearnPage2()),  
                );
              },
            ),
@@ -35,7 +35,7 @@ class LearnPage extends StatelessWidget {
          child: Column(
            crossAxisAlignment: CrossAxisAlignment.start,
            children: [
-             Center(
+             const Center(
              child:  Text(
                'What are Decimals?',
                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -69,7 +69,7 @@ class LearnPage extends StatelessWidget {
                    onPressed: () {
                      Navigator.push(
                        context,
-                       MaterialPageRoute(builder: (context) =>  LearnPage2()),
+                       MaterialPageRoute(builder: (context) =>  const LearnPage2()),
                      );
                    },
                    child: const Text('Next Page'),

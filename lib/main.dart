@@ -1,5 +1,6 @@
 import 'package:decimals/screens/memorygameapp.dart';
 import 'package:flutter/material.dart';
+import 'package:decimals/screens/practice1.dart';
 import 'learnpage.dart';
 
 void main() {
@@ -7,6 +8,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -16,13 +19,15 @@ class MyApp extends StatelessWidget {
         '/': (context) => DecimalsPage(),
         '/learn': (context) => const LearnPage(),
         '/play': (context) => const MemoryGameScreen(),
-        // '/practice': (context) => PracticePage(),
+        '/practice': (context) => PlaceValueScreen(),
       },
     );
   }
 }
 
 class DecimalsPage extends StatelessWidget {
+  const DecimalsPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
