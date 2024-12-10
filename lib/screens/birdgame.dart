@@ -177,11 +177,11 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
         // Background Image
         Container(
           width: screenWidth,
-          height: screenHeight * 0.90,
+          height: screenHeight * 0.92,
           decoration: const BoxDecoration(
             image: DecorationImage(
               image: AssetImage("assets/backgroundlake.jpg"),
-              fit: BoxFit.cover, // Cover the entire container
+              fit: BoxFit.fill, // Cover the entire container
             ),
           ),
         ),
@@ -206,7 +206,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
 
                   child: Image.asset(
                     'assets/bird.png',
-                    fit: BoxFit.fitWidth,
+                    fit: BoxFit.contain,
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.2),
