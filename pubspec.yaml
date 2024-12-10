@@ -27,6 +27,9 @@ flutter:
     - assets/background.jpeg
     - assets/fish.png
     - assets/bird.jpg
+    - assets/bird.png
+    - assets/orangefish.png
+    - assets/backgroundlake.jpg
   #  - images/a_dot_ham.jpeg
   # fonts:
   #   - family: Schyler
