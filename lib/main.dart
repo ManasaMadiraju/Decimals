@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => DecimalsPage(),
-        '/learn': (context) => const LearnPage(),
+        '/learn': (context) =>  LearnPage(),
         '/play': (context) => const MemoryGameScreen(),
         // '/practice': (context) => PracticePage(),
       },

@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_tts: ^3.6.2 # Use the latest version
+  http:  ^1.2.2
 
 
 dev_dependencies:
