@@ -185,7 +185,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                  context,
                  MaterialPageRoute(
                      builder: (context) =>
-                         LizzieTheBirdGame()),  
+                         const LizzieTheBirdGame()),  
                );
              },
            ),

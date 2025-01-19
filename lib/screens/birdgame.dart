@@ -43,7 +43,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
         ],
       ),
       body: buildGameScreen(),
-      backgroundColor: Color(0xFF34E1FF),
+      backgroundColor: const Color(0xFF34E1FF),
 
     );
   }
@@ -267,7 +267,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
                 : Colors.transparent,
             width: screenWidth * 0.01, // Responsive border width
           ),
-          image: DecorationImage(
+          image: const DecorationImage(
             image: AssetImage("assets/orangefish.png"),
             // Replace with your image path
             fit: BoxFit.fill,
