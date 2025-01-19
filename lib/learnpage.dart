@@ -60,7 +60,7 @@ class _LearnPageState extends State<LearnPage> {
                  context,
                  MaterialPageRoute(
                      builder: (context) =>
-                         const LearnPage2()),  
+                         LearnPage2()),
                );
              },
            ),
@@ -81,7 +81,7 @@ class _LearnPageState extends State<LearnPage> {
          child: Column(
            crossAxisAlignment: CrossAxisAlignment.start,
            children: [
-             const Center(
+             Center(
              child:  Text(
                translated
                    ? translatedTexts['heading'] ?? originalTexts['heading']!
@@ -119,7 +119,7 @@ class _LearnPageState extends State<LearnPage> {
                    onPressed: () {
                      Navigator.push(
                        context,
-                       MaterialPageRoute(builder: (context) =>  const LearnPage2()),
+                       MaterialPageRoute(builder: (context) =>  LearnPage2()),
                      );
                    },
                    child:  Text(translated
