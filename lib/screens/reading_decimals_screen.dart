@@ -1,15 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 
-class ReadingDecimalScreen extends StatelessWidget {
-  const ReadingDecimalScreen({super.key});
+class ReadingDecimalScreen extends StatefulWidget {
+  @override
+  _ReadingDecimalScreen createState() => _ReadingDecimalScreen();
+}
+class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
+  final Map<String, String> originalTexts = {
+    'h1':'To read decimals:',
+    'h2':'1. Say the whole number first.\n'
+  '2. Say “and.”\n'
+  '3. Say each number after the decimal.\n'
+  '4. Don’t forget to say the units of the last digit!',
+    'h3':'Examples:',
+    'h4':'number: 12.7,'
+            'description: Twelve and seven tenths',
+    'h5':'number: 38.29'
+        'description: Thirty Eight and Twenty Nine Hundredths',
+    'h6':'number: 453.01'
+ 'description: Four Hundred Fifty Three and One Hundredths',
+    'NextPage': 'Next Page'
+  };
+  Map<String, String> translatedTexts = {};
+  bool translated = false;
+  Future<void> translateTexts() async {
+    if (!translated) {
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:3000/translate'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'texts': originalTexts.values.toList()}),
+      );
 
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          translatedTexts = {
+            for (int i = 0; i < originalTexts.keys.length; i++)
+              originalTexts.keys.elementAt(i): data['translations'][i]
+          };
+          translated = true;
+        });
+      } else {
+        print('Failed to fetch translations: ${response.statusCode}');
+      }
+    } else {
+      setState(() {
+        translatedTexts.clear();
+        translated = false; // Mark as untranslated
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
        appBar: AppBar(
-         title: const Text('Reading Decimals'),
+         title:  Text('Reading Decimals'),
          backgroundColor: Colors.green,
          actions: [
             IconButton(
@@ -18,6 +66,10 @@ class ReadingDecimalScreen extends StatelessWidget {
             },
             icon: const Icon(Icons.home),
           ),
+           IconButton(
+             icon: const Icon(Icons.translate),
+             onPressed: translateTexts,
+           ),
          ],
        ),
       body: Padding(
@@ -26,28 +78,24 @@ class ReadingDecimalScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-            const Text(
-              'To read decimals:',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+             Text(
+               translated
+                   ? translatedTexts['h1'] ?? originalTexts['h1']!
+                   : originalTexts['h1']!,
+               style: const TextStyle(fontSize: 28),
             ),
             const SizedBox(height: 10),
-            const Text(
-              '1. Say the whole number first.\n'
-              '2. Say “and.”\n'
-              '3. Say each number after the decimal.\n'
-              '4. Don’t forget to say the units of the last digit!',
-              style: TextStyle(fontSize: 18),
+             Text(translated
+                ? translatedTexts['h2'] ?? originalTexts['h2']!
+                : originalTexts['h2']!,
+              style: const TextStyle(fontSize: 28),
             ),
             const SizedBox(height: 30),
-            const Text(
-              'Examples:',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+             Text(
+              translated
+                  ? translatedTexts['h3'] ?? originalTexts['h3']!
+                  : originalTexts['h3']!,
+              style: const TextStyle(fontSize: 28),
             ),
             const SizedBox(height: 20),
             ExampleItem(
