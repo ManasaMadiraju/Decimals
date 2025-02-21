@@ -1,5 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:decimals/screens/birdgame1.dart';
 import 'package:flutter/material.dart';
 
 class LizzieTheBirdGame extends StatefulWidget {
@@ -10,7 +11,7 @@ class LizzieTheBirdGame extends StatefulWidget {
 }
 
 class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
-  String targetValue = "0.8"; // Correct answer
+  String targetValue = "0.25"; // Correct answer
   String feedback = ""; // Feedback message (Correct or Incorrect)
   Color feedbackColor = Colors.transparent; // Feedback message color
 
@@ -33,8 +34,20 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
       appBar: AppBar(
         title: const Text('Play: Lizzie the Bird'),
         backgroundColor: Colors.green,
-        actions: [
+         actions: [
           IconButton(
+             icon: const Icon(Icons.arrow_forward_rounded),
+             onPressed: () {
+               Navigator.push(
+                 context,
+                 MaterialPageRoute(
+                     builder: (context) =>
+                           const LizzieTheBirdGame1()),  
+               );
+             },
+           ),
+          // Previous button - Goes back to the Practice Page
+           IconButton(
             onPressed: () {
               Navigator.popUntil(context, (route) => route.isFirst);
             },
@@ -211,7 +224,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
                 ),
                 SizedBox(height: screenHeight * 0.2),
                 const Text(
-                  '8 Tenths',
+                  '25 Hundredths',
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: screenHeight * 0.02),
@@ -223,11 +236,11 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
               spacing: screenWidth * 0.05,
               runSpacing: screenHeight * 0.02,
               children: [
-                buildFishButton('0.08', screenWidth, screenHeight),
-                buildFishButton('0.9', screenWidth, screenHeight),
-                buildFishButton('0.8', screenWidth, screenHeight),
+                buildFishButton('0.025', screenWidth, screenHeight),
+                buildFishButton('0.25', screenWidth, screenHeight),
+                buildFishButton('2.5', screenWidth, screenHeight),
                 // Correct fish
-                buildFishButton('0.09', screenWidth, screenHeight),
+                buildFishButton('0.0025', screenWidth, screenHeight),
               ],
             ),
 

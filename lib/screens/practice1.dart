@@ -1,7 +1,10 @@
+import 'package:decimals/screens/treasurehunt.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
 class PlaceValueScreen extends StatefulWidget {
+  const PlaceValueScreen({super.key});
+
   @override
   _PlaceValueScreenState createState() => _PlaceValueScreenState();
 }
@@ -37,14 +40,26 @@ class _PlaceValueScreenState extends State<PlaceValueScreen> {
         title: Text('Practice Test 1: Score $score'),
         backgroundColor: Colors.green,
         centerTitle: true,
-        actions: [
-            IconButton(
+         actions: [
+          IconButton(
+             icon: const Icon(Icons.arrow_forward_rounded),
+             onPressed: () {
+               Navigator.push(
+                 context,
+                 MaterialPageRoute(
+                     builder: (context) =>
+                         DecimalTreasureHuntGame()),  
+               );
+             },
+           ),
+          // Previous button - Goes back to the Practice Page
+           IconButton(
             onPressed: () {
               Navigator.popUntil(context, (route) => route.isFirst);
             },
             icon: const Icon(Icons.home),
           ),
-         ],
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -55,7 +70,7 @@ class _PlaceValueScreenState extends State<PlaceValueScreen> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             // Numbers with Drop Targets Below
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -63,48 +78,48 @@ class _PlaceValueScreenState extends State<PlaceValueScreen> {
                 Column(
                   children: [
                     _buildColoredNumber('1', Colors.red),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     _buildDragTarget('1'),
                   ],
                 ),
                 Column(
                   children: [
                     _buildColoredNumber('7', Colors.red),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     _buildDragTarget('7'),
                   ],
                 ),
                 Column(
                   children: [
                     _buildColoredNumber('.', Colors.black),
-                    SizedBox(height: 60),
+                    const SizedBox(height: 60),
                     //  _buildDragTarget('.'),
                   ],
                 ),
                 Column(
                   children: [
                     _buildColoredNumber('6', Colors.green),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     _buildDragTarget('6'),
                   ],
                 ),
                 Column(
                   children: [
                     _buildColoredNumber('2', Colors.blue),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     _buildDragTarget('2'),
                   ],
                 ),
                 Column(
                   children: [
                     _buildColoredNumber('5', Colors.brown),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     _buildDragTarget('5'),
                   ],
                 ),
               ],
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             // Feedback Section
             Column(
               children: feedback.keys.map((key) {
@@ -118,7 +133,7 @@ class _PlaceValueScreenState extends State<PlaceValueScreen> {
                 );
               }).toList(),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             // Draggable Options
             Wrap(
               spacing: 10,
@@ -150,28 +165,28 @@ class _PlaceValueScreenState extends State<PlaceValueScreen> {
       data: value,
       feedback: Material(
         child: Container(
-          padding: EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8),
           color: Colors.grey[300],
           child: Text(
             value,
-            style: TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 16),
           ),
         ),
       ),
       childWhenDragging: Container(
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.all(8),
         color: Colors.grey[200],
         child: Text(
           value,
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+          style: const TextStyle(fontSize: 16, color: Colors.grey),
         ),
       ),
       child: Container(
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.all(8),
         color: Colors.grey[300],
         child: Text(
           value,
-          style: TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 16),
         ),
       ),
     );
@@ -180,13 +195,13 @@ class _PlaceValueScreenState extends State<PlaceValueScreen> {
   // Widget for drag targets
   Widget _buildDragTarget(String key) {
     return DragTarget<String>(
-      onAccept: (value) {
+      onAcceptWithDetails: (value) {
         setState(() {
           if (items[key] == value) {
             if (draggedItems[key] == null) {
               score = (score < 5) ? score + 1 : score; // Increase score
             }
-            draggedItems[key] = value;
+            draggedItems[key] = value.data;
             feedback[key] = true; // Correct feedback
           } else {
             feedback[key] = false; // Incorrect feedback
@@ -208,9 +223,9 @@ class _PlaceValueScreenState extends State<PlaceValueScreen> {
           child: draggedItems[key] != null
               ? Text(
                   draggedItems[key]!,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 )
-              : Text(
+              : const Text(
                   'Drop here',
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
