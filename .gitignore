@@ -1,1 +1,11 @@
-.dart_tool
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-versions
+.idea/
+.vscode/
+build/
+ios/Pods/
+android/.gradle/
+pubspec.lock
