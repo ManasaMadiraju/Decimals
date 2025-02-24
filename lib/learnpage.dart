@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 
 
 class LearnPage extends StatefulWidget {
+  const LearnPage({super.key});
+
   @override
   _LearnPageState createState() => _LearnPageState();
 }
@@ -60,7 +62,7 @@ class _LearnPageState extends State<LearnPage> {
                  context,
                  MaterialPageRoute(
                      builder: (context) =>
-                         LearnPage2()),
+                         const LearnPage2()),
                );
              },
            ),
@@ -119,7 +121,7 @@ class _LearnPageState extends State<LearnPage> {
                    onPressed: () {
                      Navigator.push(
                        context,
-                       MaterialPageRoute(builder: (context) =>  LearnPage2()),
+                       MaterialPageRoute(builder: (context) =>  const LearnPage2()),
                      );
                    },
                    child:  Text(translated

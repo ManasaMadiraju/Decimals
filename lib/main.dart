@@ -4,7 +4,7 @@ import 'package:decimals/screens/practice1.dart';
 import 'learnpage.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -16,10 +16,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        '/': (context) => DecimalsPage(),
-        '/learn': (context) =>  LearnPage(),
+        '/': (context) => const DecimalsPage(),
+        '/learn': (context) =>  const LearnPage(),
         '/play': (context) => const MemoryGameScreen(),
-        '/practice': (context) => PlaceValueScreen(),
+        '/practice': (context) => const PlaceValueScreen(),
       },
     );
   }

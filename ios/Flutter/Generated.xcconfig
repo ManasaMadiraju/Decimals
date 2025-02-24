@@ -1,8 +1,8 @@
 // This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=C:\Users\RuthuR\Flutter\flutter
-FLUTTER_APPLICATION_PATH=C:\Users\RuthuR\Documents\GitHub\Decimals1
+FLUTTER_ROOT=/Users/manasa/development/flutter
+FLUTTER_APPLICATION_PATH=/Users/manasa/FIH-Decimals/Wed Feb 5/Decimals1
 COCOAPODS_PARALLEL_CODE_SIGN=true
-FLUTTER_TARGET=lib\main.dart
+FLUTTER_TARGET=lib/main.dart
 FLUTTER_BUILD_DIR=build
 FLUTTER_BUILD_NAME=1.0.0
 FLUTTER_BUILD_NUMBER=1

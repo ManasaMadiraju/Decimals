@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 
 
 class ReadingDecimalScreen extends StatefulWidget {
+  const ReadingDecimalScreen({super.key});
+
   @override
   _ReadingDecimalScreen createState() => _ReadingDecimalScreen();
 }
@@ -57,7 +59,7 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
        appBar: AppBar(
-         title:  Text('Reading Decimals'),
+         title:  const Text('Reading Decimals'),
          backgroundColor: Colors.green,
          actions: [
             IconButton(

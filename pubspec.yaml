@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_tts: ^3.6.2 # Use the latest version
+  audioplayers: ^6.1.1
   http:  ^1.2.2
 
 
@@ -31,6 +32,8 @@ flutter:
     - assets/bird.png
     - assets/orangefish.png
     - assets/backgroundlake.jpg
+    - assets/sounds/error.mp3
+    - assets/sounds/success.mp3
   #  - images/a_dot_ham.jpeg
   # fonts:
   #   - family: Schyler
