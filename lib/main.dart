@@ -2,6 +2,9 @@ import 'package:decimals/screens/memorygameapp.dart';
 import 'package:flutter/material.dart';
 import 'package:decimals/screens/practice1.dart';
 import 'learnpage.dart';
+import 'package:decimals/screens/birdgame.dart';
+import 'GameSelectionDialog.dart';
+import 'package:decimals/screens/treasurehunt.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,8 +21,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const DecimalsPage(),
         '/learn': (context) =>  const LearnPage(),
-        '/play': (context) => const MemoryGameScreen(),
-        '/practice': (context) => const PlaceValueScreen(),
+        '/play': (context) => const GameSelectionDialog(),
+        '/practice': (context) =>  DecimalTreasureHuntGame(),
       },
     );
   }
