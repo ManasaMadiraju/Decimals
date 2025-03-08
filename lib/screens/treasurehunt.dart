@@ -1,6 +1,5 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 
 void main() {
@@ -12,10 +11,7 @@ class DecimalTreasureHuntGame extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Decimal Treasure Hunt',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: TreasureHuntScreen(),
     );
   }
@@ -23,59 +19,42 @@ class DecimalTreasureHuntGame extends StatelessWidget {
 
 class TreasureHuntScreen extends StatefulWidget {
   @override
-  // ignore: library_private_types_in_public_api
   _TreasureHuntScreenState createState() => _TreasureHuntScreenState();
 }
 
-class _TreasureHuntScreenState extends State<TreasureHuntScreen> with SingleTickerProviderStateMixin {
-  final List<String> decimalOptions = ['0.1', '0.25', '0.5', '0.75', '1.0', '0.33', '0.67', '0.99', '0.01', '0.005', '0.125', '0.875'];
-  String targetDecimal = '0.5';
-  String decimalPlace = 'tenths'; // Default to tenths
-  bool isTreasureFound = false;
-  int score = 0;
-  late AnimationController _animationController;
-  late Animation<double> _animation;
+class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
+  final Random _random = Random();
   final AudioPlayer _audioPlayer = AudioPlayer();
+  int score = 0;
+  late String number;
+  late String question;
+  late int correctAnswer;
+  final List<String> places = ['Ones', 'Tens', 'Hundreds', 'Tenths', 'Hundredths', 'Thousandths'];
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(seconds: 1),
-      vsync: this,
-    );
-    _animation = Tween<double>(begin: 1.0, end: 1.2).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-    setTargetDecimal();
+    _generateQuestion();
   }
 
-  // Function to set target decimal dynamically
-  void setTargetDecimal() {
-    if (decimalPlace == 'tenths') {
-      targetDecimal = decimalOptions[(decimalOptions.indexOf(targetDecimal) + 1) % 5];
-    } else if (decimalPlace == 'hundredths') {
-      targetDecimal = decimalOptions[(decimalOptions.indexOf(targetDecimal) + 1) % 8];
-    } else if (decimalPlace == 'thousandths') {
-      targetDecimal = decimalOptions[(decimalOptions.indexOf(targetDecimal) + 1) % decimalOptions.length];
-    }
+  void _generateQuestion() {
+    number = (_random.nextDouble() * 1000).toStringAsFixed(3); // Generate a random decimal (e.g., 95.610)
+    String selectedPlace = places[_random.nextInt(places.length)];
+    Map<String, int> placeIndex = {
+      'Ones': number.indexOf('.') - 1,
+      'Tens': number.indexOf('.') - 2,
+      'Hundreds': number.indexOf('.') - 3,
+      'Tenths': number.indexOf('.') + 1,
+      'Hundredths': number.indexOf('.') + 2,
+      'Thousandths': number.indexOf('.') + 3,
+    };
+
+    int index = placeIndex[selectedPlace]!;
+    correctAnswer = index >= 0 && index < number.length ? int.parse(number[index]) : 0;
+    question = 'Find the digit in the $selectedPlace place of $number';
   }
 
-  // Function to get the decimal place text
-  String getDecimalPlaceText() {
-    switch (decimalPlace) {
-      case 'tenths':
-        return 'tenths';
-      case 'hundredths':
-        return 'hundredths';
-      case 'thousandths':
-        return 'thousandths';
-      default:
-        return 'decimal';
-    }
-  }
-
-  Future<void> playSound(String soundPath) async {
+  Future<void> _playSound(String soundPath) async {
     try {
       await _audioPlayer.play(AssetSource(soundPath));
     } catch (e) {
@@ -83,338 +62,81 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> with SingleTick
     }
   }
 
-  void checkDecimal(String selectedDecimal) async {
-    if (selectedDecimal == targetDecimal) {
+  void _checkAnswer(int selected) async {
+    if (selected == correctAnswer) {
+      await _playSound('sounds/success.mp3');
       setState(() {
-        isTreasureFound = true;
         score += 10;
+        _generateQuestion();
       });
-      await playSound('sounds/success.mp3');
-      _animationController.forward(from: 0);
-      
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Treasure Found!', style: TextStyle(color: Colors.green)),
-            content: Text('Congratulations! You found $targetDecimal in $decimalPlace.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  resetGame();
-                },
-                child: const Text('Next Round', style: TextStyle(color: Colors.blue)),
-              ),
-            ],
-          ),
-        );
-      }
     } else {
-      await playSound('sounds/error.mp3');
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Try Again', style: TextStyle(color: Colors.red)),
-            content: const Text("Oops! That's not the correct decimal. Try again!"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK', style: TextStyle(color: Colors.blue)),
-              ),
-            ],
-          ),
-        );
-      }
+      await _playSound('sounds/error.mp3');
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Try Again', style: TextStyle(color: Colors.red)),
+          content: Text("Oops! $selected is incorrect."),
+          actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK'))],
+        ),
+      );
     }
-  }
-
-  void resetGame() {
-    setState(() {
-      isTreasureFound = false;
-      setTargetDecimal();
-      _animationController.reset();
-    });
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    _audioPlayer.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Decimal Treasure Hunt'),
-        backgroundColor: Colors.blueAccent,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                const Icon(Icons.star, color: Colors.yellow, size: 30),
-                const SizedBox(width: 5),
-                Text('Score: $score', style: const TextStyle(fontSize: 20, color: Colors.white)),
-              ],
+      appBar: AppBar(title: const Text('Decimal Treasure Hunt'), actions: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(children: [
+            IconButton(
+              onPressed: () {
+                Navigator.popUntil(context, (route) => route.isFirst);
+              },
+              icon: const Icon(Icons.home),
             ),
-          ),
-        ],
-      ),
+            const SizedBox(width: 5),
+
+          ]),
+        )
+      ]),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue.shade100, Colors.blue.shade300],
-          ),
+          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.blue.shade100, Colors.blue.shade300]),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Text('Find the decimal in ${getDecimalPlaceText()}:', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              Text(targetDecimal, style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 20),
-              Expanded(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                  ),
-                  itemCount: decimalOptions.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () => checkDecimal(decimalOptions[index]),
-                      child: ScaleTransition(
-                        scale: _animation,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.amber.shade600,
-                            borderRadius: BorderRadius.circular(15),
-                            boxShadow: [
-                              BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 5, offset: const Offset(2, 2)),
-                            ],
-                          ),
-                          child: Center(
-                            child: Text(
-                              decimalOptions[index],
-                              style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+          child: Column(children: [
+            Text(question, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 100),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 5,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 1,
                 ),
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () => _checkAnswer(index),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade600,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 5, offset: const Offset(2, 2))],
+                      ),
+                      child: Center(child: Text('$index', style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold))),
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ]),
         ),
       ),
     );
   }
 }
-
-
-
-// // ignore_for_file: use_key_in_widget_constructors
-
-// import 'package:flutter/material.dart';
-// import 'package:audioplayers/audioplayers.dart';
-
-// void main() {
-//   runApp(DecimalTreasureHuntGame());
-// }
-
-// class DecimalTreasureHuntGame extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Decimal Treasure Hunt',
-//       theme: ThemeData(
-//         primarySwatch: Colors.blue,
-//         visualDensity: VisualDensity.adaptivePlatformDensity,
-//       ),
-//       home: TreasureHuntScreen(),
-//     );
-//   }
-// }
-
-// class TreasureHuntScreen extends StatefulWidget {
-//   @override
-//   // ignore: library_private_types_in_public_api
-//   _TreasureHuntScreenState createState() => _TreasureHuntScreenState();
-// }
-
-// class _TreasureHuntScreenState extends State<TreasureHuntScreen> with SingleTickerProviderStateMixin {
-//   final List<String> decimalOptions = ['0.1', '0.25', '0.5', '0.75', '1.0', '0.33', '0.67', '0.99', '0.01'];
-//   String targetDecimal = '0.5';
-//   bool isTreasureFound = false;
-//   int score = 0;
-//   late AnimationController _animationController;
-//   late Animation<double> _animation;
-//   final AudioPlayer _audioPlayer = AudioPlayer();
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _animationController = AnimationController(
-//       duration: const Duration(seconds: 1),
-//       vsync: this,
-//     );
-//     _animation = Tween<double>(begin: 1.0, end: 1.2).animate(
-//       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-//     );
-//   }
-
-//   Future<void> playSound(String soundPath) async {
-//     try {
-//       await _audioPlayer.play(AssetSource(soundPath));
-//     } catch (e) {
-//       print("Error playing sound: $e");
-//     }
-//   }
-
-//   void checkDecimal(String selectedDecimal) async {
-//     if (selectedDecimal == targetDecimal) {
-//       setState(() {
-//         isTreasureFound = true;
-//         score += 10;
-//       });
-//       await playSound('sounds/success.mp3');
-//       _animationController.forward(from: 0);
-      
-//       if (mounted) {
-//         showDialog(
-//           context: context,
-//           builder: (context) => AlertDialog(
-//             title: const Text('Treasure Found!', style: TextStyle(color: Colors.green)),
-//             content: Text('Congratulations! You found $targetDecimal.'),
-//             actions: [
-//               TextButton(
-//                 onPressed: () {
-//                   Navigator.of(context).pop();
-//                   resetGame();
-//                 },
-//                 child: const Text('Next Round', style: TextStyle(color: Colors.blue)),
-//               ),
-//             ],
-//           ),
-//         );
-//       }
-//     } else {
-//       await playSound('sounds/error.mp3');
-//       if (mounted) {
-//         showDialog(
-//           context: context,
-//           builder: (context) => AlertDialog(
-//             title: const Text('Try Again', style: TextStyle(color: Colors.red)),
-//             content: const Text("Oops! That's not the correct decimal. Try again!"),
-//             actions: [
-//               TextButton(
-//                 onPressed: () => Navigator.of(context).pop(),
-//                 child: const Text('OK', style: TextStyle(color: Colors.blue)),
-//               ),
-//             ],
-//           ),
-//         );
-//       }
-//     }
-//   }
-
-//   void resetGame() {
-//     setState(() {
-//       isTreasureFound = false;
-//       targetDecimal = decimalOptions[(decimalOptions.indexOf(targetDecimal) + 1) % decimalOptions.length];
-//       _animationController.reset();
-//     });
-//   }
-
-//   @override
-//   void dispose() {
-//     _animationController.dispose();
-//     _audioPlayer.dispose();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Decimal Treasure Hunt'),
-//         backgroundColor: Colors.blueAccent,
-//         actions: [
-//           Padding(
-//             padding: const EdgeInsets.all(8.0),
-//             child: Row(
-//               children: [
-//                 Icon(Icons.star, color: Colors.yellow, size: 30),
-//                 SizedBox(width: 5),
-//                 Text('Score: $score', style: TextStyle(fontSize: 20, color: Colors.white)),
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//       body: Container(
-//         decoration: BoxDecoration(
-//           gradient: LinearGradient(
-//             begin: Alignment.topCenter,
-//             end: Alignment.bottomCenter,
-//             colors: [Colors.blue.shade100, Colors.blue.shade300],
-//           ),
-//         ),
-//         child: Padding(
-//           padding: const EdgeInsets.all(16.0),
-//           child: Column(
-//             children: [
-//               Text('Find the decimal:', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-//               SizedBox(height: 10),
-//               Text(targetDecimal, style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
-//               SizedBox(height: 20),
-//               Expanded(
-//                 child: GridView.builder(
-//                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-//                     crossAxisCount: 3,
-//                     crossAxisSpacing: 10,
-//                     mainAxisSpacing: 10,
-//                   ),
-//                   itemCount: decimalOptions.length,
-//                   itemBuilder: (context, index) {
-//                     return GestureDetector(
-//                       onTap: () => checkDecimal(decimalOptions[index]),
-//                       child: ScaleTransition(
-//                         scale: _animation,
-//                         child: Container(
-//                           decoration: BoxDecoration(
-//                             color: Colors.amber.shade600,
-//                             borderRadius: BorderRadius.circular(15),
-//                             boxShadow: [
-//                               BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 5, offset: Offset(2, 2)),
-//                             ],
-//                           ),
-//                           child: Center(
-//                             child: Text(
-//                               decimalOptions[index],
-//                               style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
-//                             ),
-//                           ),
-//                         ),
-//                       ),
-//                     );
-//                   },
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
