@@ -37,7 +37,7 @@ class _PlaceValueScreenState extends State<PlaceValueScreen> {
   final shuffledOptions = [...items.values, ...extraOptions]..shuffle(Random());
     return Scaffold(
       appBar: AppBar(
-        title: Text('Practice Test 1: Score $score'),
+        title: Text('Practice Test, Match it'),
         backgroundColor: Colors.green,
         centerTitle: true,
          actions: [
@@ -197,7 +197,7 @@ class _PlaceValueScreenState extends State<PlaceValueScreen> {
     return DragTarget<String>(
       onAcceptWithDetails: (value) {
         setState(() {
-          if (items[key] == value) {
+          if (items[key] == value.data) {
             if (draggedItems[key] == null) {
               score = (score < 5) ? score + 1 : score; // Increase score
             }

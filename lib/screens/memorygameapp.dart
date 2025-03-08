@@ -1,3 +1,4 @@
+import 'dart:math'; // Import for random selection
 import 'package:flutter/material.dart';
 import 'birdgame.dart';
 
@@ -9,42 +10,57 @@ class MemoryGameScreen extends StatefulWidget {
 }
 
 class _MemoryGameScreenState extends State<MemoryGameScreen> {
-  final List<String> items = [
-    '.444',
-    '.73',
-    '61',
-    '1.13',
-    'Tenths',
-    'Hundredths',
-    'Thousandths',
-    'Tens'
-  ];
-  final Map<String, String> correctPairs = {
-    '.444': 'Tenths',
-    '.73': 'Hundredths',
-    '61': 'Tens',
-    '1.13': 'Thousandths'
-  };
+  final List<Map<String, String>> questionSets = [
+    {'.444': 'Thousandths', '.73': 'Hundredths', '61': 'Tens', '1.13': 'Tenths', '7842': 'Thousands', '5': 'Ones'},
+    {'0.89': 'Hundredths', '92': 'Tens', '0.6': 'Tenths', '4567': 'Thousands', '3': 'Ones', '0.234': 'Thousandths'},
+    {'0.15': 'Hundredths', '45': 'Tens', '1.2': 'Tenths', '6789': 'Thousands', '7': 'Ones', '0.098': 'Thousandths'},
+  ]; // Multiple sets of questions
+
+  late Map<String, String> correctPairs;
+  late List<String> items;
   List<String> selectedItems = [];
+  int score = 0;
+  final Random random = Random();
+
+  @override
+  void initState() {
+    super.initState();
+    _generateNewRound();
+  }
+
+  void _generateNewRound() {
+    setState(() {
+      int randomIndex = random.nextInt(questionSets.length);
+      correctPairs = questionSets[randomIndex]; // Pick a random set
+      items = correctPairs.entries.expand((e) => [e.key, e.value]).toList(); // Flatten into a list
+      items.shuffle(); // Shuffle the items for randomness
+      selectedItems.clear();
+      score = score;
+    });
+  }
 
   void checkMatch() {
     if (selectedItems.length == 2) {
       final String first = selectedItems[0];
       final String second = selectedItems[1];
 
-      // Check if the pair is correct in either order
       if ((correctPairs[first] == second) || (correctPairs[second] == first)) {
-        // Correct match
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Correct!'),
           backgroundColor: Colors.green,
         ));
         setState(() {
+          score++;
           items.remove(first);
           items.remove(second);
         });
+
+        if (items.isEmpty) {
+          Future.delayed(const Duration(milliseconds: 500), () {
+            _showCompletionDialog();
+          });
+        }
       } else {
-        // Incorrect match
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Incorrect!'),
           backgroundColor: Colors.red,
@@ -54,6 +70,27 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     }
   }
 
+  void _showCompletionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Good Job! 🎉"),
+          content: const Text("You matched all pairs! Play Next Round ?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _generateNewRound(); // Generate a new question set
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
   Widget buildUnderlinedText(String text) {
     if (text == '.444') {
       return RichText(
@@ -159,6 +196,318 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           ],
         ),
       );
+    } else if (text == '7842') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '7',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            TextSpan(
+              text: '842',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (text == '5') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '5',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (text == '0.89') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '0.8',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            TextSpan(
+              text: '9',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (text == '92') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '9',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            TextSpan(
+              text: '2',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (text == '0.6') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '0.',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            TextSpan(
+              text: '6',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (text == '4567') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '4',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            TextSpan(
+              text: '567',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (text == '3') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '3',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (text == '0.234') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '0.23',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            TextSpan(
+              text: '4',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (text == '0.15') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '0.1',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            TextSpan(
+              text: '5',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (text == '45') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '4',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            TextSpan(
+              text: '5',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (text == '1.2') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '1.',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            TextSpan(
+              text: '2',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (text == '6789') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '6',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            TextSpan(
+              text: '789',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (text == '7') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '7',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (text == '0.098') {
+      return RichText(
+        text: const TextSpan(
+          children: [
+            TextSpan(
+              text: '0.09',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            TextSpan(
+              text: '8',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
+      );
     } else {
       return Text(
         text,
@@ -171,6 +520,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -178,24 +528,28 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
         backgroundColor: Colors.green,
         title: const Text('Play: Memory'),
         actions: [
-            IconButton(
-             icon: const Icon(Icons.arrow_forward_rounded),
-             onPressed: () {
-               Navigator.push(
-                 context,
-                 MaterialPageRoute(
-                     builder: (context) =>
-                         const LizzieTheBirdGame()),  
-               );
-             },
-           ),
-            IconButton(
+          Text(
+            "Score: $score",
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          IconButton(
+            icon: const Icon(Icons.arrow_forward_rounded),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LizzieTheBirdGame(),
+                ),
+              );
+            },
+          ),
+          IconButton(
             onPressed: () {
               Navigator.popUntil(context, (route) => route.isFirst);
             },
             icon: const Icon(Icons.home),
           ),
-         ],
+        ],
       ),
       body: Column(
         children: [
@@ -209,11 +563,12 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           ),
           Expanded(
             child: GridView.builder(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.only(left: 450.0, right: 450.0, bottom: 450.0),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+                crossAxisSpacing: 5,
+                mainAxisSpacing: 5,
+                childAspectRatio: 1,
               ),
               itemCount: items.length,
               itemBuilder: (context, index) {
@@ -221,7 +576,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                 final bool isSelected = selectedItems.contains(item);
                 return GestureDetector(
                   onTap: () {
-                    if (selectedItems.contains(item)) return; // Prevent double-selection
+                    if (selectedItems.contains(item)) return;
                     setState(() {
                       selectedItems.add(item);
                     });
@@ -236,16 +591,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                           : Border.all(color: Colors.purple, width: 1),
                     ),
                     alignment: Alignment.center,
-                    child: item.contains('.') || item == '61'
-                        ? buildUnderlinedText(item)
-                        : Text(
-                            item,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
+                    child:item.contains('.') || (item == '61' || (item == '7842') || (item == '5')|| (item == '92') || (item == '4567')|| (item == '45')|| (item == '6789')|| (item == '7')|| (item == '3'))? buildUnderlinedText(item) : Text(
+                      item,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 );
               },

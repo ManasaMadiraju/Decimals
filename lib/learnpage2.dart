@@ -23,7 +23,7 @@ class _LearnPageState2 extends State<LearnPage2> {
   Future<void> translateTexts() async {
     if (!translated) {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/translate'),
+        Uri.parse('http://localhost:3000/translate'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'texts': originalTexts.values.toList()}),
       );
