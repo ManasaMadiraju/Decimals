@@ -80,18 +80,6 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.arrow_forward_rounded),
-            onPressed: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //       builder: (context) =>
-              //           DecimalTreasureHuntGame()),
-              // );
-            },
-          ),
-          // Previous button - Goes back to the Practice Page
-          IconButton(
             onPressed: () {
               Navigator.popUntil(context, (route) => route.isFirst);
             },

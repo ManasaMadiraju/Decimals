@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:decimals/screens/practice1.dart';
 import 'package:decimals/screens/birdgame.dart';
 import 'package:decimals/screens/memorygameapp.dart';
 import 'package:decimals/screens/PlaceValueScreenState1.dart';
