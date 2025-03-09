@@ -533,17 +533,6 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           IconButton(
-            icon: const Icon(Icons.arrow_forward_rounded),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const LizzieTheBirdGame(),
-                ),
-              );
-            },
-          ),
-          IconButton(
             onPressed: () {
               Navigator.popUntil(context, (route) => route.isFirst);
             },
