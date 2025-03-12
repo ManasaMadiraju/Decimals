@@ -78,62 +78,163 @@ class _LearnPageState extends State<LearnPage> {
            ),
          ],
        ),
+       // body: Padding(
+       //   padding: const EdgeInsets.all(16.0),
+       //   child: Column(
+       //     crossAxisAlignment: CrossAxisAlignment.start,
+       //     children: [
+       //       Center(
+       //       child:  Text(
+       //         translated
+       //             ? translatedTexts['heading'] ?? originalTexts['heading']!
+       //             : originalTexts['heading']!,
+       //         style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+       //       ),
+       //       ),
+       //       const SizedBox(height: 20),
+       //       Text(
+       //         translated? translatedTexts['body'] ?? originalTexts['body']!
+       //             : originalTexts['body']!,
+       //         style: const TextStyle(fontSize: 18),
+       //       ),
+       //       const SizedBox(height: 20),
+       //        Text(
+       //         translated
+       //             ? translatedTexts['example'] ?? originalTexts['example']!
+       //             : originalTexts['example']!,
+       //         style: const TextStyle(fontSize: 18),
+       //       ),
+       //       const SizedBox(height: 30),
+       //        Center(
+       //        child: Image.asset(
+       //         'assets/decimal1.png',
+       //         width: 200,
+       //         height: 100,
+       //         fit: BoxFit.cover,
+       //       ),
+       //        ),
+       //       const SizedBox(height: 20),
+       //       Row(
+       //         mainAxisAlignment: MainAxisAlignment.end, // Aligns the button to the left
+       //         children: [
+       //           ElevatedButton(
+       //             onPressed: () {
+       //               Navigator.push(
+       //                 context,
+       //                 MaterialPageRoute(builder: (context) =>  const LearnPage2()),
+       //               );
+       //             },
+       //             child:  Text(translated
+       //                 ? translatedTexts['NextPage'] ?? originalTexts['NextPage']!
+       //                 : originalTexts['NextPage']!,
+       //               style: const TextStyle(fontSize: 18),),
+       //           ),
+       //         ],
+       //       ),
+       //     ],
+       //   ),
+       // ),
        body: Padding(
-         padding: const EdgeInsets.all(16.0),
+         padding: const EdgeInsets.only(left: 50, right: 50),
          child: Column(
-           crossAxisAlignment: CrossAxisAlignment.start,
+           crossAxisAlignment: CrossAxisAlignment.center,
            children: [
+             // Heading
              Center(
-             child:  Text(
-               translated
-                   ? translatedTexts['heading'] ?? originalTexts['heading']!
-                   : originalTexts['heading']!,
-               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+               child: Text(
+                 translated
+                     ? translatedTexts['heading'] ?? originalTexts['heading']!
+                     : originalTexts['heading']!,
+                 style: const TextStyle(
+                   fontSize: 50,
+                   fontWeight: FontWeight.bold,
+                   color: Colors.teal,
+                 ),
+                 textAlign: TextAlign.center,
+               ),
              ),
+
+             const SizedBox(height: 50),
+
+             // Description Text
+             Container(
+               padding: const EdgeInsets.all(12),
+               decoration: BoxDecoration(
+                 color: Colors.grey[200], // Light background for better contrast
+                 borderRadius: BorderRadius.circular(10),
+               ),
+               child: Text(
+                 translated ? translatedTexts['body'] ?? originalTexts['body']!
+                     : originalTexts['body']!,
+                 style: const TextStyle(fontSize: 18, height: 1.5),
+                 textAlign: TextAlign.justify,
+               ),
              ),
+
              const SizedBox(height: 20),
-             Text(
-               translated? translatedTexts['body'] ?? originalTexts['body']!
-                   : originalTexts['body']!,
-               style: const TextStyle(fontSize: 18),
+
+             // Example Text
+             Container(
+               padding: const EdgeInsets.all(12),
+               decoration: BoxDecoration(
+                 color: Colors.blue[50], // Slightly different background
+                 borderRadius: BorderRadius.circular(10),
+               ),
+               child: Text(
+                 translated
+                     ? translatedTexts['example'] ?? originalTexts['example']!
+                     : originalTexts['example']!,
+                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                 textAlign: TextAlign.justify,
+               ),
              ),
-             const SizedBox(height: 20),
-              Text(
-               translated
-                   ? translatedTexts['example'] ?? originalTexts['example']!
-                   : originalTexts['example']!,
-               style: const TextStyle(fontSize: 18),
+
+             const SizedBox(height: 60),
+
+             // Image Centered
+             Center(
+               child: ClipRRect(
+                 borderRadius: BorderRadius.circular(15),
+                 child: Image.asset(
+                   'assets/decimal1.png',
+                   width: 320,
+                   height: 120,
+                   fit: BoxFit.cover,
+                 ),
+               ),
              ),
-             const SizedBox(height: 30),
-              Center(
-              child: Image.asset(
-               'assets/decimal1.png',
-               width: 200,
-               height: 100,
-               fit: BoxFit.cover,
-             ),
-              ),
-             const SizedBox(height: 20),
-             Row(
-               mainAxisAlignment: MainAxisAlignment.end, // Aligns the button to the left
-               children: [
-                 ElevatedButton(
-                   onPressed: () {
-                     Navigator.push(
-                       context,
-                       MaterialPageRoute(builder: (context) =>  const LearnPage2()),
-                     );
-                   },
-                   child:  Text(translated
+
+             const SizedBox(height: 60),
+
+             // Next Page Button
+             Align(
+               alignment: Alignment.centerRight,
+               child: ElevatedButton(
+                 style: ElevatedButton.styleFrom(
+                   backgroundColor: Colors.teal, // Button color
+                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                   shape: RoundedRectangleBorder(
+                     borderRadius: BorderRadius.circular(10),
+                   ),
+                 ),
+                 onPressed: () {
+                   Navigator.push(
+                     context,
+                     MaterialPageRoute(builder: (context) => const LearnPage2()),
+                   );
+                 },
+                 child: Text(
+                   translated
                        ? translatedTexts['NextPage'] ?? originalTexts['NextPage']!
                        : originalTexts['NextPage']!,
-                     style: const TextStyle(fontSize: 18),),
+                   style: const TextStyle(fontSize: 18, color: Colors.white),
                  ),
-               ],
+               ),
              ),
            ],
          ),
        ),
+
      );
    }
 }

@@ -80,57 +80,86 @@ class _LearnPageState2 extends State<LearnPage2> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(left: 50,right: 50),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Center( child:  Text(
-              translated
-                  ? translatedTexts['h1'] ?? originalTexts['h1']!
-                  : originalTexts['h1']!,
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              translated
-                  ? translatedTexts['h2'] ?? originalTexts['h2']!
-                  : originalTexts['h2']!,
-              style: const TextStyle(fontSize: 28),
-            ),
-            const SizedBox(height: 20),
             Center(
-
-            child: Image.asset(
-              'assets/decimal2.png', // Add your own image path
-              width: 200,
-              height: 100,
-              fit: BoxFit.cover,
+                child: Text(
+                  translated
+                      ? translatedTexts['h1'] ?? originalTexts['h1']!
+                      : originalTexts['h1']!,
+                  style: const TextStyle(
+                    fontSize: 45,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.teal,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
             ),
+            const SizedBox(height: 40),
+
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                translated
+                    ? translatedTexts['h2'] ?? originalTexts['h2']!
+                    : originalTexts['h2']!,
+                style: const TextStyle(fontSize: 22, color: Colors.black87),
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  'assets/decimal2.png',
+                  width: 220,
+                  height: 150,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
             const SizedBox(height: 20),
+
             Row(
-              mainAxisAlignment: MainAxisAlignment.end, // Aligns the button to the left
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    textStyle: const TextStyle(fontSize: 20),
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ReadingDecimalScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const ReadingDecimalScreen(),
+                      ),
                     );
                   },
-                  child: Text(translated
-                      ? translatedTexts['NextPage'] ?? originalTexts['NextPage']!
-                      : originalTexts['NextPage']!,
-                    style: const TextStyle(fontSize: 28),),
+                  child: Text(
+                    translated
+                        ? translatedTexts['NextPage'] ?? originalTexts['NextPage']!
+                        : originalTexts['NextPage']!,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
                 ),
               ],
             ),
-
-
           ],
         ),
       ),
+
     );
   }
 }
