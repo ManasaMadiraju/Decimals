@@ -48,6 +48,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Correct!'),
           backgroundColor: Colors.green,
+          duration: const Duration(seconds: 1),
         ));
         setState(() {
           score++;
@@ -64,6 +65,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Incorrect!'),
           backgroundColor: Colors.red,
+          duration: const Duration(seconds: 1),
         ));
       }
       selectedItems.clear();
@@ -523,6 +525,8 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
@@ -552,7 +556,13 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           ),
           Expanded(
             child: GridView.builder(
-              padding: const EdgeInsets.only(left: 450.0, right: 450.0, bottom: 450.0),
+              // padding: const EdgeInsets.only(left: 450.0, right: 450.0, bottom: 450.0),
+              padding: EdgeInsets.only(
+                left: screenWidth > 600 ? 450.0 : 16.0,
+                right: screenWidth > 600 ? 450.0 : 16.0,
+                bottom: screenWidth > 600 ? 450.0 : 16.0,
+              ),
+
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
                 crossAxisSpacing: 5,

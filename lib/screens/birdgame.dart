@@ -1,7 +1,5 @@
-// ignore_for_file: library_private_types_in_public_api
-
-import 'package:decimals/screens/birdgame1.dart';
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class LizzieTheBirdGame extends StatefulWidget {
   const LizzieTheBirdGame({super.key});
@@ -11,289 +9,269 @@ class LizzieTheBirdGame extends StatefulWidget {
 }
 
 class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
-  String targetValue = "0.25"; // Correct answer
-  String feedback = ""; // Feedback message (Correct or Incorrect)
-  Color feedbackColor = Colors.transparent; // Feedback message color
+  String feedback = "";
+  Color feedbackColor = Colors.black;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool showBubble = false;
+  bool birdMoves = false;
+  double birdTop = 400; // Initial position
+  double birdLeft = 400; // Initial position // Initial bird position
+  int currentQuestionIndex = 0;
+  int score = 0;
+  String selectedAnswer = '';
+  String correctAnswer='';
+  double birdTop2 = 200;
+  double birdLeft2 = 450;
+  Map<String, GlobalKey> fishKeys = {};
+  Set<String> hiddenFishes = {};
+  final List<Map<String, dynamic>> questions = [
+    {
+      'number': 0.25,
+      'description': '25 Hundredths',
+      'options': [
+        '0.025',
+        '0.25',
+        '2.5',
+        '0.0025',
+      ]
+    },
+    {
+      'number': 0.007,
+      'description': '7 Thousandths',
+      'options': [
+        '0.07',
+        '0.007',
+        '0.7',
+        '0.0007',
+      ]
+    },
+    {
+      'number': 3.14,
+      'description': '3 and 14 Hundredths',
+      'options': [
+        '3.14',
+        '3.014',
+        '31.4',
+        '0.314',
+      ]
+    },
+    {
+      'number': 0.63,
+      'description': '6 Tenths and 3 Hundredths',
+      'options': [
+        '0.603',
+        '0.63',
+        '6.03',
+        '0.063',
+      ]
+    },
 
-  // Function to check the selected value
-  void checkAnswer(String selectedValue) {
-    setState(() {
-      if (selectedValue == targetValue) {
-        feedback = "Correct!";
-        feedbackColor = Colors.green;
-      } else {
-        feedback = "Incorrect!";
-        feedbackColor = Colors.red;
+  ];
+  Future<void> _playSound(String soundPath) async {
+    try {
+      await _audioPlayer.play(AssetSource(soundPath));
+    } catch (e) {
+      print("Error playing sound: $e");
+    }
+  }
+  void initState() {
+    super.initState();
+    fishKeys = {
+    };
+  }
+  void checkAnswer(String answer) async {
+    if (!fishKeys.containsKey(answer)) {
+      fishKeys[answer] = GlobalKey();
+    }
+    final key = fishKeys[answer];
+    if (key != null) {
+      final RenderBox? renderBox = key.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox != null) {
+        final Offset position = renderBox.localToGlobal(Offset.zero);
+
+        setState(() {
+          selectedAnswer = answer;
+          correctAnswer = questions[currentQuestionIndex]['number'].toString();
+          if (answer == correctAnswer) {
+            feedback = "Correct!";
+            _playSound('sounds/success.mp3');
+            feedbackColor = Colors.green;
+            showBubble = true;
+            birdMoves = true;
+            birdTop = position.dy - 50;
+            birdLeft=position.dx;
+            score++;
+
+            Future.delayed(const Duration(seconds: 2), () {
+              setState(() {
+                hiddenFishes.add(answer);
+                birdMoves = false;
+                });
+            });
+
+            Future.delayed(const Duration(seconds: 3), () {
+              setState(() {
+                showBubble = false;
+                if (currentQuestionIndex < questions.length - 1) {
+                  hiddenFishes.clear();
+                  currentQuestionIndex++;
+                }
+              });
+            });
+          } else {
+            feedback = "Try Again!";
+            feedbackColor = Colors.red;
+            _playSound('sounds/error.mp3');
+            showBubble = true;
+            Future.delayed(const Duration(seconds: 2), () {
+              setState(() {
+                showBubble = false;
+              });
+            });
+          }
+        });
       }
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    String question = questions[currentQuestionIndex]['description'];
+    String correctAnswer = questions[currentQuestionIndex]['number'].toString();
+    birdLeft = screenWidth < 600 ? birdLeft - 60 : birdLeft - 160;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Play: Lizzie the Bird'),
         backgroundColor: Colors.green,
-         actions: [
+        actions: [
+          Text(
+            "Score: $score",
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
           IconButton(
-             icon: const Icon(Icons.arrow_forward_rounded),
-             onPressed: () {
-               Navigator.push(
-                 context,
-                 MaterialPageRoute(
-                     builder: (context) =>
-                           const LizzieTheBirdGame1()),  
-               );
-             },
-           ),
-          // Previous button - Goes back to the Practice Page
-           IconButton(
+            icon: const Icon(Icons.home),
             onPressed: () {
               Navigator.popUntil(context, (route) => route.isFirst);
             },
-            icon: const Icon(Icons.home),
           ),
         ],
       ),
-      body: buildGameScreen(),
-      backgroundColor: const Color(0xFF34E1FF),
+      body: Stack(
+        children: [
+          // Background Image
+          Center(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                double width = constraints.maxWidth < 600 ? screenWidth : screenWidth * 0.4;
 
-    );
-  }
-
-//   Widget buildGameScreen() {
-//     return Stack(
-//       children: [
-//         // Background Image
-//         Container(
-//           width: MediaQuery.of(context).size.width,
-//           height: MediaQuery.of(context).size.height*0.90,
-//           decoration: const BoxDecoration(
-//             image: DecorationImage(
-//               image: AssetImage("assets/backgroundlake.jpg"),
-//               fit: BoxFit.cover, // Cover the entire container
-//             ),
-//           ),
-//         ),
-//         // Content on top of the background
-//         Column(
-//           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Aligns items at top and bottom
-//           children: [
-//             // Top Section
-//             Column(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               children: [
-//                 const Text(
-//                   'Help me choose the right fish to eat!',
-//                   style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
-//                 ),
-//                 const SizedBox(height: 30),
-//                 SizedBox(
-//                   height: 200, // Adjust the size
-//                   width: 250,
-//                   child: Image.asset(
-//                     'assets/bird.png',
-//                     fit: BoxFit.cover,
-//                   ),
-//                 ),
-//     const SizedBox(height: 30),
-//                 const Text(
-//                   '8 Tenths',
-//                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-//                 ),
-//
-//                 const SizedBox(height:230),
-//               ],
-//             ),
-//             // const Spacer(),
-//
-//             // Wrap Section
-//             Align(
-//               alignment: Alignment.bottomCenter,
-//               child: Wrap(
-//                 spacing: 20,
-//                 runSpacing: 20,
-//                 children: [
-//                   buildFishButton('0.08'),
-//                   buildFishButton('0.9'),
-//                   buildFishButton('0.8'), // Correct fish
-//                   buildFishButton('0.09'),
-//                 ],
-//               ),
-//             ),
-//
-//             // Feedback Text Below Wrap
-//             Align(
-//               alignment: Alignment.bottomCenter,
-//               child: Text(
-//                 feedback,
-//                 style: TextStyle(
-//                   fontSize: 20,
-//                   fontWeight: FontWeight.bold,
-//                   color: feedbackColor,
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ],
-//     );
-//   }
-//
-//
-//   // Helper function to build fish buttons
-//   Widget buildFishButton(String value) {
-//     return GestureDetector(
-//       onTap: () => checkAnswer(value),
-//       child: Container(
-//         width: 150,
-//         height: 90,
-//         decoration: BoxDecoration(
-//           color: Colors.transparent,
-//           border: Border.all(
-//             color: value == targetValue && feedback == "Correct!"
-//                 ? Colors.pink
-//                 : Colors.transparent,
-//             width: 4,
-//           ),
-//           image: DecorationImage(
-//             image: AssetImage("assets/orangefish.png"), // Replace with your image path
-//             fit: BoxFit.fill,
-//           ),
-//         ),
-//
-//         alignment: Alignment.center,
-//         child: Text(
-//           value,
-//           style: const TextStyle(
-//             fontSize: 20,
-//             fontWeight: FontWeight.bold,
-//             color: Colors.white,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-  Widget buildGameScreen() {
-    final screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
-    final screenHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
-
-    return Stack(
-      children: [
-        // Background Image
-        Container(
-          width: screenWidth,
-          height: screenHeight * 0.92,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage("assets/backgroundlake.jpg"),
-              fit: BoxFit.fill, // Cover the entire container
+                return Image.asset(
+                  'assets/finalbackground.jpg',
+                  width: width,
+                  height: screenHeight * 0.9,
+                  fit: BoxFit.fitWidth,
+                );
+              },
             ),
           ),
-        ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          // Aligns items at top and bottom
-          children: [
-            // Top Section
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+
+          Positioned(
+            top: screenHeight*0.1,
+            left: screenWidth*0.06,
+            right: 0,
+            child: Column(
               children: [
-                const Text(
-                  'Help me choose the right fish to eat!',
-                  style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: screenHeight * 0.15),
-                SizedBox(
-                  height: screenHeight * 0.2,
-
-                  width: screenWidth * 0.35,
-
-                  child: Image.asset(
-                    'assets/bird.png',
-                    fit: BoxFit.contain,
+                 Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
                   ),
+                  child: Text(
+                    'Help me choose the right fish to eat! $question?',
+                    style: TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold, color: feedbackColor),
+                  ),
+
                 ),
-                SizedBox(height: screenHeight * 0.2),
-                const Text(
-                  '25 Hundredths',
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: screenHeight * 0.02),
+                SizedBox(height: screenHeight * 0.05),
               ],
             ),
+          ),
 
-            // Wrap Section
-            Wrap(
-              spacing: screenWidth * 0.05,
-              runSpacing: screenHeight * 0.02,
-              children: [
-                buildFishButton('0.025', screenWidth, screenHeight),
-                buildFishButton('0.25', screenWidth, screenHeight),
-                buildFishButton('2.5', screenWidth, screenHeight),
-                // Correct fish
-                buildFishButton('0.0025', screenWidth, screenHeight),
-              ],
+          AnimatedPositioned(
+            duration: const Duration(seconds: 1),
+            curve: Curves.easeInOut,
+            top: birdMoves ? birdTop: screenHeight*0.2,
+            left: birdMoves ? birdLeft:screenWidth*0.35,
+            child: Image.asset(
+              'assets/bird.png',
+              width: screenWidth * 0.3,
+              height: screenHeight * 0.2,
             ),
+          ),
 
-            // Feedback Text Below Wrap
-            Padding(
-              padding: EdgeInsets.only(bottom: screenHeight * 0.02),
-              child: Text(
-                feedback,
-                style: TextStyle(
-                  fontSize: screenHeight * 0.025,
-                  fontWeight: FontWeight.bold,
-                  color: feedbackColor,
+
+          // Speech Bubble
+          if (showBubble)
+            Positioned(
+              top: (screenHeight*0.2) - 40,
+              left: screenWidth * 0.5,
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Text(
+                  feedback,
+                  style: TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold, color: feedbackColor),
                 ),
               ),
             ),
-          ],
-        ),
-      ],
+
+          // Fish Buttons
+          Positioned(
+            bottom: screenWidth*0.05,
+            left: screenWidth*0.03,
+            right: 0,
+            child: Wrap(
+              spacing: screenWidth * 0.03,
+              runSpacing: screenHeight * 0.01,
+              alignment: WrapAlignment.center,
+              children: [
+                for (var option in questions[currentQuestionIndex]['options'])
+                  if (!hiddenFishes.contains(option)) buildFishButton(option, screenWidth, screenHeight),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
 
-  Widget buildFishButton(String value, double screenWidth,
-      double screenHeight) {
+
+    Widget buildFishButton(String value, double screenWidth, double screenHeight) {
     return GestureDetector(
       onTap: () => checkAnswer(value),
       child: Container(
-        width: screenWidth * 0.2,
-        // Responsive width
-        height: screenHeight * 0.15,
-        // Responsive height
+        key: fishKeys.putIfAbsent(value, () => GlobalKey()),
+        width: screenWidth > 600 ? screenWidth * 0.07: screenWidth *0.2,
+        height: screenHeight * 0.25,
         decoration: BoxDecoration(
-          color: Colors.transparent,
-          border: Border.all(
-            color: value == targetValue && feedback == "Correct!"
-                ? Colors.pink
-                : Colors.transparent,
-            width: screenWidth * 0.01, // Responsive border width
-          ),
-          image: const DecorationImage(
-            image: AssetImage("assets/orangefish.png"),
-            // Replace with your image path
-            fit: BoxFit.fill,
+          image: DecorationImage(
+            image: AssetImage('assets/orangefish.png'),
+            fit: screenWidth > 600 ?BoxFit.contain: BoxFit.fitWidth,
           ),
         ),
         alignment: Alignment.center,
         child: Text(
           value,
-          style: TextStyle(
-            fontSize: screenHeight * 0.02, // Responsive font size
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: const TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
     );

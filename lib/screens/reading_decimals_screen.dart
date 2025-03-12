@@ -80,24 +80,45 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-             Text(
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(  // Wrap texts inside a Column
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+               Text(
                translated
                    ? translatedTexts['h1'] ?? originalTexts['h1']!
                    : originalTexts['h1']!,
-               style: const TextStyle(fontSize: 28),
+                 style: const TextStyle(fontSize: 22, color: Colors.black87),
             ),
             const SizedBox(height: 10),
              Text(translated
                 ? translatedTexts['h2'] ?? originalTexts['h2']!
                 : originalTexts['h2']!,
-              style: const TextStyle(fontSize: 28),
+               style: const TextStyle(fontSize: 22, color: Colors.black87),
             ),
-            const SizedBox(height: 30),
-             Text(
+              ],
+              ),
+            ),
+            const SizedBox(height: 20),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue[50], // Slightly different background
+            borderRadius: BorderRadius.circular(10),
+          ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+            Text(
               translated
                   ? translatedTexts['h3'] ?? originalTexts['h3']!
                   : originalTexts['h3']!,
-              style: const TextStyle(fontSize: 28),
+              style: const TextStyle(fontSize: 22, color: Colors.black87),
             ),
             const SizedBox(height: 20),
             ExampleItem(
@@ -112,6 +133,9 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
               number: '453.01',
               description: 'Four Hundred Fifty Three and One Hundredths',
             ),
+    ],
+            ),
+        ),
           ],
         ),
       ),

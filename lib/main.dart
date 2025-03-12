@@ -32,6 +32,8 @@ class DecimalsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
@@ -48,9 +50,9 @@ class DecimalsPage extends StatelessWidget {
                   Center(
                     child: Image.asset(
                       'assets/demo1.jpg',
-                      width: 550, // Set image width
-                      height: 660, // Set image height
-                      fit: BoxFit.contain,
+                      width: screenWidth> 600 ? screenWidth*0.55: screenWidth, // Set image width
+                      height: screenHeight*0.95, // Set image height
+                      fit:screenWidth> 600 ? BoxFit.contain: BoxFit.fitWidth,
                       alignment: Alignment.center,
                     ),
                   ),
