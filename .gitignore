@@ -9,3 +9,4 @@ build/
 ios/Pods/
 android/.gradle/
 pubspec.lock
+backend/node_modules/

@@ -50,7 +50,7 @@ class DecimalsPage extends StatelessWidget {
                   Center(
                     child: Image.asset(
                       'assets/demo1.jpg',
-                      width: screenWidth> 600 ? screenWidth*0.55: screenWidth, // Set image width
+                      width: screenWidth> 1200 ? screenWidth*0.55: screenWidth, // Set image width
                       height: screenHeight*0.95, // Set image height
                       fit:screenWidth> 600 ? BoxFit.contain: BoxFit.fitWidth,
                       alignment: Alignment.center,
@@ -58,15 +58,15 @@ class DecimalsPage extends StatelessWidget {
                   ),
                   Center(
                     child: Column(
-                      mainAxisSize: MainAxisSize.min, // Ensures the Column takes only necessary space
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const SizedBox(height: 400), // Adjust this value to move it lower
+                        const SizedBox(height:400),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildButton('Learn', Colors.green.shade600, context, '/learn'),
-                            _buildButton('Play', Colors.green.shade300, context, '/play'),
-                            _buildButton('Practice', Colors.green.shade600, context, '/practice'),
+                            _buildButton('Learn', Colors.green.shade600, context, '/learn',screenWidth,screenHeight),
+                            _buildButton('Play', Colors.green.shade300, context, '/play',screenWidth,screenHeight),
+                            _buildButton('Practice', Colors.green.shade600, context, '/practice',screenWidth,screenHeight),
                           ],
                         ),
                         Text(
@@ -97,9 +97,9 @@ class DecimalsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(String text, Color color, BuildContext context, String route) {
+  Widget _buildButton(String text, Color color, BuildContext context, String route,double screenWidth, double screenHeight) {
     return SizedBox(
-      width: 150,
+      width: screenWidth< 500?120: 150,
       height: 150,
       child:  Align( alignment: Alignment.center,
         child:  ElevatedButton(

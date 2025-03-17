@@ -558,9 +558,9 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
             child: GridView.builder(
               // padding: const EdgeInsets.only(left: 450.0, right: 450.0, bottom: 450.0),
               padding: EdgeInsets.only(
-                left: screenWidth > 600 ? 450.0 : 16.0,
-                right: screenWidth > 600 ? 450.0 : 16.0,
-                bottom: screenWidth > 600 ? 450.0 : 16.0,
+                left: screenWidth > 1200 ? 450.0 : 16.0,
+                right: screenWidth > 1200 ? 450.0 : 16.0,
+                bottom: screenWidth > 1200 ? 450.0 : 16.0,
               ),
 
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

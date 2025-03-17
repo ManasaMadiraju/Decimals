@@ -115,7 +115,7 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
               child: GridView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 100),
                 gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: screenWidth > 600 ? 5 : 3,
+                  crossAxisCount: screenWidth > 1200 ? 5 : 3,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                   childAspectRatio: 1,
