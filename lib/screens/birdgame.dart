@@ -88,7 +88,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
       final RenderBox? renderBox = key.currentContext?.findRenderObject() as RenderBox?;
       if (renderBox != null) {
         final Offset position = renderBox.localToGlobal(Offset.zero);
-
+        if (!mounted) return;
         setState(() {
           selectedAnswer = answer;
           correctAnswer = questions[currentQuestionIndex]['number'].toString();
@@ -103,6 +103,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
             score++;
 
             Future.delayed(const Duration(seconds: 2), () {
+              if (!mounted) return;
               setState(() {
                 hiddenFishes.add(answer);
                 birdMoves = false;
@@ -110,6 +111,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
             });
 
             Future.delayed(const Duration(seconds: 3), () {
+              if (!mounted) return;
               setState(() {
                 showBubble = false;
                 if (currentQuestionIndex < questions.length - 1) {
@@ -124,6 +126,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
             _playSound('sounds/error.mp3');
             showBubble = true;
             Future.delayed(const Duration(seconds: 2), () {
+              if (!mounted) return;
               setState(() {
                 showBubble = false;
               });
@@ -140,7 +143,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
     final screenHeight = MediaQuery.of(context).size.height;
     String question = questions[currentQuestionIndex]['description'];
     String correctAnswer = questions[currentQuestionIndex]['number'].toString();
-    birdLeft = screenWidth < 600 ? birdLeft - 60 : birdLeft - 160;
+    birdLeft = screenWidth < 1200 ? birdLeft - 60 : birdLeft - 160;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Play: Lizzie the Bird'),
@@ -164,7 +167,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
           Center(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                double width = constraints.maxWidth < 600 ? screenWidth : screenWidth * 0.4;
+                double width = constraints.maxWidth < 1200 ? screenWidth : screenWidth * 0.4;
 
                 return Image.asset(
                   'assets/finalbackground.jpg',
@@ -177,7 +180,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
           ),
 
           Positioned(
-            top: screenHeight*0.1,
+            top: screenWidth < 500 ? screenHeight*0.17: screenHeight*0.1,
             left: screenWidth*0.06,
             right: 0,
             child: Column(
@@ -216,7 +219,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
           // Speech Bubble
           if (showBubble)
             Positioned(
-              top: (screenHeight*0.2) - 40,
+              top: screenWidth < 500 ?(screenHeight*0.4) - 40:  (screenHeight*0.3) - 50,
               left: screenWidth * 0.5,
               child: Container(
                 padding: const EdgeInsets.all(10),
@@ -234,7 +237,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
 
           // Fish Buttons
           Positioned(
-            bottom: screenWidth*0.05,
+            bottom: screenWidth < 500 ? screenWidth*0.2: screenWidth*0.05,
             left: screenWidth*0.03,
             right: 0,
             child: Wrap(
@@ -259,12 +262,12 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
       onTap: () => checkAnswer(value),
       child: Container(
         key: fishKeys.putIfAbsent(value, () => GlobalKey()),
-        width: screenWidth > 600 ? screenWidth * 0.07: screenWidth *0.2,
-        height: screenHeight * 0.25,
+        width: screenWidth > 1200 ? screenWidth * 0.07: screenWidth *0.2,
+        height:screenHeight * 0.25,
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/orangefish.png'),
-            fit: screenWidth > 600 ?BoxFit.contain: BoxFit.fitWidth,
+            fit: screenWidth > 1200 ?BoxFit.contain: BoxFit.fitWidth,
           ),
         ),
         alignment: Alignment.center,

@@ -120,10 +120,11 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
       selectedAnswer = answer;
       if (answer == questions[currentQuestionIndex]['description']) {
         score++;
-        selectedAnswer='';
       }
       if (currentQuestionIndex < questions.length - 1) {
         currentQuestionIndex++;
+        selectedAnswer='';
+
       } else {
         // End of the game
         showDialog(
@@ -170,7 +171,7 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
               Text(
                 'What is the correct description for $question?',
                 style: const TextStyle(
-                  fontSize: 24,
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
