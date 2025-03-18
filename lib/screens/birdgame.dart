@@ -88,7 +88,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
       final RenderBox? renderBox = key.currentContext?.findRenderObject() as RenderBox?;
       if (renderBox != null) {
         final Offset position = renderBox.localToGlobal(Offset.zero);
-
+        if (!mounted) return;
         setState(() {
           selectedAnswer = answer;
           correctAnswer = questions[currentQuestionIndex]['number'].toString();
@@ -103,6 +103,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
             score++;
 
             Future.delayed(const Duration(seconds: 2), () {
+              if (!mounted) return;
               setState(() {
                 hiddenFishes.add(answer);
                 birdMoves = false;
@@ -110,6 +111,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
             });
 
             Future.delayed(const Duration(seconds: 3), () {
+              if (!mounted) return;
               setState(() {
                 showBubble = false;
                 if (currentQuestionIndex < questions.length - 1) {
@@ -124,6 +126,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
             _playSound('sounds/error.mp3');
             showBubble = true;
             Future.delayed(const Duration(seconds: 2), () {
+              if (!mounted) return;
               setState(() {
                 showBubble = false;
               });
@@ -216,7 +219,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
           // Speech Bubble
           if (showBubble)
             Positioned(
-              top: screenWidth < 500 ?(screenHeight*0.4) - 40:  (screenHeight*0.2) - 40,
+              top: screenWidth < 500 ?(screenHeight*0.4) - 40:  (screenHeight*0.3) - 50,
               left: screenWidth * 0.5,
               child: Container(
                 padding: const EdgeInsets.all(10),
