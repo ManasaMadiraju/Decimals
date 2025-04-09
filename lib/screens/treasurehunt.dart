@@ -7,6 +7,8 @@ void main() {
 }
 
 class DecimalTreasureHuntGame extends StatelessWidget {
+  const DecimalTreasureHuntGame({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,6 +20,8 @@ class DecimalTreasureHuntGame extends StatelessWidget {
 }
 
 class TreasureHuntScreen extends StatefulWidget {
+  const TreasureHuntScreen({super.key});
+
   @override
   _TreasureHuntScreenState createState() => _TreasureHuntScreenState();
 }

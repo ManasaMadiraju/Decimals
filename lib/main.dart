@@ -1,7 +1,5 @@
-import 'package:decimals/screens/memorygameapp.dart';
 import 'package:flutter/material.dart';
 import 'learnpage.dart';
-import 'package:decimals/screens/birdgame.dart';
 import 'GameSelectionDialog.dart';
 import 'package:decimals/screens/treasurehunt.dart';
 
@@ -65,7 +63,7 @@ class DecimalsPage extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             _buildButton('Learn', Colors.green.shade600, context, '/learn',screenWidth,screenHeight),
-                            _buildButton('Play', Colors.green.shade300, context, '/play',screenWidth,screenHeight),
+                            _buildButton('Play', Colors.green.shade600, context, '/play',screenWidth,screenHeight),
                             _buildButton('Practice', Colors.green.shade600, context, '/practice',screenWidth,screenHeight),
                           ],
                         ),

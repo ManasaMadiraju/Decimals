@@ -78,62 +78,8 @@ class _LearnPageState extends State<LearnPage> {
            ),
          ],
        ),
-       // body: Padding(
-       //   padding: const EdgeInsets.all(16.0),
-       //   child: Column(
-       //     crossAxisAlignment: CrossAxisAlignment.start,
-       //     children: [
-       //       Center(
-       //       child:  Text(
-       //         translated
-       //             ? translatedTexts['heading'] ?? originalTexts['heading']!
-       //             : originalTexts['heading']!,
-       //         style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-       //       ),
-       //       ),
-       //       const SizedBox(height: 20),
-       //       Text(
-       //         translated? translatedTexts['body'] ?? originalTexts['body']!
-       //             : originalTexts['body']!,
-       //         style: const TextStyle(fontSize: 18),
-       //       ),
-       //       const SizedBox(height: 20),
-       //        Text(
-       //         translated
-       //             ? translatedTexts['example'] ?? originalTexts['example']!
-       //             : originalTexts['example']!,
-       //         style: const TextStyle(fontSize: 18),
-       //       ),
-       //       const SizedBox(height: 30),
-       //        Center(
-       //        child: Image.asset(
-       //         'assets/decimal1.png',
-       //         width: 200,
-       //         height: 100,
-       //         fit: BoxFit.cover,
-       //       ),
-       //        ),
-       //       const SizedBox(height: 20),
-       //       Row(
-       //         mainAxisAlignment: MainAxisAlignment.end, // Aligns the button to the left
-       //         children: [
-       //           ElevatedButton(
-       //             onPressed: () {
-       //               Navigator.push(
-       //                 context,
-       //                 MaterialPageRoute(builder: (context) =>  const LearnPage2()),
-       //               );
-       //             },
-       //             child:  Text(translated
-       //                 ? translatedTexts['NextPage'] ?? originalTexts['NextPage']!
-       //                 : originalTexts['NextPage']!,
-       //               style: const TextStyle(fontSize: 18),),
-       //           ),
-       //         ],
-       //       ),
-       //     ],
-       //   ),
-       // ),
+
+      
        body: Padding(
          padding: const EdgeInsets.only(left: 50, right: 50),
          child: Column(

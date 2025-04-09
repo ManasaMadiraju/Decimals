@@ -1,3 +1,4 @@
+import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 
 class ChooseItGameScreen extends StatefulWidget {
@@ -111,6 +112,19 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
     },
   ];
 
+  // Method to navigate to a specific page when back button is pressed
+  void _navigateToCustomPage() {
+    // Navigate to a specific page - replace BirdGameScreen() with your desired destination
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => GameSelectionDialog()),
+    );
+  }
+
+  // Method to handle home button press
+  void _navigateToHome() {
+    // Navigate to home screen
+    Navigator.popUntil(context, (route) => route.isFirst);
+  }
 
   int currentQuestionIndex = 0;
   int score = 0;
@@ -159,7 +173,19 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Choose It Game'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _navigateToCustomPage,
+        ),
         backgroundColor: Colors.green,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.popUntil(context, (route) => route.isFirst);
+            },
+            icon: const Icon(Icons.home),
+          ),
+        ],
       ),
       body: Center(
         child: Padding(
@@ -183,7 +209,6 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: ElevatedButton(
                     onPressed: () => checkAnswer(option),
-                    child: Text(option),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.purple,
                       foregroundColor: Colors.white,
@@ -192,6 +217,7 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
                         borderRadius: BorderRadius.circular(15),
                       ),
                     ),
+                    child: Text(option),
                   ),
                 ),
               if (selectedAnswer.isNotEmpty)

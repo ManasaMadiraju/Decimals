@@ -132,12 +132,11 @@ class _LearnPageState2 extends State<LearnPage2> {
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    textStyle: const TextStyle(fontSize: 20),
-                    backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    backgroundColor: Colors.teal, // Button color
+                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                   shape: RoundedRectangleBorder(
+                     borderRadius: BorderRadius.circular(10),
+                   ),
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -151,7 +150,7 @@ class _LearnPageState2 extends State<LearnPage2> {
                     translated
                         ? translatedTexts['NextPage'] ?? originalTexts['NextPage']!
                         : originalTexts['NextPage']!,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: const TextStyle(fontSize: 18, color: Colors.white),
                   ),
                 ),
               ],

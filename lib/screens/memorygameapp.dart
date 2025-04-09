@@ -1,4 +1,5 @@
 import 'dart:math'; // Import for random selection
+import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 import 'birdgame.dart';
 
@@ -39,6 +40,20 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     });
   }
 
+  // Method to navigate to a specific page when back button is pressed
+  void _navigateToCustomPage() {
+    // Navigate to a specific page - replace BirdGameScreen() with your desired destination
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => GameSelectionDialog()),
+    );
+  }
+  
+  // Method to handle home button press
+  void _navigateToHome() {
+    // Navigate to home screen
+    Navigator.popUntil(context, (route) => route.isFirst);
+  }
+
   void checkMatch() {
     if (selectedItems.length == 2) {
       final String first = selectedItems[0];
@@ -48,7 +63,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Correct!'),
           backgroundColor: Colors.green,
-          duration: const Duration(seconds: 1),
+          duration: Duration(seconds: 1),
         ));
         setState(() {
           score++;
@@ -65,7 +80,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Incorrect!'),
           backgroundColor: Colors.red,
-          duration: const Duration(seconds: 1),
+          duration: Duration(seconds: 1),
         ));
       }
       selectedItems.clear();
@@ -531,15 +546,17 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
       appBar: AppBar(
         backgroundColor: Colors.green,
         title: const Text('Play: Memory'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _navigateToCustomPage,
+        ),
         actions: [
           Text(
             "Score: $score",
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           IconButton(
-            onPressed: () {
-              Navigator.popUntil(context, (route) => route.isFirst);
-            },
+            onPressed: _navigateToHome,
             icon: const Icon(Icons.home),
           ),
         ],
@@ -556,7 +573,6 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           ),
           Expanded(
             child: GridView.builder(
-              // padding: const EdgeInsets.only(left: 450.0, right: 450.0, bottom: 450.0),
               padding: EdgeInsets.only(
                 left: screenWidth > 1200 ? 450.0 : 16.0,
                 right: screenWidth > 1200 ? 450.0 : 16.0,

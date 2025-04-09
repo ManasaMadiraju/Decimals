@@ -36,6 +36,8 @@ flutter:
     - assets/sounds/success.mp3
     - assets/demo1.jpg
     - assets/finalbackground.jpg
+    - assets/play.jpg
+    
   #  - images/a_dot_ham.jpeg
   # fonts:
   #   - family: Schyler

@@ -3,6 +3,7 @@ import 'package:decimals/screens/birdgame.dart';
 import 'package:decimals/screens/memorygameapp.dart';
 import 'package:decimals/screens/PlaceValueScreenState1.dart';
 import 'package:decimals/screens/ChooseItGameScreen.dart';
+
 class GameSelectionDialog extends StatelessWidget {
   const GameSelectionDialog({super.key});
 
@@ -14,40 +15,61 @@ class GameSelectionDialog extends StatelessWidget {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+
     return Dialog(
       backgroundColor: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.95), // Slight transparency
-          borderRadius: BorderRadius.circular(20), // Rounded corners
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3), // Soft shadow
-              blurRadius: 10,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+      insetPadding: EdgeInsets.zero, // Remove default padding
+      child: SizedBox(
+        width: screenSize.width,
+        height: screenSize.height,
+        child: Stack(
           children: [
-            const Text(
-              'Choose a Game',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            Positioned.fill(
+              child: Image.asset(
+                'assets/play.jpg',
+                fit: BoxFit.cover,
+              ),
             ),
-            const SizedBox(height: 20),
-            _buildGameButton(context, '🃏 Memory Game', MemoryGameScreen(), Colors.blue),
-            _buildGameButton(context, '🐦 Lizzie Bird', LizzieTheBirdGame(), Colors.green),
-            _buildGameButton(context, '🎯 Match It', PlaceValueScreen1(), Colors.orange),
-            _buildGameButton(context, '🎤 Choose It', ChooseItGameScreen(), Colors.purple),
-            const SizedBox(height: 10),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(fontSize: 16, color: Colors.red),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Choose a Game',
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildGameButton(context, '🃏 Memory Game', MemoryGameScreen(), Colors.blue),
+                    _buildGameButton(context, '🐦 Lizzie Bird', LizzieTheBirdGame(), Colors.green),
+                    _buildGameButton(context, '🎯 Match It', PlaceValueScreen1(), Colors.orange),
+                    _buildGameButton(context, '🎤 Choose It', ChooseItGameScreen(), Colors.purple),
+                    const SizedBox(height: 10),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(fontSize: 16, color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
