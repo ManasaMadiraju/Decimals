@@ -8,5 +8,6 @@
 build/
 ios/Pods/
 android/.gradle/
+android/local.properties
 pubspec.lock
 backend/node_modules/
