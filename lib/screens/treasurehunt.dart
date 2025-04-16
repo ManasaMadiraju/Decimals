@@ -1,23 +1,33 @@
+import 'package:decimals/learnpage.dart';
+import 'package:decimals/main.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 
-void main() {
-  runApp(DecimalTreasureHuntGame());
-}
+// Comment out the runApp functionaity; makes the practice page 
+// to be a child page of the main.dart
+
+// void main() {
+//   runApp(DecimalTreasureHuntGame());
+// }
 
 class DecimalTreasureHuntGame extends StatelessWidget {
   const DecimalTreasureHuntGame({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Decimal Treasure Hunt',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: TreasureHuntScreen(),
-    );
+    return const TreasureHuntScreen();
   }
 }
+  // @override
+  // Widget build(BuildContext context) {
+  //   return MaterialApp(
+  //     title: 'Decimal Treasure Hunt',
+  //     theme: ThemeData(primarySwatch: Colors.blue),
+  //     home: TreasureHuntScreen(),
+  //   );
+  // }
+
 
 class TreasureHuntScreen extends StatefulWidget {
   const TreasureHuntScreen({super.key});
@@ -96,10 +106,8 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Row(children: [
             IconButton(
-              onPressed: () {
-                Navigator.popUntil(context, (route) => route.isFirst);
-              },
               icon: const Icon(Icons.home),
+              onPressed: (){ Navigator.popUntil(context, (route) => route.isFirst);},
             ),
             const SizedBox(width: 5),
 
