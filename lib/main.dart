@@ -1,5 +1,7 @@
+import 'package:decimals/screens/memorygameapp.dart';
 import 'package:flutter/material.dart';
 import 'learnpage.dart';
+import 'package:decimals/screens/birdgame.dart';
 import 'GameSelectionDialog.dart';
 import 'package:decimals/screens/treasurehunt.dart';
 
@@ -77,7 +79,7 @@ class DecimalsPage extends StatelessWidget {
                             shadows: [
                               Shadow(
                                 blurRadius: 4,
-                                color: Colors.black.withOpacity(0.4),
+                                color: const Color.fromARGB(118, 0, 0, 0).withValues(),
                                 offset: const Offset(2, 2),
                               ),
                             ],

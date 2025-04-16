@@ -1,3 +1,4 @@
+import 'package:decimals/learnpage.dart';
 import 'package:flutter/material.dart';
 import 'screens/reading_decimals_screen.dart';
 import 'dart:convert';
@@ -69,7 +70,10 @@ class _LearnPageState2 extends State<LearnPage2> {
           // Previous button - Goes back to the LearnPage
            IconButton(
             onPressed: () {
-              Navigator.popUntil(context, (route) => route.isFirst);
+              Navigator.pop(
+                context,
+                MaterialPageRoute(builder: (context) => LearnPage()),
+                );
             },
             icon: const Icon(Icons.home),
           ),

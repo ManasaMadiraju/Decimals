@@ -80,7 +80,13 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
         title: const Text('Reading Decimals'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: _navigateToCustomPage,
+          onPressed:() {
+              Navigator.pop(
+                context,
+                MaterialPageRoute(builder: (context) => LearnPage2()),
+              );
+            }, 
+          //_navigateToCustomPage,
         ),
         backgroundColor: Colors.green,
         actions: [
