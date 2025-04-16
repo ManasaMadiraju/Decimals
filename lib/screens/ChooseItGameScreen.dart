@@ -115,7 +115,7 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
   // Method to navigate to a specific page when back button is pressed
   void _navigateToCustomPage() {
     // Navigate to a specific page - replace BirdGameScreen() with your desired destination
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).pop(
       MaterialPageRoute(builder: (context) => GameSelectionDialog()),
     );
   }

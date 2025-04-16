@@ -78,7 +78,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
   // Method to navigate to a specific page when back button is pressed
   void _navigateToCustomPage() {
     // Navigate to a specific page - replace BirdGameScreen() with your desired destination
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).pop(
       MaterialPageRoute(builder: (context) => GameSelectionDialog()),
     );
   }

@@ -8,7 +8,6 @@ class GameSelectionDialog extends StatelessWidget {
   const GameSelectionDialog({super.key});
 
   void _navigateToGame(BuildContext context, Widget screen) {
-    Navigator.pop(context); // Close the dialog
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => screen),
@@ -38,11 +37,11 @@ class GameSelectionDialog extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: const Color.fromARGB(96, 0, 0, 0).withValues(),
                       blurRadius: 10,
                       spreadRadius: 2,
                     ),
@@ -53,19 +52,19 @@ class GameSelectionDialog extends StatelessWidget {
                   children: [
                     const Text(
                       'Choose a Game',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 20),
-                    _buildGameButton(context, '🃏 Memory Game', MemoryGameScreen(), Colors.blue),
+                    const SizedBox(height: 30),
+                    _buildGameButton(context, '🃏 Match the Tile', MemoryGameScreen(), Colors.blue),
                     _buildGameButton(context, '🐦 Lizzie Bird', LizzieTheBirdGame(), Colors.green),
-                    _buildGameButton(context, '🎯 Match It', PlaceValueScreen1(), Colors.orange),
+                    _buildGameButton(context, '🎯 Decimal Place Value Puzzle', PlaceValueScreen1(), Colors.orange),
                     _buildGameButton(context, '🎤 Choose It', ChooseItGameScreen(), Colors.purple),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 20),
                     TextButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: (){ Navigator.popUntil(context, (route) => route.isFirst);},
                       child: const Text(
                         'Cancel',
-                        style: TextStyle(fontSize: 16, color: Colors.red),
+                        style: TextStyle(fontSize: 18, color: Colors.red),
                       ),
                     ),
                   ],

@@ -43,7 +43,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
   // Method to navigate to a specific page when back button is pressed
   void _navigateToCustomPage() {
     // Navigate to a specific page - replace BirdGameScreen() with your desired destination
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).pop(
       MaterialPageRoute(builder: (context) => GameSelectionDialog()),
     );
   }
@@ -545,7 +545,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: const Text('Play: Memory'),
+        title: const Text('Play: Matching Tiles'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: _navigateToCustomPage,
@@ -566,7 +566,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           const Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
-              "Let's play Memory! Match each underlined value to the correct units:",
+              "Let's play matching! Match each underlined value to the correct units:",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
