@@ -107,12 +107,23 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
           ),
         ],
       ),
-      body: shouldRotate
+      body:Stack(
+        children: [
+      Positioned.fill(
+      child: Image.asset(
+      screenWidth > 1200
+      ?
+      'assets/matchitbackground.png': 'assets/l2.png',
+        fit:  BoxFit.cover,
+      ),
+    ), shouldRotate
           ? RotatedBox(
               quarterTurns: 3, // Rotate the screen by 90 degrees
               child: _buildGameContent(),
             )
           : _buildGameContent(),
+    ],
+    ),
     );
   }
 

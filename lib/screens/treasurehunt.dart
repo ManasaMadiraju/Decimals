@@ -101,7 +101,7 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      appBar: AppBar(title: const Text('Decimal Treasure Hunt'), actions: [
+      appBar: AppBar(backgroundColor: Colors.green,title: const Text('Decimal Treasure Hunt!'), actions: [
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(children: [
@@ -114,9 +114,19 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
           ]),
         )
       ]),
-      body: Container(
+      body: Stack(
+        children: [
+      Positioned.fill(
+      child: Image.asset(
+      screenWidth > 1200
+      ?
+      'assets/matchitbackground.png': 'assets/b2.png',
+        fit:  BoxFit.cover,
+      ),
+    ),
+      Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.blue.shade100, Colors.blue.shade300]),
+          // gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.blue.shade100, Colors.blue.shade300]),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -150,6 +160,8 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
             ),
           ]),
         ),
+      ),
+    ],
       ),
     );
   }
