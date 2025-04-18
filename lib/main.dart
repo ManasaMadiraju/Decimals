@@ -38,9 +38,10 @@ class DecimalsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
+
         title: const Text(
           'Decimals',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white)
         ),
       ),
         body: Column(

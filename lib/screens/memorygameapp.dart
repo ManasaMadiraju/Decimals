@@ -2,6 +2,7 @@ import 'dart:math'; // Import for random selection
 import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 import 'birdgame.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class MemoryGameScreen extends StatefulWidget {
   const MemoryGameScreen({super.key});
@@ -21,6 +22,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
   late List<String> items;
   List<String> selectedItems = [];
   int score = 0;
+  final AudioPlayer _audioPlayer = AudioPlayer();
   final Random random = Random();
 
   @override
@@ -28,7 +30,13 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     super.initState();
     _generateNewRound();
   }
-
+  Future<void> _playSound(String soundPath) async {
+    try {
+      await _audioPlayer.play(AssetSource(soundPath));
+    } catch (e) {
+      print("Error playing sound: $e");
+    }
+  }
   void _generateNewRound() {
     setState(() {
       int randomIndex = random.nextInt(questionSets.length);
@@ -54,12 +62,13 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     Navigator.popUntil(context, (route) => route.isFirst);
   }
 
-  void checkMatch() {
+  void  checkMatch() async {
     if (selectedItems.length == 2) {
       final String first = selectedItems[0];
       final String second = selectedItems[1];
 
       if ((correctPairs[first] == second) || (correctPairs[second] == first)) {
+        await _playSound('sounds/success.mp3');
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Correct!'),
           backgroundColor: Colors.green,
@@ -77,6 +86,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           });
         }
       } else {
+        await _playSound('sounds/error.mp3');
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Incorrect!'),
           backgroundColor: Colors.red,
@@ -93,15 +103,62 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Good Job! 🎉"),
-          content: const Text("You matched all pairs! Play Next Round ?"),
+          // Rounded corners and a playful pastel background
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          backgroundColor: Color(0xFFeec7fc),
+
+          // A fun title with an icon
+          title: Row(
+            children: [
+              Icon(Icons.emoji_events, color: Colors.orangeAccent, size: 32),
+              const SizedBox(width: 8),
+              Text(
+                "   Good Job! 🎉  ",
+                style: TextStyle(
+                  color: Color(0xFF1f6924),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+
+          // Content in a bright contrasting color
+          content: Text(
+            "You matched all the pairs!\nPlay the next round?",
+            style: TextStyle(
+              color: Color(0xFF1f6924),
+              fontSize: 18,
+              fontWeight: FontWeight.w600
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          // Center the action and use a colorful, rounded button
+          actionsAlignment: MainAxisAlignment.center,
           actions: [
-            TextButton(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,   // formerly `primary`
+                foregroundColor: Colors.white,               // Text color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+              ),
               onPressed: () {
                 Navigator.pop(context);
-                _generateNewRound(); // Generate a new question set
+                _generateNewRound();
               },
-              child: const Text("OK"),
+              child: const Text(
+                "Next Round!",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         );
@@ -561,15 +618,38 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              "Let's play matching! Match each underlined value to the correct units:",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+          Positioned.fill(
+            child: Image.asset(
+              screenWidth > 1200
+                  ?
+              'assets/matchitbackground.png': 'assets/b2.png',
+              fit:  BoxFit.cover,
             ),
+          ),
+           Column(
+           children: [
+           Padding(
+            padding: EdgeInsets.all(16.0),
+      child: Text(
+        "Let's play matching! Match each underlined value to the correct units:",
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontFamily: 'LuckiestGuy',     // a playful kids’ font
+          fontSize: screenWidth > 1200 ? 25.0 : 20.0,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF1f6924),
+          shadows: [
+            Shadow(
+              color: Colors.black38,
+              offset: Offset(1, 1),
+              blurRadius: 2,
+            ),
+          ],
+          letterSpacing: 0.5,
+        ),
+      ),
           ),
           Expanded(
             child: GridView.builder(
@@ -608,8 +688,8 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                     alignment: Alignment.center,
                     child:item.contains('.') || (item == '61' || (item == '7842') || (item == '5')|| (item == '92') || (item == '4567')|| (item == '45')|| (item == '6789')|| (item == '7')|| (item == '3'))? buildUnderlinedText(item) : Text(
                       item,
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style:  TextStyle(
+                        fontSize: screenWidth > 1200 ? 18.0 : 15.0,
                         fontWeight: FontWeight.bold,
                       ),
                       textAlign: TextAlign.center,
@@ -620,6 +700,8 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
             ),
           ),
         ],
+      ),
+    ],
       ),
     );
   }

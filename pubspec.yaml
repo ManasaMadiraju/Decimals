@@ -37,6 +37,8 @@ flutter:
     - assets/demo1.jpg
     - assets/finalbackground.jpg
     - assets/play.jpg
+    - assets/matchitbackground.png
+    - assets/b2.png
     
   #  - images/a_dot_ham.jpeg
   # fonts:
