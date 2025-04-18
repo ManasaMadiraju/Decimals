@@ -169,6 +169,7 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
   Widget build(BuildContext context) {
     String question = questions[currentQuestionIndex]['number'].toString();
     String correctAnswer = questions[currentQuestionIndex]['description'];
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(
@@ -187,11 +188,21 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
           ),
         ],
       ),
-      body: Center(
+      body: Stack(
+        children: [
+      Positioned.fill(
+      child: Image.asset(
+      screenWidth > 1200
+      ?
+      'assets/matchitbackground.png': 'assets/top2.png',
+        fit: screenWidth>1200? BoxFit.cover: BoxFit.cover,
+      ),
+    ),
+    Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Center content vertically
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
@@ -239,6 +250,8 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
             ],
           ),
         ),
+      ),
+    ],
       ),
     );
   }
