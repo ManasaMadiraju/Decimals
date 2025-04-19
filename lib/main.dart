@@ -81,7 +81,7 @@ class DecimalsPage extends StatelessWidget {
                             shadows: [
                               Shadow(
                                 blurRadius: 4,
-                                color: const Color.fromARGB(118, 0, 0, 0).withValues(),
+                                color: Colors.black.withOpacity(0.4),
                                 offset: const Offset(2, 2),
                               ),
                             ],

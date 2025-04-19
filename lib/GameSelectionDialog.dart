@@ -37,11 +37,11 @@ class GameSelectionDialog extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(),
+                  color: Colors.white.withOpacity(0.9),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color.fromARGB(96, 0, 0, 0).withValues(),
+                      color:  Colors.black.withOpacity(0.3),
                       blurRadius: 10,
                       spreadRadius: 2,
                     ),
