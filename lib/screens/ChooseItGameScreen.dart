@@ -1,5 +1,6 @@
 import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class ChooseItGameScreen extends StatefulWidget {
   const ChooseItGameScreen({super.key});
@@ -9,6 +10,8 @@ class ChooseItGameScreen extends StatefulWidget {
 }
 
 class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
+  // adds audio for the correct answer 
+  final FlutterTts _flutterTts = FlutterTts();
   final List<Map<String, dynamic>> questions = [
     {
       'number': 12.7,
@@ -72,7 +75,7 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
     },
     {
       'number': 123.004,
-      'description': 'One Hundred Twenty Three and Four Thousandths',
+      'description': 'One Hundred and Twenty Three and Four Thousandths',
       'options': [
         'One Hundred Twenty Three and Four Hundredths',
         'One Hundred Twenty Three and Forty Thousandths',
@@ -112,6 +115,12 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
     },
   ];
 
+  Future<void> _speak(String text) async {
+    await _flutterTts.setLanguage("en-US");
+    await _flutterTts.setPitch(1.0);
+    await _flutterTts.speak(text);
+  }
+
   // Method to navigate to a specific page when back button is pressed
   void _navigateToCustomPage() {
     // Navigate to a specific page - replace BirdGameScreen() with your desired destination
@@ -129,12 +138,21 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
   int currentQuestionIndex = 0;
   int score = 0;
   String selectedAnswer = '';
-  void checkAnswer(String answer) {
+  // modified and add output sound
+  void checkAnswer(String answer) async {
     setState(() {
       selectedAnswer = answer;
-      if (answer == questions[currentQuestionIndex]['description']) {
-        score++;
-      }
+    });
+
+    if (answer == questions[currentQuestionIndex]['description']) {
+      score++;
+      await _speak("Correct. ${questions[currentQuestionIndex]['description']}");
+    } else {
+      await _speak("Incorrect. This is ${questions[currentQuestionIndex]['description']}");
+    }
+    await Future.delayed(const Duration(seconds: 4));
+    
+    setState(() {
       if (currentQuestionIndex < questions.length - 1) {
         currentQuestionIndex++;
         selectedAnswer='';
@@ -153,6 +171,7 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
                     setState(() {
                       score = 0;
                       currentQuestionIndex = 0;
+                      selectedAnswer = '';
                       Navigator.of(context).pop();
                     });
                   },
@@ -221,7 +240,13 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
                   child: ElevatedButton(
                     onPressed: () => checkAnswer(option),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple,
+                      backgroundColor: selectedAnswer.isEmpty
+                        ? Colors.purple
+                        : option == correctAnswer
+                          ? Colors.green
+                          : selectedAnswer != correctAnswer && option == selectedAnswer
+                            ? Colors.red
+                            : Colors.grey,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                       shape: RoundedRectangleBorder(
@@ -237,7 +262,7 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
                   child: Text(
                     selectedAnswer == correctAnswer
                         ? 'Correct!'
-                        : 'Incorrect!',
+                        : 'Incorrect.',
                     style: TextStyle(
                       color: selectedAnswer == correctAnswer
                           ? Colors.green
