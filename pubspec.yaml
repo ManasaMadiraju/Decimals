@@ -41,6 +41,10 @@ flutter:
     - assets/b2.png
     - assets/l2.png
     - assets/top2.png
+    - assets/fishnew.png
+    - assets/birdnew.png
+    - assets/backdrop.png
+    - assets/backdrop2.jpeg
     
   #  - images/a_dot_ham.jpeg
   # fonts:
