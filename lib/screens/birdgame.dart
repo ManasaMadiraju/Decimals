@@ -200,6 +200,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
 
       if (answer == correctValue) {
         feedback = "Correct!";
+        _playSound('sounds/success.mp3');
         feedbackColor = Colors.green;
         showBubble = true;
         score++;
@@ -233,6 +234,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
         });
       } else {
         feedback = "Try Again!";
+        _playSound('sounds/error.mp3');
         feedbackColor = Colors.red;
         showBubble = true;
         Future.delayed(const Duration(seconds: 1), () {
