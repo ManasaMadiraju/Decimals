@@ -107,6 +107,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
       ]
     },
   ];
+
   Future<void> _playSound(String soundPath) async {
     try {
       await _audioPlayer.play(AssetSource(soundPath));
@@ -201,9 +202,8 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
 
       if (answer == correctValue) {
         feedback = "Correct!";
-        _playSound('sounds/success.mp3');
         feedbackColor = Colors.green;
-        _playSound('assets/sounds/success.mp3');
+        _playSound('sounds/success.mp3');
         showBubble = true;
         score++;
 
@@ -237,9 +237,8 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
         });
       } else {
         feedback = "Try Again!";
-        _playSound('sounds/error.mp3');
         feedbackColor = Colors.red;
-        _playSound('assets/sounds/error.mp3');
+        _playSound('sounds/error.mp3');
         showBubble = true;
         Future.delayed(const Duration(seconds: 1), () {
           if (!mounted) return;

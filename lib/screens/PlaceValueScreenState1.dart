@@ -1,6 +1,7 @@
 import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:audioplayers/audioplayers.dart';
 
 class PlaceValueScreen1 extends StatefulWidget {
   const PlaceValueScreen1({super.key});
@@ -57,6 +58,7 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
 
   final Map<String, String> draggedItems = {};
   final Map<String, bool> feedback = {};
+  final AudioPlayer _audioPlayer = AudioPlayer();
   int score = 0;
   int currentQuestionIndex = 0;
 
@@ -68,6 +70,14 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
     Colors.purple,
     Colors.brown
   ];
+
+  Future<void> _playSound(String soundPath) async {
+    try {
+      await _audioPlayer.play(AssetSource(soundPath));
+    } catch (e) {
+      print("Error playing sound: $e");
+    }
+  }
 
   // Method to navigate to a specific page when back button is pressed
   void _navigateToCustomPage() {
@@ -82,7 +92,6 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
     // Navigate to home screen
     Navigator.popUntil(context, (route) => route.isFirst);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -107,23 +116,24 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
           ),
         ],
       ),
-      body:Stack(
+      body: Stack(
         children: [
-      Positioned.fill(
-      child: Image.asset(
-      screenWidth > 1200
-      ?
-      'assets/matchitbackground.png': 'assets/l2.png',
-        fit:  BoxFit.cover,
+          Positioned.fill(
+            child: Image.asset(
+              screenWidth > 1200
+                  ? 'assets/matchitbackground.png'
+                  : 'assets/l2.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          shouldRotate
+              ? RotatedBox(
+                  quarterTurns: 3, // Rotate the screen by 90 degrees
+                  child: _buildGameContent(),
+                )
+              : _buildGameContent(),
+        ],
       ),
-    ), shouldRotate
-          ? RotatedBox(
-              quarterTurns: 3, // Rotate the screen by 90 degrees
-              child: _buildGameContent(),
-            )
-          : _buildGameContent(),
-    ],
-    ),
     );
   }
 
@@ -227,8 +237,10 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
             }
             draggedItems[key] = value.data;
             feedback[key] = true;
+            _playSound('sounds/success.mp3');
           } else {
             feedback[key] = false;
+            _playSound('sounds/error.mp3');
           }
 
           if (score == questions[currentQuestionIndex].length) {
