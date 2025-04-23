@@ -1,164 +1,89 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
+class ComparingDecimalsPage extends StatelessWidget {
+  const ComparingDecimalsPage({Key? key}) : super(key: key);
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Compare Decimals',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: CompareDecimals(),
-    );
-  }
-}
-
-class CompareDecimals extends StatefulWidget {
-  @override
-  _CompareDecimalsState createState() => _CompareDecimalsState();
-}
-
-class _CompareDecimalsState extends State<CompareDecimals> {
-  double number1 = 2.45;
-  double number2 = 2.67;
-  String resultMessage = '';
-  bool showExplanation = true;
-
-  void compareDecimals() {
-    if (number1 > number2) {
-      setState(() {
-        resultMessage = '✨ Number 1 ($number1) is greater! ✨';
-      });
-    } else if (number1 < number2) {
-      setState(() {
-        resultMessage = '✨ Number 2 ($number2) is greater! ✨';
-      });
-    } else {
-      setState(() {
-        resultMessage = '🎉 Both numbers are equal! 🎉';
-      });
-    }
+  void _navigateToHome(BuildContext context) {
+    // Navigate to home screen
+    Navigator.popUntil(context, (route) => route.isFirst);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightGreen[50],
+      backgroundColor: const Color(0xFFF8F0F8),
       appBar: AppBar(
-        title: Text('Compare Decimals', style: TextStyle(fontSize: 24)),
-        backgroundColor: Colors.green,
-        // centerTitle: true,
+        backgroundColor: const Color(0xFF4CAF50),
+        title: const Text('Comparing Decimals'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        actions: [
+          const Icon(Icons.arrow_forward),
+          const SizedBox(width: 10),
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => _navigateToHome(context),
+          ),
+          // Icon(Icons.home),
+          const SizedBox(width: 10),
+          const Icon(Icons.translate),
+          const SizedBox(width: 10),
+        ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            if (showExplanation)
-              AnimatedOpacity(
-                opacity: showExplanation ? 1.0 : 0.0,
-                duration: Duration(seconds: 1),
-                child: Column(
-                  children: [
-                    Text(
-                      'Comparing Decimals',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.teal,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      'Decimals are numbers with a whole part and a fractional part. For example, 2.5 has 2 as the whole part and 0.5 as the fractional part.\n\n'
-                      '1. Compare the whole numbers: The bigger whole number is greater.\n'
-                      '2. If the whole numbers are the same, compare the fractional part: The bigger decimal part is greater.\n\n'
-                      'Example: 3.7 > 3.5 because 7 > 5.\n\nLet\'s practice comparing decimals!',
-                      style: TextStyle(fontSize: 20, color: Colors.black),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 30),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          showExplanation = false;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orangeAccent,
-                        padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                      ),
-                      child: Text(
-                        'Got it! Let\'s Compare!',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else
-              AnimatedOpacity(
-                opacity: showExplanation ? 0.0 : 1.0,
-                duration: Duration(seconds: 1),
-                child: Column(
-                  children: [
-                    Text(
-                      'Which decimal is greater?',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blueAccent),
-                    ),
-                    SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.blue[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'Decimal 1: $number1',
-                        style: TextStyle(fontSize: 22, color: Colors.black),
-                      ),
-                    ),
-                    SizedBox(height: 15),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.blue[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'Decimal 2: $number2',
-                        style: TextStyle(fontSize: 22, color: Colors.black),
-                      ),
-                    ),
-                    SizedBox(height: 30),
-                    ElevatedButton(
-                      onPressed: compareDecimals,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.pinkAccent,
-                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                      ),
-                      child: Text(
-                        'Compare',
-                        style: TextStyle(fontSize: 20, color: Colors.white),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      resultMessage,
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+          children: [
+            const Text(
+              'Comparing Decimals',
+              style: TextStyle(
+                fontSize: 42,
+                fontWeight: FontWeight.bold,
+                color: Colors.teal,
               ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Text(
+                // 'When we compare decimals, we look at each number from left to right:\n\n'
+                // '• First, compare the whole numbers.\n'
+                // '• If they are the same, look at the tenths.\n'
+                // '• Then check hundredths if needed.\n\n'
+                '👉 Example: Which is bigger: 3.45 or 3.5?\n'
+                '- Whole numbers: 3 and 3 → same!\n'
+                '- Tenths: 4 vs 5 → 5 is bigger!\n'
+                'So, 3.45 is smaller than 3.5\n\n'
+                '📌 Tip: You can write 3.5 as 3.50 to compare easily.\n'
+                'Now compare: 3.45 < 3.50',
+                style: TextStyle(fontSize: 20),
+              ),
+            ),
+            const SizedBox(height: 30),
+            Image.asset(
+              'assets/comparingdecimals.png', // add image in assets
+              height: 200,
+            ),
+            const Spacer(),
+            Align(
+              alignment: Alignment.bottomRight,
+              // child: ElevatedButton(
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: const Color(0xFF009688),
+              //   ),
+              //   onPressed: () {
+              //     // Add navigation logic here
+              //   },
+              //   child: const Text('Next Page'),
+              // ),
+            ),
           ],
         ),
       ),

@@ -56,8 +56,8 @@ class GameSelectionDialog extends StatelessWidget {
                     ),
                     const SizedBox(height: 30),
                     _buildGameButton(context, '🃏 Match the Tile', MemoryGameScreen(), Colors.blue),
-                    _buildGameButton(context, '🐦 Lizzie Bird', LizzieTheBirdGame(), Colors.green),
-                    _buildGameButton(context, '🎯 Decimal Place Value Puzzle', PlaceValueScreen1(), Colors.orange),
+                    _buildGameButton(context, '🐦 Lizzie the Bird', LizzieTheBirdGame(), Colors.green),
+                    _buildGameButton(context, '🎯 Place Value Puzzle', PlaceValueScreen1(), Colors.orange),
                     _buildGameButton(context, '🎤 Choose It', ChooseItGameScreen(), Colors.purple),
                     const SizedBox(height: 20),
                     TextButton(

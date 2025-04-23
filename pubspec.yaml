@@ -45,6 +45,7 @@ flutter:
     - assets/birdnew.png
     - assets/backdrop.png
     - assets/backdrop2.jpeg
+    - assets/comparingdecimals.png
     
   #  - images/a_dot_ham.jpeg
   # fonts:

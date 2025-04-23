@@ -95,7 +95,7 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => CompareDecimals()),
+                MaterialPageRoute(builder: (context) => ComparingDecimalsPage()),
               );
             },
           ),

@@ -193,7 +193,8 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
   //   }
   // }
   void checkAnswer(String answer) {
-    final String correctValue = questions[currentQuestionIndex]['number'].toString();
+    final String correctValue =
+        questions[currentQuestionIndex]['number'].toString();
 
     setState(() {
       selectedAnswer = answer;
@@ -201,11 +202,13 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
       if (answer == correctValue) {
         feedback = "Correct!";
         feedbackColor = Colors.green;
+        _playSound('assets/sounds/success.mp3');
         showBubble = true;
         score++;
 
         // get position of the correct fish
-        final renderBox = _correctFishKey.currentContext?.findRenderObject() as RenderBox?;
+        final renderBox =
+            _correctFishKey.currentContext?.findRenderObject() as RenderBox?;
         if (renderBox != null) {
           final Offset position = renderBox.localToGlobal(Offset.zero);
           birdTop = position.dy - 50;
@@ -234,6 +237,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
       } else {
         feedback = "Try Again!";
         feedbackColor = Colors.red;
+        _playSound('assets/sounds/error.mp3');
         showBubble = true;
         Future.delayed(const Duration(seconds: 1), () {
           if (!mounted) return;
@@ -282,9 +286,10 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
                     : screenWidth * 0.4;
 
                 return Image.asset(
-                  screenWidth > 1200?
-                  'assets/backdrop.png':'assets/backdrop2.jpeg',
-                  width: screenWidth*0.9,
+                  screenWidth > 1200
+                      ? 'assets/backdrop.png'
+                      : 'assets/backdrop2.jpeg',
+                  width: screenWidth * 0.9,
                   height: screenHeight * 0.9,
                   fit: BoxFit.fill,
                 );
@@ -335,7 +340,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
               top: screenWidth < 500
                   ? (screenHeight * 0.4) - 60
                   : (screenHeight * 0.3) - 40,
-              left: screenWidth < 1200?screenWidth * 0.6: screenWidth*0.55,
+              left: screenWidth < 1200 ? screenWidth * 0.6 : screenWidth * 0.55,
               child: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -373,8 +378,10 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
     );
   }
 
-  Widget buildFishButton(String value, double screenWidth, double screenHeight) {
-    final String correctValue = questions[currentQuestionIndex]['number'].toString();
+  Widget buildFishButton(
+      String value, double screenWidth, double screenHeight) {
+    final String correctValue =
+        questions[currentQuestionIndex]['number'].toString();
     final bool isCorrect = value == correctValue;
     return GestureDetector(
       onTap: () => checkAnswer(value),
@@ -403,6 +410,4 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
       ),
     );
   }
-
-
 }

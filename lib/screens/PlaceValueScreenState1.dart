@@ -200,7 +200,7 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
       ),
       childWhenDragging: Container(
         padding: const EdgeInsets.all(8),
-        color: Colors.teal[200],
+        color: const Color.fromARGB(255, 147, 212, 206),
         child: Text(
           value,
           style: const TextStyle(fontSize: 16, color: Colors.grey),
@@ -208,7 +208,7 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
       ),
       child: Container(
         padding: const EdgeInsets.all(8),
-        color: Colors.teal[300],
+        color: const Color.fromARGB(255, 147, 212, 206),
         child: Text(
           value,
           style: const TextStyle(fontSize: 16),

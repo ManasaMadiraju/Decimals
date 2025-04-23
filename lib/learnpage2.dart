@@ -15,8 +15,8 @@ class LearnPage2 extends StatefulWidget {
 class _LearnPageState2 extends State<LearnPage2> {
   final Map<String, String> originalTexts = {
     'h1':'Place Values in Decimals',
-    'h2':'Each number after the decimal point has a place value: tenths, hundredths, and thousandths.'
-  'Example : In 0.25, 2 is in the tenths place, and 5 is in the hundredths place.',
+    'h2':'Each number after the decimal point has a place value: tenths, hundredths, and thousandths.\n'
+  '\n Example : In 0.25, 2 is in the tenths place, and 5 is in the hundredths place.',
     'NextPage': 'Next Page'
   };
   Map<String, String> translatedTexts = {};
@@ -123,8 +123,8 @@ class _LearnPageState2 extends State<LearnPage2> {
                 borderRadius: BorderRadius.circular(10),
                 child: Image.asset(
                   'assets/decimal2.png',
-                  width: 220,
-                  height: 150,
+                  width: 250,
+                  height: 220,
                   fit: BoxFit.cover,
                 ),
               ),
