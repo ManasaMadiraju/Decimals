@@ -1,5 +1,3 @@
-import 'package:decimals/learnpage.dart';
-import 'package:decimals/main.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
