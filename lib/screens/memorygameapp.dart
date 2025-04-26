@@ -2,6 +2,8 @@ import 'dart:math'; // Import for random selection
 import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:decimals/custom_dialog.dart'; 
+
 
 class MemoryGameScreen extends StatefulWidget {
   const MemoryGameScreen({super.key});
@@ -61,40 +63,36 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     Navigator.popUntil(context, (route) => route.isFirst);
   }
 
-  void  checkMatch() async {
-    if (selectedItems.length == 2) {
-      final String first = selectedItems[0];
-      final String second = selectedItems[1];
+  void checkMatch() async {
+  if (selectedItems.length == 2) {
+    final String first = selectedItems[0];
+    final String second = selectedItems[1];
 
-      if ((correctPairs[first] == second) || (correctPairs[second] == first)) {
-        await _playSound('sounds/success.mp3');
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Correct!'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 1),
-        ));
-        setState(() {
-          score++;
-          items.remove(first);
-          items.remove(second);
+    if ((correctPairs[first] == second) || (correctPairs[second] == first)) {
+      await _playSound('sounds/success.mp3');
+
+      showCustomAnimatedDialog(context, "Correct Match!", isSuccess: true);
+
+      setState(() {
+        score++;
+        items.remove(first);
+        items.remove(second);
+      });
+
+      if (items.isEmpty) {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          _showCompletionDialog();
         });
-
-        if (items.isEmpty) {
-          Future.delayed(const Duration(milliseconds: 500), () {
-            _showCompletionDialog();
-          });
-        }
-      } else {
-        await _playSound('sounds/error.mp3');
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Incorrect!'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 1),
-        ));
       }
-      selectedItems.clear();
+    } else {
+      await _playSound('sounds/error.mp3');
+
+      showCustomAnimatedDialog(context, "Wrong Match!", isSuccess: false);
     }
+    selectedItems.clear();
   }
+}
+
 
   void _showCompletionDialog() {
     showDialog(
