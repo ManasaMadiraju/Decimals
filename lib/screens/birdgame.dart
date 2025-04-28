@@ -1,6 +1,8 @@
 import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class LizzieTheBirdGame extends StatefulWidget {
   const LizzieTheBirdGame({super.key});
@@ -25,6 +27,39 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
   double birdLeft2 = 450;
   final GlobalKey _correctFishKey = GlobalKey();
   Set<String> hiddenFishes = {};
+  final Map<String, String> originalTexts = {
+    'heading': 'Help me choose the right fish to eat!\n',
+  };
+  Map<String, String> translatedTexts = {};
+  bool translated = false;
+  Future<void> translateTexts() async {
+    if (!translated) {
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/translate'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'texts': originalTexts.values.toList()}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          translatedTexts = {
+            for (int i = 0; i < originalTexts.keys.length; i++)
+              originalTexts.keys.elementAt(i): data['translations'][i]
+          };
+          translated = true;
+        });
+      } else {
+        print('Failed to fetch translations: ${response.statusCode}');
+      }
+    } else {
+      setState(() {
+        translatedTexts.clear();
+        translated = false; // Mark as untranslated
+      });
+    }
+  }
+
   final List<Map<String, dynamic>> questions = [
     {
       'number': 0.25,
@@ -130,69 +165,6 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
     Navigator.popUntil(context, (route) => route.isFirst);
   }
 
-  @override
-  // void initState() {
-  //   super.initState();
-  //   fishKeys = {};
-  // }
-  // void checkAnswer(String answer) async {
-  //   if (!fishKeys.containsKey(answer)) {
-  //     fishKeys[answer] = GlobalKey();
-  //   }
-  //   final key = fishKeys[answer];
-  //   if (key != null) {
-  //     final RenderBox? renderBox =
-  //     key.currentContext?.findRenderObject() as RenderBox?;
-  //     if (renderBox != null) {
-  //       final Offset position = renderBox.localToGlobal(Offset.zero);
-  //       if (!mounted) return;
-  //       setState(() {
-  //         selectedAnswer = answer;
-  //         correctAnswer = questions[currentQuestionIndex]['number'].toString();
-  //         if (answer == correctAnswer) {
-  //           feedback = "Correct!";
-  //           _playSound('sounds/success.mp3');
-  //           feedbackColor = Colors.green;
-  //           showBubble = true;
-  //           birdMoves = true;
-  //           birdTop = position.dy - 50;
-  //           birdLeft = position.dx;
-  //           score++;
-  //
-  //           Future.delayed(const Duration(seconds: 2), () {
-  //             if (!mounted) return;
-  //             setState(() {
-  //               hiddenFishes.add(answer);
-  //               birdMoves = false;
-  //             });
-  //           });
-  //
-  //           Future.delayed(const Duration(seconds: 3), () {
-  //             if (!mounted) return;
-  //             setState(() {
-  //               showBubble = false;
-  //               if (currentQuestionIndex < questions.length - 1) {
-  //                 hiddenFishes.clear();
-  //                 currentQuestionIndex++;
-  //               }
-  //             });
-  //           });
-  //         } else {
-  //           feedback = "Try Again!";
-  //           feedbackColor = Colors.red;
-  //           _playSound('sounds/error.mp3');
-  //           showBubble = true;
-  //           Future.delayed(const Duration(seconds: 2), () {
-  //             if (!mounted) return;
-  //             setState(() {
-  //               showBubble = false;
-  //             });
-  //           });
-  //         }
-  //       });
-  //     }
-  //   }
-  // }
   void checkAnswer(String answer) {
     final String correctValue =
         questions[currentQuestionIndex]['number'].toString();
@@ -274,6 +246,10 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
               Navigator.popUntil(context, (route) => route.isFirst);
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.translate),
+            onPressed: translateTexts,
+          ),
         ],
       ),
       body: Stack(
@@ -311,7 +287,9 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
                   //   borderRadius: BorderRadius.circular(15),
                   // ),
                   child: Text(
-                    'Help me choose the right fish to eat!\n                    $question?',
+                    translated
+                        ? '${translatedTexts['heading'] ?? originalTexts['heading']} $question?'
+                        : '${originalTexts['heading']} $question?',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

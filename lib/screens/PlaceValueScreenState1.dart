@@ -2,6 +2,8 @@ import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class PlaceValueScreen1 extends StatefulWidget {
   const PlaceValueScreen1({super.key});
@@ -11,6 +13,38 @@ class PlaceValueScreen1 extends StatefulWidget {
 }
 
 class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
+  final Map<String, String> originalTexts = {
+    'heading': 'Match Each Number with its Place Value:',
+  };
+  Map<String, String> translatedTexts = {};
+  bool translated = false;
+  Future<void> translateTexts() async {
+    if (!translated) {
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/translate'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'texts': originalTexts.values.toList()}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          translatedTexts = {
+            for (int i = 0; i < originalTexts.keys.length; i++)
+              originalTexts.keys.elementAt(i): data['translations'][i]
+          };
+          translated = true;
+        });
+      } else {
+        print('Failed to fetch translations: ${response.statusCode}');
+      }
+    } else {
+      setState(() {
+        translatedTexts.clear();
+        translated = false; // Mark as untranslated
+      });
+    }
+  }
   final List<Map<String, String>> questions = [
     {
       '1': 'Tens',
@@ -114,6 +148,10 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
             },
             icon: const Icon(Icons.home),
           ),
+          IconButton(
+            icon: const Icon(Icons.translate),
+            onPressed: translateTexts,
+          ),
         ],
       ),
       body: Stack(
@@ -142,8 +180,9 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          const Text(
-            "Match Each Number with its Place Value:",
+           Text(
+            translated ? translatedTexts['heading'] ?? originalTexts['heading']!
+                : originalTexts['heading']!,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
