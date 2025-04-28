@@ -2,6 +2,8 @@ import 'dart:math'; // Import for random selection
 import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class MemoryGameScreen extends StatefulWidget {
   const MemoryGameScreen({super.key});
@@ -11,6 +13,38 @@ class MemoryGameScreen extends StatefulWidget {
 }
 
 class _MemoryGameScreenState extends State<MemoryGameScreen> {
+  final Map<String, String> originalTexts = {
+    'heading': 'Lets play matching! Match each underlined value to the correct units:',
+  };
+  Map<String, String> translatedTexts = {};
+  bool translated = false;
+  Future<void> translateTexts() async {
+    if (!translated) {
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/translate'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'texts': originalTexts.values.toList()}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          translatedTexts = {
+            for (int i = 0; i < originalTexts.keys.length; i++)
+              originalTexts.keys.elementAt(i): data['translations'][i]
+          };
+          translated = true;
+        });
+      } else {
+        print('Failed to fetch translations: ${response.statusCode}');
+      }
+    } else {
+      setState(() {
+        translatedTexts.clear();
+        translated = false; // Mark as untranslated
+      });
+    }
+  }
   final List<Map<String, String>> questionSets = [
     {'.444': 'Thousandths', '.73': 'Hundredths', '61': 'Tens', '1.13': 'Tenths', '7842': 'Thousands', '5': 'Ones'},
     {'0.89': 'Hundredths', '92': 'Tens', '0.6': 'Tenths', '4567': 'Thousands', '3': 'Ones', '0.234': 'Thousandths'},
@@ -615,6 +649,10 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
             onPressed: _navigateToHome,
             icon: const Icon(Icons.home),
           ),
+          IconButton(
+            icon: const Icon(Icons.translate),
+            onPressed: translateTexts,
+          ),
         ],
       ),
       body: Stack(
@@ -632,7 +670,9 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
            Padding(
             padding: EdgeInsets.all(16.0),
       child: Text(
-        "Let's play matching! Match each underlined value to the correct units:",
+        translated
+            ? translatedTexts['heading'] ?? originalTexts['heading']!
+            : originalTexts['heading']!,
         textAlign: TextAlign.center,
         style: TextStyle(
           fontFamily: 'LuckiestGuy',     // a playful kids’ font

@@ -1,6 +1,8 @@
 import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class ChooseItGameScreen extends StatefulWidget {
   const ChooseItGameScreen({super.key});
@@ -10,8 +12,41 @@ class ChooseItGameScreen extends StatefulWidget {
 }
 
 class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
+
   // adds audio for the correct answer 
   final FlutterTts _flutterTts = FlutterTts();
+  final Map<String, String> originalTexts = {
+    'heading': 'What is the correct description for',
+  };
+  Map<String, String> translatedTexts = {};
+  bool translated = false;
+  Future<void> translateTexts() async {
+    if (!translated) {
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/translate'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'texts': originalTexts.values.toList()}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          translatedTexts = {
+            for (int i = 0; i < originalTexts.keys.length; i++)
+              originalTexts.keys.elementAt(i): data['translations'][i]
+          };
+          translated = true;
+        });
+      } else {
+        print('Failed to fetch translations: ${response.statusCode}');
+      }
+    } else {
+      setState(() {
+        translatedTexts.clear();
+        translated = false; // Mark as untranslated
+      });
+    }
+  }
   final List<Map<String, dynamic>> questions = [
     {
       'number': 12.7,
@@ -205,6 +240,10 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
             },
             icon: const Icon(Icons.home),
           ),
+          IconButton(
+            icon: const Icon(Icons.translate),
+            onPressed: translateTexts,
+          ),
         ],
       ),
       body: Stack(
@@ -225,7 +264,8 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                'What is the correct description for $question?',
+                translated ? '${translatedTexts['heading'] ?? originalTexts['heading']} $question?'
+        : '${originalTexts['heading']} $question?',
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
