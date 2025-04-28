@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ComparingDecimalsPage extends StatelessWidget {
-  const ComparingDecimalsPage({Key? key}) : super(key: key);
+  const ComparingDecimalsPage({super.key});
 
   void _navigateToHome(BuildContext context) {
     // Navigate to home screen

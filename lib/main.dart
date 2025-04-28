@@ -1,7 +1,5 @@
-import 'package:decimals/screens/memorygameapp.dart';
 import 'package:flutter/material.dart';
 import 'learnpage.dart';
-import 'package:decimals/screens/birdgame.dart';
 import 'GameSelectionDialog.dart';
 import 'package:decimals/screens/treasurehunt.dart';
 

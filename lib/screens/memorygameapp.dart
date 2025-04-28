@@ -1,7 +1,6 @@
 import 'dart:math'; // Import for random selection
 import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
-import 'birdgame.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
