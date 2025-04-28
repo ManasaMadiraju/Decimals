@@ -2,6 +2,7 @@ import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:decimals/custom_dialog.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -268,33 +269,49 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
 
   Widget _buildDragTarget(String key) {
     return DragTarget<String>(
-      onAcceptWithDetails: (value) {
-        setState(() {
-          if (questions[currentQuestionIndex][key] == value.data) {
-            if (!draggedItems.containsKey(key)) {
-              score++;
-            }
-            draggedItems[key] = value.data;
-            feedback[key] = true;
-            _playSound('sounds/success.mp3');
-          } else {
-            feedback[key] = false;
-            _playSound('sounds/error.mp3');
-          }
+      onAcceptWithDetails: (details) {
+  setState(() {
+    if (questions[currentQuestionIndex][key] == details.data) {
+      if (!draggedItems.containsKey(key)) {
+        score++;
+      }
+      draggedItems[key] = details.data;
+      feedback[key] = true;
+      _playSound('sounds/success.mp3');
 
-          if (score == questions[currentQuestionIndex].length) {
-            Future.delayed(const Duration(seconds: 1), () {
-              setState(() {
-                currentQuestionIndex =
-                    (currentQuestionIndex + 1) % questions.length;
-                draggedItems.clear();
-                feedback.clear();
-                score = 0;
-              });
+      if (score == questions[currentQuestionIndex].length) {
+        showCustomAnimatedDialog(
+          context,
+          "Awesome! You matched all correctly 🎯",
+          isSuccess: true,
+        );
+
+        Future.delayed(const Duration(milliseconds: 2500), () {
+          if (mounted) {
+            setState(() {
+              currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
+              draggedItems.clear();
+              feedback.clear();
+              score = 0;
             });
           }
         });
-      },
+      }
+    } else {
+      feedback[key] = false;
+      _playSound('sounds/error.mp3');
+
+      showCustomAnimatedDialog(
+        context,
+        "Oops! That's incorrect ❌",
+        isSuccess: false,
+      );
+    }
+  });
+},
+
+
+
       builder: (context, candidateData, rejectedData) {
         return Container(
           width: 100,
