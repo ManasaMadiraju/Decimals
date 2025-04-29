@@ -198,20 +198,54 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Game Over'),
-              content: Text('Your score: $score/${questions.length}'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      score = 0;
-                      currentQuestionIndex = 0;
-                      selectedAnswer = '';
-                      Navigator.of(context).pop();
-                    });
-                  },
-                  child: const Text('Restart'),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              backgroundColor: Colors.white,
+              title: Text(
+                "  Game Over  ",
+                style: TextStyle(
+                  color: Color(0xFF1f6924),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
+                textAlign: TextAlign.center,
+              ),
+              content: Text(
+            'Your score: $score/${questions.length}',
+              style: TextStyle(
+                  color: Colors.lightGreen,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600
+              ),
+              textAlign: TextAlign.center,
+            ),
+              actionsAlignment: MainAxisAlignment.center,
+              actions: [ ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.lightGreen,   // formerly `primary`
+                  foregroundColor: Colors.white,               // Text color
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+                onPressed: () {
+                  setState(() {
+                    score = 0;
+                    currentQuestionIndex = 0;
+                    selectedAnswer = '';
+                    Navigator.of(context).pop();
+                  });
+                },
+                child: const Text(
+                  "Restart",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
               ],
             );
           },

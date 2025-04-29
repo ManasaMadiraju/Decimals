@@ -138,17 +138,16 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
         return AlertDialog(
           // Rounded corners and a playful pastel background
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(20),
           ),
-          backgroundColor: Color(0xFFeec7fc),
+          backgroundColor: Colors.white,
 
-          // A fun title with an icon
-          title: Row(
+          title: Column(
             children: [
-              Icon(Icons.emoji_events, color: Colors.orangeAccent, size: 32),
+              Icon(Icons.check_circle_outline, color: Colors.lightGreen, size: 32),
               const SizedBox(width: 8),
               Text(
-                "   Good Job! 🎉  ",
+                "  Success!   ",
                 style: TextStyle(
                   color: Color(0xFF1f6924),
                   fontSize: 24,
@@ -162,7 +161,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           content: Text(
             "You matched all the pairs!\nPlay the next round?",
             style: TextStyle(
-              color: Color(0xFF1f6924),
+              color: Colors.lightGreen,
               fontSize: 18,
               fontWeight: FontWeight.w600
             ),
@@ -174,7 +173,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           actions: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,   // formerly `primary`
+                backgroundColor: Colors.lightGreen,   // formerly `primary`
                 foregroundColor: Colors.white,               // Text color
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),

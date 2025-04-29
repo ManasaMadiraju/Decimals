@@ -329,12 +329,55 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Try Again', style: TextStyle(color: Colors.red)),
-          content: Text("Oops! $selected is incorrect."),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: Colors.white,
+          // title: const Text('Try Again', style: TextStyle(color: Colors.red)),
+          title: Column(
+              children: [
+              Icon( Icons.error_outline, color: Colors.red, size: 32),
+          const SizedBox(width: 8), Text(
+            "  Try Again  ",
+            style: TextStyle(
+              color: Colors.red,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          ],
+          ),
+          // content: Text("Oops! $selected is incorrect."),
+          content: Text(
+            "Oops! $selected is incorrect",
+            style: TextStyle(
+                color: Colors.red,
+                fontSize: 18,
+                fontWeight: FontWeight.w600
+            ),
+            textAlign: TextAlign.center,
+          ),
+          actionsAlignment: MainAxisAlignment.center,
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,   // formerly `primary`
+                foregroundColor: Colors.white,               // Text color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+              ),
+              onPressed: () =>
+                Navigator.of(context).pop(),
+              child: const Text(
+                "OK",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
