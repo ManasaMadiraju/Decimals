@@ -201,9 +201,6 @@ import 'package:decimals/main.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:decimals/custom_dialog.dart';
-
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -320,23 +317,30 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
     }
   }
 
- void _checkAnswer(int selected) async {
-  if (selected == correctAnswer) {
-    await _playSound('sounds/success.mp3');
-    setState(() {
-      score += 10;
-      _generateQuestion();
-    });
-  } else {
-    await _playSound('sounds/error.mp3');
-    showCustomAnimatedDialog(
-      context,
-      "Oops! $selected is incorrect ❌",
-      isSuccess: false,
-    );
+  void _checkAnswer(int selected) async {
+    if (selected == correctAnswer) {
+      await _playSound('sounds/success.mp3');
+      setState(() {
+        score += 10;
+        _generateQuestion();
+      });
+    } else {
+      await _playSound('sounds/error.mp3');
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Try Again', style: TextStyle(color: Colors.red)),
+          content: Text("Oops! $selected is incorrect."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {

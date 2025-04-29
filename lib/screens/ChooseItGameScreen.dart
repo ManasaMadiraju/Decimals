@@ -1,7 +1,6 @@
 import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:decimals/custom_dialog.dart'; 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -168,55 +167,38 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
   // Method to handle home button press
   void _navigateToHome() {
     // Navigate to home screen
-    IconButton(
-  onPressed: _navigateToHome,
-  icon: const Icon(Icons.home),
-);
-
+    Navigator.popUntil(context, (route) => route.isFirst);
   }
 
   int currentQuestionIndex = 0;
   int score = 0;
   String selectedAnswer = '';
   // modified and add output sound
-    void checkAnswer(String answer) async {
-  setState(() {
-    selectedAnswer = answer;
-  });
+  void checkAnswer(String answer) async {
+    setState(() {
+      selectedAnswer = answer;
+    });
 
-  bool isCorrect = (answer == questions[currentQuestionIndex]['description']);
-
-  if (isCorrect) {
-    score++;
-    await _speak("Correct. ${questions[currentQuestionIndex]['description']}");
-    showCustomAnimatedDialog(
-      context,
-      'Correct Answer!',
-      isSuccess: true,
-    );
-  } else {
-    await _speak("Incorrect. This is ${questions[currentQuestionIndex]['description']}");
-    showCustomAnimatedDialog(
-      context,
-      'Incorrect. Try Again!',
-      isSuccess: false,
-    );
-  }
-
-  await Future.delayed(const Duration(seconds: 4)); // wait after speaking
-
-  if (isCorrect) {
+    if (answer == questions[currentQuestionIndex]['description']) {
+      score++;
+      await _speak("Correct. ${questions[currentQuestionIndex]['description']}");
+    } else {
+      await _speak("Incorrect. This is ${questions[currentQuestionIndex]['description']}");
+    }
+    await Future.delayed(const Duration(seconds: 4));
+    
     setState(() {
       if (currentQuestionIndex < questions.length - 1) {
         currentQuestionIndex++;
-        selectedAnswer = '';
+        selectedAnswer='';
+
       } else {
-        // game over
+        // End of the game
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text('Game Over'),
+              title: Text('Game Over'),
               content: Text('Your score: $score/${questions.length}'),
               actions: <Widget>[
                 TextButton(
@@ -237,9 +219,6 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
       }
     });
   }
-}
-
-
   @override
   Widget build(BuildContext context) {
     String question = questions[currentQuestionIndex]['number'].toString();
