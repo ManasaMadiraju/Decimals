@@ -46,6 +46,13 @@ flutter:
     - assets/backdrop.png
     - assets/backdrop2.jpeg
     - assets/comparingdecimals.png
+    - assets/balloon_red.png
+    - assets/balloon_yellow.png
+    - assets/balloon_purple.png
+    - assets/balloon_green.png
+    - assets/decimalpopbg.jpeg
+    - assets/poppy.png
+    
     
   #  - images/a_dot_ham.jpeg
   # fonts:

@@ -1,8 +1,10 @@
+import 'package:decimals/screens/DecimalPop.dart';
 import 'package:flutter/material.dart';
 import 'package:decimals/screens/birdgame.dart';
 import 'package:decimals/screens/memorygameapp.dart';
 import 'package:decimals/screens/PlaceValueScreenState1.dart';
 import 'package:decimals/screens/ChooseItGameScreen.dart';
+import 'package:decimals/screens/DecimalPop.dart';
 
 class GameSelectionDialog extends StatelessWidget {
   const GameSelectionDialog({super.key});
@@ -59,6 +61,7 @@ class GameSelectionDialog extends StatelessWidget {
                     _buildGameButton(context, '🐦 Lizzie the Bird', LizzieTheBirdGame(), Colors.green),
                     _buildGameButton(context, '🎯 Place Value Puzzle', PlaceValueScreen1(), Colors.orange),
                     _buildGameButton(context, '🎤 Choose It', ChooseItGameScreen(), Colors.purple),
+                    _buildGameButton(context, '🎈 Decimal Pop!', DecimalPopGame(),Colors.teal),
                     const SizedBox(height: 20),
                     TextButton(
                       onPressed: (){ Navigator.popUntil(context, (route) => route.isFirst);},
