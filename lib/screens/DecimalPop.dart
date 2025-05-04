@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:math';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class DecimalPopGame extends StatefulWidget {
   const DecimalPopGame({Key? key}) : super(key: key);
@@ -31,6 +33,41 @@ class _DecimalPopGameState extends State<DecimalPopGame>
   late List<Animation<double>> _animations;
   late AnimationController _mascotController;
   late Animation<double> _mascotBounce;
+
+  final Map<String, String> originalTexts = {
+    'question': 'Pick the balloon with the greatest value!',
+    'title': 'Decimal Pop Game',
+  };
+  Map<String, String> translatedTexts = {};
+  bool translated = false;
+
+  Future<void> translateTexts() async {
+    if (!translated) {
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/translate'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'texts': originalTexts.values.toList()}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          translatedTexts = {
+            for (int i = 0; i < originalTexts.keys.length; i++)
+              originalTexts.keys.elementAt(i): data['translations'][i]
+          };
+          translated = true;
+        });
+      } else {
+        print('Failed to fetch translations: \${response.statusCode}');
+      }
+    } else {
+      setState(() {
+        translatedTexts.clear();
+        translated = false;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -180,6 +217,26 @@ class _DecimalPopGameState extends State<DecimalPopGame>
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.green,
+        title: Text(
+          translated ? translatedTexts['title'] ?? originalTexts['title']! : originalTexts['title']!,
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
+          ),
+          IconButton(
+            icon: const Icon(Icons.translate),
+            onPressed: translateTexts,
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           Container(
@@ -259,7 +316,7 @@ class _DecimalPopGameState extends State<DecimalPopGame>
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    current['question'],
+                    translated ? translatedTexts['question'] ?? originalTexts['question']! : originalTexts['question']!,
                     style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -273,46 +330,45 @@ class _DecimalPopGameState extends State<DecimalPopGame>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: shuffledOptions.asMap().entries.map((entry) {
-  int index = entry.key;
-  double option = entry.value;
-  final imagePath = getBalloonAsset(index);
+                    int index = entry.key;
+                    double option = entry.value;
+                    final imagePath = getBalloonAsset(index);
 
-          return GestureDetector(
-          onTap: () => checkAnswer(option),
-          child: ScaleTransition(
-              scale: _animations[index],
-                child: SizedBox(
-                   width: size.width * 0.18,
-                   height: size.width * 0.18,
-                   child: Stack(
-                     alignment: Alignment.center,
-                     children: [
-                       Image.asset(
-                       imagePath,
-                       width: double.infinity,
-                       height: double.infinity,
-                       fit: BoxFit.contain,
+                    return GestureDetector(
+                      onTap: () => checkAnswer(option),
+                      child: ScaleTransition(
+                        scale: _animations[index],
+                        child: SizedBox(
+                          width: size.width * 0.18,
+                          height: size.width * 0.18,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Image.asset(
+                                imagePath,
+                                width: double.infinity,
+                                height: double.infinity,
+                                fit: BoxFit.contain,
+                              ),
+                              Align(
+                                alignment: const Alignment(0, -0.6),
+                                child: Text(
+                                  option.toString(),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 35,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontFamily: 'ComicNeue',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                     Align(
-                        alignment: const Alignment(0, -0.6), // Higher up in the balloon
-                        child: Text(
-                        option.toString(),
-                        textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 35,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        fontFamily: 'ComicNeue',
-                      ),
-                      ),
-                     ),
-                   ],
-                 ),
-                 ),
-                 ),
-                );
-               }).toList(),
-
+                    );
+                  }).toList(),
                 ),
               ],
             ),
