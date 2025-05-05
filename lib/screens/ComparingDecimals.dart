@@ -20,7 +20,7 @@ class ComparingDecimalsPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          const Icon(Icons.arrow_forward),
+          // const Icon(Icons.arrow_forward),
           const SizedBox(width: 10),
           IconButton(
             icon: const Icon(Icons.home),

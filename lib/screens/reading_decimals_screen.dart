@@ -80,12 +80,12 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
         title: const Text('Reading Decimals'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed:() {
-              Navigator.pop(
-                context,
-                MaterialPageRoute(builder: (context) => LearnPage2()),
-              );
-            }, 
+          onPressed: () {
+            Navigator.pop(
+              context,
+              MaterialPageRoute(builder: (context) => LearnPage2()),
+            );
+          },
           //_navigateToCustomPage,
         ),
         backgroundColor: Colors.green,
@@ -95,11 +95,11 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ComparingDecimalsPage()),
+                MaterialPageRoute(
+                    builder: (context) => ComparingDecimalsPage()),
               );
             },
           ),
-          // Previous button - Goes back to the LearnPage
           IconButton(
             onPressed: () {
               Navigator.popUntil(context, (route) => route.isFirst);
@@ -194,11 +194,11 @@ class ExampleItem extends StatelessWidget {
   });
 
   final FlutterTts _flutterTts = FlutterTts();
-  
+
   get translatedTexts => null;
-  
+
   get originalTexts => null;
-  
+
   get translated => null;
 
   Future<void> _speak(String text) async {
