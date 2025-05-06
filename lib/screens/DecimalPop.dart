@@ -15,17 +15,52 @@ class DecimalPopGame extends StatefulWidget {
 class _DecimalPopGameState extends State<DecimalPopGame>
     with TickerProviderStateMixin {
   final List<Map<String, dynamic>> questions = [
-    {'question': 'Pick the balloon with the greatest value!', 'options': [0.23, 0.67, 0.45, 0.12], 'answer': 0.67},
-    {'question': 'Pick the balloon with the greatest value!', 'options': [0.12, 0.09, 0.25, 0.19], 'answer': 0.25},
-    {'question': 'Pick the balloon with the greatest value!', 'options': [0.3, 0.31, 0.299, 0.29], 'answer': 0.31},
-    {'question': 'Pick the balloon with the greatest value!', 'options': [0.78, 0.87, 0.65, 0.54], 'answer': 0.87},
-    {'question': 'Pick the balloon with the greatest value!', 'options': [0.111, 0.11, 0.1, 0.09], 'answer': 0.111},
-    {'question': 'Pick the balloon with the greatest value!', 'options': [0.8, 0.88, 0.82, 0.81], 'answer': 0.88},
+    {
+      'question': 'Pick the balloon with the greatest value!',
+      'options': [0.23, 0.67, 0.45, 0.12],
+      'answer': 0.67
+    },
+    {
+      'question': 'Pick the balloon with the greatest value!',
+      'options': [0.12, 0.09, 0.25, 0.19],
+      'answer': 0.25
+    },
+    {
+      'question': 'Pick the balloon with the greatest value!',
+      'options': [0.3, 0.31, 0.299, 0.29],
+      'answer': 0.31
+    },
+    {
+      'question': 'Pick the balloon with the greatest value!',
+      'options': [0.78, 0.87, 0.65, 0.54],
+      'answer': 0.87
+    },
+    {
+      'question': 'Pick the balloon with the greatest value!',
+      'options': [0.111, 0.11, 0.1, 0.09],
+      'answer': 0.111
+    },
+    {
+      'question': 'Pick the balloon with the greatest value!',
+      'options': [0.8, 0.88, 0.82, 0.81],
+      'answer': 0.88
+    },
+    {
+      'question': 'Pick the balloon with the greatest value!',
+      'options': [0.11, 0.8, 0.18, 0.81],
+      'answer': 0.81
+    },
+    {
+      'question': 'Pick the balloon with the greatest value!',
+      'options': [1.5, 1.31, 1.18, 1.42],
+      'answer': 1.5
+    },
   ];
 
   int currentQuestionIndex = 0;
   String feedbackText = "";
-  String mascotMessage = "Hi! I'm Poppy! 🎈 Let's pop the balloons with greatest value together!";
+  String mascotMessage =
+      "Hi! I'm Poppy! 🎈 Let's pop the balloons with greatest value together!";
   final AudioPlayer _audioPlayer = AudioPlayer();
   final FlutterTts _flutterTts = FlutterTts();
   late List<double> shuffledOptions;
@@ -91,21 +126,26 @@ class _DecimalPopGameState extends State<DecimalPopGame>
   }
 
   void _shuffleOptions() {
-    final options = List<double>.from(questions[currentQuestionIndex]['options']);
+    final options =
+        List<double>.from(questions[currentQuestionIndex]['options']);
     options.shuffle(Random());
     shuffledOptions = options;
   }
 
   void _initAnimations() {
-    _controllers = List.generate(4, (index) => AnimationController(
-      duration: const Duration(milliseconds: 250),
-      lowerBound: 0.0,
-      upperBound: 1.0,
-      vsync: this,
-    ));
-    _animations = _controllers.map((controller) => Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: controller, curve: Curves.easeInOut),
-    )).toList();
+    _controllers = List.generate(
+        4,
+        (index) => AnimationController(
+              duration: const Duration(milliseconds: 250),
+              lowerBound: 0.0,
+              upperBound: 1.0,
+              vsync: this,
+            ));
+    _animations = _controllers
+        .map((controller) => Tween<double>(begin: 1.0, end: 0.0).animate(
+              CurvedAnimation(parent: controller, curve: Curves.easeInOut),
+            ))
+        .toList();
   }
 
   void checkAnswer(double selected) async {
@@ -146,7 +186,8 @@ class _DecimalPopGameState extends State<DecimalPopGame>
   }
 
   void _showEndDialog() async {
-    String thankYouMessage = "Thank you for helping me pop all the balloons! You're amazing!";
+    String thankYouMessage =
+        "Thank you for helping me pop all the balloons! You're amazing!";
     _speakMascot(thankYouMessage);
     Future.delayed(const Duration(milliseconds: 500), () {
       showDialog(
@@ -161,7 +202,8 @@ class _DecimalPopGameState extends State<DecimalPopGame>
               Text(
                 thankYouMessage,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -178,7 +220,8 @@ class _DecimalPopGameState extends State<DecimalPopGame>
                   currentQuestionIndex = 0;
                   _shuffleOptions();
                   _initAnimations();
-                  mascotMessage = "Hi! I'm Poppy! 🎈 Let's pop the biggest balloons together!";
+                  mascotMessage =
+                      "Hi! I'm Poppy! 🎈 Let's pop the biggest balloons together!";
                 });
                 Navigator.pop(context);
               },
@@ -220,7 +263,9 @@ class _DecimalPopGameState extends State<DecimalPopGame>
       appBar: AppBar(
         backgroundColor: Colors.green,
         title: Text(
-          translated ? translatedTexts['title'] ?? originalTexts['title']! : originalTexts['title']!,
+          translated
+              ? translatedTexts['title'] ?? originalTexts['title']!
+              : originalTexts['title']!,
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -229,7 +274,8 @@ class _DecimalPopGameState extends State<DecimalPopGame>
         actions: [
           IconButton(
             icon: const Icon(Icons.home),
-            onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
+            onPressed: () =>
+                Navigator.popUntil(context, (route) => route.isFirst),
           ),
           IconButton(
             icon: const Icon(Icons.translate),
@@ -316,7 +362,10 @@ class _DecimalPopGameState extends State<DecimalPopGame>
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    translated ? translatedTexts['question'] ?? originalTexts['question']! : originalTexts['question']!,
+                    translated
+                        ? translatedTexts['question'] ??
+                            originalTexts['question']!
+                        : originalTexts['question']!,
                     style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
