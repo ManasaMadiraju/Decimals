@@ -402,14 +402,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
               Expanded(
                 child: GridView.builder(
                   padding: EdgeInsets.only(
-                    left: screenWidth > 1200 ? 450.0 : 16.0,
-                    right: screenWidth > 1200 ? 450.0 : 16.0,
-                    bottom: screenWidth > 1200 ? 450.0 : 16.0,
+                    left: screenWidth > 1200 ? 350.0 : 16.0,
+                    right: screenWidth > 1200 ? 350.0 : 16.0,
+                    bottom: screenWidth > 1200 ? 350.0 : 16.0,
                   ),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 4,
-                    crossAxisSpacing: 5,
-                    mainAxisSpacing: 5,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
                     childAspectRatio: 1,
                   ),
                   itemCount: items.length,
@@ -442,7 +442,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                                       item,
                                       style: TextStyle(
                                         fontSize:
-                                            screenWidth > 1200 ? 18.0 : 15.0,
+                                            screenWidth > 1200 ? 22.0 : 18.0,
                                         fontWeight: FontWeight.bold,
                                       ),
                                       textAlign: TextAlign.center,
