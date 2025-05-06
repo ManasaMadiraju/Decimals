@@ -14,7 +14,8 @@ class MemoryGameScreen extends StatefulWidget {
 
 class _MemoryGameScreenState extends State<MemoryGameScreen> {
   final Map<String, String> originalTexts = {
-    'heading': 'Lets play matching! Match each underlined value to the correct units:',
+    'heading':
+        'Lets play matching! Match each underlined value to the correct units:',
   };
   Map<String, String> translatedTexts = {};
   bool translated = false;
@@ -45,10 +46,73 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
       });
     }
   }
+
   final List<Map<String, String>> questionSets = [
-    {'.444': 'Thousandths', '.73': 'Hundredths', '61': 'Tens', '1.13': 'Tenths', '7842': 'Thousands', '5': 'Ones'},
-    {'0.89': 'Hundredths', '92': 'Tens', '0.6': 'Tenths', '4567': 'Thousands', '3': 'Ones', '0.234': 'Thousandths'},
-    {'0.15': 'Hundredths', '45': 'Tens', '1.2': 'Tenths', '6789': 'Thousands', '7': 'Ones', '0.098': 'Thousandths'},
+    {
+      '0.444': 'Thousandths',
+      '0.73': 'Hundredths',
+      '61': 'Tens',
+      '1.13': 'Tenths',
+      '7842': 'Thousands',
+      '5': 'Ones'
+    },
+    {
+      '0.89': 'Hundredths',
+      '92': 'Tens',
+      '0.6': 'Tenths',
+      '4567': 'Thousands',
+      '3': 'Ones',
+      '0.234': 'Thousandths'
+    },
+    {
+      '0.15': 'Hundredths',
+      '45': 'Tens',
+      '1.2': 'Tenths',
+      '6789': 'Thousands',
+      '7': 'Ones',
+      '0.098': 'Thousandths'
+    },
+    // Adding new questions
+    {
+      '0.42': 'Hundredths',
+      '50': 'Tens',
+      '2.3': 'Tenths',
+      '1450': 'Thousands',
+      '0': 'Ones',
+      '0.118': 'Thousandths'
+    },
+    {
+      '0.45': 'Hundredths',
+      '10': 'Tens',
+      '1.92': 'Tenths',
+      '1750': 'Thousands',
+      '20': 'Ones',
+      '4.123': 'Thousandths'
+    },
+    {
+      '0.32': 'Hundredths',
+      '101': 'Tens',
+      '2.1': 'Tenths',
+      '3349': 'Thousands',
+      '4': 'Ones',
+      '10.091': 'Thousandths'
+    },
+    {
+      '1.31': 'Hundredths',
+      '13': 'Tens',
+      '4.6': 'Tenths',
+      '6162': 'Thousands',
+      '81': 'Ones',
+      '0.438': 'Thousandths'
+    },
+    {
+      '5.24': 'Hundredths',
+      '11': 'Tens',
+      '4.2': 'Tenths',
+      '6763': 'Thousands',
+      '42': 'Ones',
+      '5.987': 'Thousandths'
+    },
   ]; // Multiple sets of questions
 
   late Map<String, String> correctPairs;
@@ -63,6 +127,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     super.initState();
     _generateNewRound();
   }
+
   Future<void> _playSound(String soundPath) async {
     try {
       await _audioPlayer.play(AssetSource(soundPath));
@@ -70,11 +135,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
       print("Error playing sound: $e");
     }
   }
+
   void _generateNewRound() {
     setState(() {
       int randomIndex = random.nextInt(questionSets.length);
       correctPairs = questionSets[randomIndex]; // Pick a random set
-      items = correctPairs.entries.expand((e) => [e.key, e.value]).toList(); // Flatten into a list
+      items = correctPairs.entries
+          .expand((e) => [e.key, e.value])
+          .toList(); // Flatten into a list
       items.shuffle(); // Shuffle the items for randomness
       selectedItems.clear();
       score = score;
@@ -88,14 +156,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
       MaterialPageRoute(builder: (context) => GameSelectionDialog()),
     );
   }
-  
+
   // Method to handle home button press
   void _navigateToHome() {
     // Navigate to home screen
     Navigator.popUntil(context, (route) => route.isFirst);
   }
 
-  void  checkMatch() async {
+  void checkMatch() async {
     if (selectedItems.length == 2) {
       final String first = selectedItems[0];
       final String second = selectedItems[1];
@@ -144,7 +212,8 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
 
           title: Column(
             children: [
-              Icon(Icons.check_circle_outline, color: Colors.lightGreen, size: 32),
+              Icon(Icons.check_circle_outline,
+                  color: Colors.lightGreen, size: 32),
               const SizedBox(width: 8),
               Text(
                 "  Success!   ",
@@ -161,10 +230,9 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           content: Text(
             "You matched all the pairs!\nPlay the next round?",
             style: TextStyle(
-              color: Colors.lightGreen,
-              fontSize: 18,
-              fontWeight: FontWeight.w600
-            ),
+                color: Colors.lightGreen,
+                fontSize: 18,
+                fontWeight: FontWeight.w600),
             textAlign: TextAlign.center,
           ),
 
@@ -173,8 +241,8 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           actions: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.lightGreen,   // formerly `primary`
-                foregroundColor: Colors.white,               // Text color
+                backgroundColor: Colors.lightGreen, // formerly `primary`
+                foregroundColor: Colors.white, // Text color
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -197,435 +265,77 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
       },
     );
   }
-  Widget buildUnderlinedText(String text) {
-    if (text == '.444') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '.44',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            TextSpan(
-              text: '4',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '.73') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '.7',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            TextSpan(
-              text: '3',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '61') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '6',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-            TextSpan(
-              text: '1',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '1.13') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '1.',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            TextSpan(
-              text: '1',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-            TextSpan(
-              text: '3',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '7842') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '7',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-            TextSpan(
-              text: '842',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '5') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '5',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '0.89') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '0.8',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            TextSpan(
-              text: '9',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '92') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '9',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-            TextSpan(
-              text: '2',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '0.6') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '0.',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            TextSpan(
-              text: '6',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '4567') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '4',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-            TextSpan(
-              text: '567',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '3') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '3',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '0.234') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '0.23',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            TextSpan(
-              text: '4',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '0.15') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '0.1',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            TextSpan(
-              text: '5',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '45') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '4',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-            TextSpan(
-              text: '5',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '1.2') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '1.',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            TextSpan(
-              text: '2',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '6789') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '6',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-            TextSpan(
-              text: '789',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '7') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '7',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (text == '0.098') {
-      return RichText(
-        text: const TextSpan(
-          children: [
-            TextSpan(
-              text: '0.09',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            TextSpan(
-              text: '8',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
+
+// change this function - previously was hardcoded
+  Widget buildUnderlinedText(String text, String? unit) {
+    // handle the case when no unit - shouldn't happen
+    if (unit == null) {
       return Text(
         text,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         textAlign: TextAlign.center,
       );
     }
-  }
+    final parts = text.split('.');
+    final intPart = parts[0];
+    final decPart = parts.length > 1 ? parts[1] : '';
+    int underlineIndex = -1;
+    if (unit == 'Thousands') {
+      underlineIndex = intPart.length - 4;
+    } else if (unit == 'Tens') {
+      underlineIndex = intPart.length - 2;
+    } else if (unit == 'Ones') {
+      underlineIndex = intPart.length - 1;
+    } else if (unit == 'Tenths') {
+      underlineIndex = 0;
+    } else if (unit == 'Hundredths') {
+      underlineIndex = 1;
+    } else if (unit == 'Thousandths') {
+      underlineIndex = 2;
+    }
+    List<InlineSpan> spans = [];
 
+    if (unit == 'Thousands' || unit == 'Tens' || unit == 'Ones') {
+      for (int i = 0; i < intPart.length; i++) {
+        spans.add(TextSpan(
+          text: intPart[i],
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+            decoration: i == underlineIndex ? TextDecoration.underline : null,
+          ),
+        ));
+      }
+      if (decPart.isNotEmpty) {
+        spans.add(TextSpan(
+          text: '.',
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ));
+        spans.addAll(decPart.split('').map((c) => TextSpan(
+              text: c,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            )));
+      }
+    } else {
+      spans.add(TextSpan(
+        text: intPart + (decPart.isNotEmpty ? '.' : ''),
+        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      ));
+      for (int i = 0; i < decPart.length; i++) {
+        spans.add(TextSpan(
+          text: decPart[i],
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+            decoration: i == underlineIndex ? TextDecoration.underline : null,
+          ),
+        ));
+      }
+    }
+    return RichText(text: TextSpan(children: spans));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -659,87 +369,93 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           Positioned.fill(
             child: Image.asset(
               screenWidth > 1200
-                  ?
-              'assets/matchitbackground.png': 'assets/b2.png',
-              fit:  BoxFit.cover,
+                  ? 'assets/matchitbackground.png'
+                  : 'assets/b2.png',
+              fit: BoxFit.cover,
             ),
           ),
-           Column(
-           children: [
-           Padding(
-            padding: EdgeInsets.all(16.0),
-      child: Text(
-        translated
-            ? translatedTexts['heading'] ?? originalTexts['heading']!
-            : originalTexts['heading']!,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontFamily: 'LuckiestGuy',     // a playful kids’ font
-          fontSize: screenWidth > 1200 ? 25.0 : 20.0,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF1f6924),
-          shadows: [
-            Shadow(
-              color: Colors.black38,
-              offset: Offset(1, 1),
-              blurRadius: 2,
-            ),
-          ],
-          letterSpacing: 0.5,
-        ),
-      ),
-          ),
-          Expanded(
-            child: GridView.builder(
-              padding: EdgeInsets.only(
-                left: screenWidth > 1200 ? 450.0 : 16.0,
-                right: screenWidth > 1200 ? 450.0 : 16.0,
-                bottom: screenWidth > 1200 ? 450.0 : 16.0,
-              ),
-
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                crossAxisSpacing: 5,
-                mainAxisSpacing: 5,
-                childAspectRatio: 1,
-              ),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final String item = items[index];
-                final bool isSelected = selectedItems.contains(item);
-                return GestureDetector(
-                  onTap: () {
-                    if (selectedItems.contains(item)) return;
-                    setState(() {
-                      selectedItems.add(item);
-                    });
-                    checkMatch();
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.orange.shade200 : Colors.purple.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                      border: isSelected
-                          ? Border.all(color: Colors.orange, width: 2)
-                          : Border.all(color: Colors.purple, width: 1),
-                    ),
-                    alignment: Alignment.center,
-                    child:item.contains('.') || (item == '61' || (item == '7842') || (item == '5')|| (item == '92') || (item == '4567')|| (item == '45')|| (item == '6789')|| (item == '7')|| (item == '3'))? buildUnderlinedText(item) : Text(
-                      item,
-                      style:  TextStyle(
-                        fontSize: screenWidth > 1200 ? 18.0 : 15.0,
-                        fontWeight: FontWeight.bold,
+          Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  translated
+                      ? translatedTexts['heading'] ?? originalTexts['heading']!
+                      : originalTexts['heading']!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'LuckiestGuy', // a playful kids’ font
+                    fontSize: screenWidth > 1200 ? 25.0 : 20.0,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1f6924),
+                    shadows: [
+                      Shadow(
+                        color: Colors.black38,
+                        offset: Offset(1, 1),
+                        blurRadius: 2,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
+                    ],
+                    letterSpacing: 0.5,
                   ),
-                );
-              },
-            ),
+                ),
+              ),
+              Expanded(
+                child: GridView.builder(
+                  padding: EdgeInsets.only(
+                    left: screenWidth > 1200 ? 450.0 : 16.0,
+                    right: screenWidth > 1200 ? 450.0 : 16.0,
+                    bottom: screenWidth > 1200 ? 450.0 : 16.0,
+                  ),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 5,
+                    mainAxisSpacing: 5,
+                    childAspectRatio: 1,
+                  ),
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final String item = items[index];
+                    final bool isSelected = selectedItems.contains(item);
+                    return GestureDetector(
+                      onTap: () {
+                        if (selectedItems.contains(item)) return;
+                        setState(() {
+                          selectedItems.add(item);
+                        });
+                        checkMatch();
+                      },
+                      child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? Colors.orange.shade200
+                                : Colors.purple.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                            border: isSelected
+                                ? Border.all(color: Colors.orange, width: 2)
+                                : Border.all(color: Colors.purple, width: 1),
+                          ),
+                          alignment: Alignment.center,
+                          child: correctPairs.containsKey(item)
+                              ? buildUnderlinedText(item, correctPairs[item])
+                              : correctPairs.containsValue(item)
+                                  ? Text(
+                                      item,
+                                      style: TextStyle(
+                                        fontSize:
+                                            screenWidth > 1200 ? 18.0 : 15.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    )
+                                  : Text(item) // fallback
+                          ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ],
-      ),
-    ],
       ),
     );
   }
