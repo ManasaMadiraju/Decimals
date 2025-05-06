@@ -4,7 +4,6 @@ import 'screens/reading_decimals_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-
 class LearnPage2 extends StatefulWidget {
   const LearnPage2({super.key});
 
@@ -14,9 +13,9 @@ class LearnPage2 extends StatefulWidget {
 
 class _LearnPageState2 extends State<LearnPage2> {
   final Map<String, String> originalTexts = {
-    'h1':'Place Values in Decimals',
-    'h2':'Each number after the decimal point has a place value: tenths, hundredths, and thousandths.\n'
-  '\n Example : In 0.25, 2 is in the tenths place, and 5 is in the hundredths place.',
+    'h1': 'Place Values in Decimals',
+    'h2': 'Each number after the decimal point has a place value: tenths, hundredths, and thousandths.\n'
+        '\n Example : In 0.25, 2 is in the tenths place, and 5 is in the hundredths place.',
     'NextPage': 'Next Page'
   };
   Map<String, String> translatedTexts = {};
@@ -57,23 +56,19 @@ class _LearnPageState2 extends State<LearnPage2> {
         backgroundColor: Colors.green,
         actions: [
           IconButton(
-             icon: const Icon(Icons.arrow_forward_rounded),
-             onPressed: () {
-               Navigator.push(
-                 context,
-                 MaterialPageRoute(
-                     builder: (context) =>
-                         const ReadingDecimalScreen()),  
-               );
-             },
-           ),
-          // Previous button - Goes back to the LearnPage
-           IconButton(
+            icon: const Icon(Icons.arrow_forward_rounded),
             onPressed: () {
-              Navigator.pop(
+              Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => LearnPage()),
-                );
+                MaterialPageRoute(
+                    builder: (context) => const ReadingDecimalScreen()),
+              );
+            },
+          ),
+          // Previous button - Goes back to the LearnPage
+          IconButton(
+            onPressed: () {
+              Navigator.popUntil(context, (route) => route.isFirst);
             },
             icon: const Icon(Icons.home),
           ),
@@ -84,25 +79,24 @@ class _LearnPageState2 extends State<LearnPage2> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.only(left: 50,right: 50),
+        padding: const EdgeInsets.only(left: 50, right: 50),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Center(
-                child: Text(
-                  translated
-                      ? translatedTexts['h1'] ?? originalTexts['h1']!
-                      : originalTexts['h1']!,
-                  style: const TextStyle(
-                    fontSize: 45,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.teal,
-                  ),
-                  textAlign: TextAlign.center,
+              child: Text(
+                translated
+                    ? translatedTexts['h1'] ?? originalTexts['h1']!
+                    : originalTexts['h1']!,
+                style: const TextStyle(
+                  fontSize: 45,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal,
                 ),
+                textAlign: TextAlign.center,
+              ),
             ),
             const SizedBox(height: 40),
-
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -117,7 +111,6 @@ class _LearnPageState2 extends State<LearnPage2> {
               ),
             ),
             const SizedBox(height: 40),
-
             Center(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
@@ -130,17 +123,17 @@ class _LearnPageState2 extends State<LearnPage2> {
               ),
             ),
             const SizedBox(height: 20),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal, // Button color
-                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                   shape: RoundedRectangleBorder(
-                     borderRadius: BorderRadius.circular(10),
-                   ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -152,7 +145,8 @@ class _LearnPageState2 extends State<LearnPage2> {
                   },
                   child: Text(
                     translated
-                        ? translatedTexts['NextPage'] ?? originalTexts['NextPage']!
+                        ? translatedTexts['NextPage'] ??
+                            originalTexts['NextPage']!
                         : originalTexts['NextPage']!,
                     style: const TextStyle(fontSize: 18, color: Colors.white),
                   ),
@@ -162,7 +156,6 @@ class _LearnPageState2 extends State<LearnPage2> {
           ],
         ),
       ),
-
     );
   }
 }

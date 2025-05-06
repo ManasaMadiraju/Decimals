@@ -13,6 +13,15 @@ class PlaceValueScreen1 extends StatefulWidget {
 }
 
 class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
+  // shuffle the questions
+  late final List<Map<String, String>> _initialQuestions;
+  @override
+  void initState() {
+    super.initState();
+    _initialQuestions = List<Map<String, String>>.from(questions);
+    questions.shuffle(Random());
+  }
+
   final Map<String, String> originalTexts = {
     'heading': 'Match Each Number with its Place Value:',
   };
@@ -45,6 +54,7 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
       });
     }
   }
+
   final List<Map<String, String>> questions = [
     {
       '1': 'Tens',
@@ -72,6 +82,33 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
       '8': 'Hundreds',
       '6': 'Tens',
       '4': 'Ones',
+    },
+    {
+      '3': 'Tens',
+      '9': 'Ones',
+      '.': 'Decimal',
+      '4': 'Tenths',
+      '6': 'Hundredths',
+      '1': 'Thousandths',
+    },
+    {
+      '7': 'Ones',
+      '.': 'Decimal',
+      '5': 'Tenths',
+      '3': 'Hundredths',
+    },
+    {
+      '2': 'Ones',
+      '.': 'Decimal',
+      '8': 'Tenths',
+      '0': 'Hundredths',
+      '4': 'Thousandths',
+    },
+    {
+      '6': 'Thousands',
+      '2': 'Hundreds',
+      '1': 'Tens',
+      '9': 'Ones',
     },
   ];
 
@@ -176,12 +213,40 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
   }
 
   Widget _buildGameContent() {
+    if (questions.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Great job! All questions completed!',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  questions.addAll(_initialQuestions);
+                  questions.shuffle(Random());
+                  // Change this line if want to keep the previous score
+                  score = 0;
+                  draggedItems.clear();
+                  feedback.clear();
+                });
+              },
+              child: const Text('Restart Game'),
+            ),
+          ],
+        ),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-           Text(
-            translated ? translatedTexts['heading'] ?? originalTexts['heading']!
+          Text(
+            translated
+                ? translatedTexts['heading'] ?? originalTexts['heading']!
                 : originalTexts['heading']!,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
@@ -189,12 +254,10 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: questions[currentQuestionIndex].keys.map((number) {
-              int colorIndex = questions[currentQuestionIndex]
-                      .keys
-                      .toList()
-                      .indexOf(number) %
-                  colors.length;
+            // change to first because it's been shuffled
+            children: questions.first.keys.map((number) {
+              int colorIndex =
+                  questions.first.keys.toList().indexOf(number) % colors.length;
               return Column(
                 children: [
                   _buildColoredNumber(number, colors[colorIndex]),
@@ -270,7 +333,7 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
     return DragTarget<String>(
       onAcceptWithDetails: (value) {
         setState(() {
-          if (questions[currentQuestionIndex][key] == value.data) {
+          if (questions.first[key] == value.data) {
             if (!draggedItems.containsKey(key)) {
               score++;
             }
@@ -281,15 +344,15 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
             feedback[key] = false;
             _playSound('sounds/error.mp3');
           }
-
-          if (score == questions[currentQuestionIndex].length) {
+          int scoreThisRound = draggedItems.length;
+          if (scoreThisRound == questions.first.length) {
             Future.delayed(const Duration(seconds: 1), () {
               setState(() {
-                currentQuestionIndex =
-                    (currentQuestionIndex + 1) % questions.length;
+                questions.removeAt(0);
                 draggedItems.clear();
                 feedback.clear();
-                score = 0;
+                // comment out this line of setting score to be 0 after each round;
+                // score = 0;
               });
             });
           }
