@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:decimals/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -12,13 +14,13 @@ class ChooseItGameScreen extends StatefulWidget {
 }
 
 class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
-  // adds audio for the correct answer
   final FlutterTts _flutterTts = FlutterTts();
   final Map<String, String> originalTexts = {
     'heading': 'What is the correct description for',
   };
   Map<String, String> translatedTexts = {};
   bool translated = false;
+
   Future<void> translateTexts() async {
     if (!translated) {
       final response = await http.post(
@@ -42,12 +44,12 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
     } else {
       setState(() {
         translatedTexts.clear();
-        translated = false; // Mark as untranslated
+        translated = false;
       });
     }
   }
 
-  final List<Map<String, dynamic>> questions = [
+  final List<Map<String, dynamic>> _questions = [
     {
       'number': 38.29,
       'description': 'Thirty Eight and Twenty Nine Hundredths',
@@ -136,24 +138,46 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
     await _flutterTts.speak(text);
   }
 
-  // Method to navigate to a specific page when back button is pressed
   void _navigateToCustomPage() {
-    // Navigate to a specific page - replace BirdGameScreen() with your desired destination
     Navigator.of(context).pop(
       MaterialPageRoute(builder: (context) => GameSelectionDialog()),
     );
   }
 
-  // Method to handle home button press
   void _navigateToHome() {
-    // Navigate to home screen
     Navigator.popUntil(context, (route) => route.isFirst);
   }
 
   int currentQuestionIndex = 0;
   int score = 0;
   String selectedAnswer = '';
-  // modified and add output sound
+
+  @override
+  void initState() {
+    super.initState();
+    _shuffleQuestions(); // Shuffle questions when the widget initializes
+  }
+
+  // Create a copy to avoid modifying the original
+  List<Map<String, dynamic>> questions = [];
+  void _shuffleQuestions() {
+    var random = Random();
+    questions = [..._questions];
+    for (var i = questions.length - 1; i > 0; i--) {
+      var n = random.nextInt(i + 1);
+      var temp = questions[i];
+      questions[i] = questions[n];
+      questions[n] = temp;
+      List options = questions[i]['options'];
+      for (var j = options.length - 1; j > 0; j--) {
+        var m = random.nextInt(j + 1);
+        var tempOption = options[j];
+        options[j] = options[m];
+        options[m] = tempOption;
+      }
+    }
+  }
+
   void checkAnswer(String answer) async {
     setState(() {
       selectedAnswer = answer;
@@ -161,78 +185,7 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
 
     if (answer == questions[currentQuestionIndex]['description']) {
       score++;
-      await _speak(
-          "Correct. ${questions[currentQuestionIndex]['description']}");
-    } else {
-      await _speak(
-          "Incorrect. This is ${questions[currentQuestionIndex]['description']}");
     }
-    await Future.delayed(const Duration(seconds: 4));
-
-    setState(() {
-      if (currentQuestionIndex < questions.length - 1) {
-        currentQuestionIndex++;
-        selectedAnswer = '';
-      } else {
-        // End of the game
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              backgroundColor: Colors.white,
-              title: Text(
-                "  Game Over  ",
-                style: TextStyle(
-                  color: Color(0xFF1f6924),
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              content: Text(
-                'Your score: $score/${questions.length}',
-                style: TextStyle(
-                    color: Colors.lightGreen,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600),
-                textAlign: TextAlign.center,
-              ),
-              actionsAlignment: MainAxisAlignment.center,
-              actions: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.lightGreen, // formerly `primary`
-                    foregroundColor: Colors.white, // Text color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      score = 0;
-                      currentQuestionIndex = 0;
-                      selectedAnswer = '';
-                      Navigator.of(context).pop();
-                    });
-                  },
-                  child: const Text(
-                    "Restart",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      }
-    });
   }
 
   @override
@@ -251,9 +204,7 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
         backgroundColor: Colors.green,
         actions: [
           IconButton(
-            onPressed: () {
-              Navigator.popUntil(context, (route) => route.isFirst);
-            },
+            onPressed: _navigateToHome,
             icon: const Icon(Icons.home),
           ),
           IconButton(
@@ -279,18 +230,36 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    translated
-                        ? '${translatedTexts['heading'] ?? originalTexts['heading']} $question?'
-                        : '${originalTexts['heading']} $question?',
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        translated
+                            ? '${translatedTexts['heading'] ?? originalTexts['heading']} $question?'
+                            : '${originalTexts['heading']} $question?',
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      if (selectedAnswer.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 8.0), // Added padding here
+                          child: IconButton(
+                            onPressed: () => _speak(correctAnswer),
+                            icon: const Icon(Icons.volume_up),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
                   for (var option in questions[currentQuestionIndex]['options'])
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -315,21 +284,89 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
                         child: Text(option),
                       ),
                     ),
+                  const SizedBox(height: 20),
                   if (selectedAnswer.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20),
-                      child: Text(
-                        selectedAnswer == correctAnswer
-                            ? 'Correct!'
-                            : 'Incorrect.',
-                        style: TextStyle(
-                          color: selectedAnswer == correctAnswer
-                              ? Colors.green
-                              : Colors.red,
-                          fontSize: 18,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+                    Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              if (currentQuestionIndex < questions.length - 1) {
+                                currentQuestionIndex++;
+                                selectedAnswer = '';
+                              } else {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      backgroundColor: Colors.white,
+                                      title: const Text(
+                                        "  Game Over  ",
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      content: Text(
+                                        'Your score: $score/${questions.length}',
+                                        style: const TextStyle(
+                                            color: Colors.lightGreen,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      actionsAlignment:
+                                          MainAxisAlignment.center,
+                                      actions: [
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.lightGreen,
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 24,
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              score = 0;
+                                              currentQuestionIndex = 0;
+                                              selectedAnswer = '';
+                                              Navigator.of(context).pop();
+                                              _shuffleQuestions();
+                                            });
+                                          },
+                                          child: const Text(
+                                            "Restart",
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+                            });
+                          },
+                          child: const Text('Next question'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                          ),
+                        )
+                      ],
                     ),
                 ],
               ),
