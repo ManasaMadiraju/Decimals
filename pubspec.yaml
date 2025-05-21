@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_tts: ^4.2.2 # Use the latest version
+  shared_preferences: ^2.0.15
   audioplayers: ^6.1.1
   http:  ^1.2.2
 
