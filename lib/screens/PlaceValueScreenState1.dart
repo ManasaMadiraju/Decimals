@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PlaceValueScreen1 extends StatefulWidget {
   const PlaceValueScreen1({super.key});
@@ -13,13 +14,15 @@ class PlaceValueScreen1 extends StatefulWidget {
 }
 
 class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
-  // shuffle the questions
   late final List<Map<String, String>> _initialQuestions;
+  late SharedPreferences _preferences;
+
   @override
   void initState() {
     super.initState();
     _initialQuestions = List<Map<String, String>>.from(questions);
     questions.shuffle(Random());
+    _loadBestScore();
   }
 
   final Map<String, String> originalTexts = {
@@ -131,6 +134,7 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
   final Map<String, bool> feedback = {};
   final AudioPlayer _audioPlayer = AudioPlayer();
   int score = 0;
+  int bestScore = 0;
   int currentQuestionIndex = 0;
 
   final List<Color> colors = [
@@ -150,9 +154,25 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
     }
   }
 
+  Future<void> _loadBestScore() async {
+    _preferences = await SharedPreferences.getInstance();
+    setState(() {
+      bestScore = _preferences.getInt('bestScore') ?? 0;
+    });
+  }
+
+  Future<void> _saveBestScore(int newBest) async {
+    if (newBest > bestScore) {
+      setState(() {
+        bestScore = newBest;
+      });
+      await _preferences.setInt('bestScore', newBest);
+    }
+  }
+
   // Method to navigate to a specific page when back button is pressed
   void _navigateToCustomPage() {
-    // Navigate to a specific page - replace BirdGameScreen() with your desired destination
+    _saveBestScore(score);
     Navigator.of(context).pop(
       MaterialPageRoute(builder: (context) => GameSelectionDialog()),
     );
@@ -161,6 +181,7 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
   // Method to handle home button press
   void _navigateToHome() {
     // Navigate to home screen
+    _saveBestScore(score);
     Navigator.popUntil(context, (route) => route.isFirst);
   }
 
@@ -171,7 +192,13 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Match it !        : Score $score'),
+        title: RichText(
+            text: TextSpan(style: const TextStyle(fontSize: 24), children: [
+          const TextSpan(text: "Match it! "),
+          TextSpan(
+              text: " Score: $score",
+              style: TextStyle(fontWeight: FontWeight.bold))
+        ])),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: _navigateToCustomPage,
@@ -179,9 +206,14 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
         backgroundColor: Colors.green,
         centerTitle: true,
         actions: [
+          Text(
+            "Best Score: $bestScore",
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          Padding(padding: const EdgeInsets.all(5.0)),
           IconButton(
             onPressed: () {
-              Navigator.popUntil(context, (route) => route.isFirst);
+              _navigateToHome();
             },
             icon: const Icon(Icons.home),
           ),
@@ -228,7 +260,6 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
                 setState(() {
                   questions.addAll(_initialQuestions);
                   questions.shuffle(Random());
-                  // Change this line if want to keep the previous score
                   score = 0;
                   draggedItems.clear();
                   feedback.clear();
@@ -334,9 +365,6 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
       onAcceptWithDetails: (value) {
         setState(() {
           if (questions.first[key] == value.data) {
-            if (!draggedItems.containsKey(key)) {
-              score++;
-            }
             draggedItems[key] = value.data;
             feedback[key] = true;
             _playSound('sounds/success.mp3');
@@ -344,15 +372,21 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
             feedback[key] = false;
             _playSound('sounds/error.mp3');
           }
-          int scoreThisRound = draggedItems.length;
-          if (scoreThisRound == questions.first.length) {
+          bool allCorrect = true;
+          for (var entry in questions.first.entries) {
+            if (draggedItems[entry.key] != entry.value) {
+              allCorrect = false;
+              break;
+            }
+          }
+          if (allCorrect && draggedItems.length == questions.first.length) {
+            score += 10;
+            _saveBestScore(score);
             Future.delayed(const Duration(seconds: 1), () {
               setState(() {
                 questions.removeAt(0);
                 draggedItems.clear();
                 feedback.clear();
-                // comment out this line of setting score to be 0 after each round;
-                // score = 0;
               });
             });
           }

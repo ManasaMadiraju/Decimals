@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MemoryGameScreen extends StatefulWidget {
   const MemoryGameScreen({super.key});
@@ -13,6 +14,7 @@ class MemoryGameScreen extends StatefulWidget {
 }
 
 class _MemoryGameScreenState extends State<MemoryGameScreen> {
+  late SharedPreferences _preferences;
   final Map<String, String> originalTexts = {
     'heading':
         'Lets play matching! Match each underlined value to the correct units:',
@@ -119,6 +121,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
   late List<String> items;
   List<String> selectedItems = [];
   int score = 0;
+  int bestScore = 0;
   final AudioPlayer _audioPlayer = AudioPlayer();
   final Random random = Random();
 
@@ -126,6 +129,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
   void initState() {
     super.initState();
     _generateNewRound();
+    _loadBestScore();
   }
 
   Future<void> _playSound(String soundPath) async {
@@ -133,6 +137,22 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
       await _audioPlayer.play(AssetSource(soundPath));
     } catch (e) {
       print("Error playing sound: $e");
+    }
+  }
+
+  Future<void> _loadBestScore() async {
+    _preferences = await SharedPreferences.getInstance();
+    setState(() {
+      bestScore = _preferences.getInt('bestScore') ?? 0;
+    });
+  }
+
+  Future<void> _saveBestScore(int newBest) async {
+    if (newBest > bestScore) {
+      setState(() {
+        bestScore = newBest;
+      });
+      await _preferences.setInt('bestScore', newBest);
     }
   }
 
@@ -146,12 +166,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
       items.shuffle(); // Shuffle the items for randomness
       selectedItems.clear();
       score = score;
+      _saveBestScore(score);
     });
   }
 
   // Method to navigate to a specific page when back button is pressed
   void _navigateToCustomPage() {
     // Navigate to a specific page - replace BirdGameScreen() with your desired destination
+    _saveBestScore(score);
     Navigator.of(context).pop(
       MaterialPageRoute(builder: (context) => GameSelectionDialog()),
     );
@@ -160,6 +182,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
   // Method to handle home button press
   void _navigateToHome() {
     // Navigate to home screen
+    _saveBestScore(score);
     Navigator.popUntil(context, (route) => route.isFirst);
   }
 
@@ -176,12 +199,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           duration: Duration(seconds: 1),
         ));
         setState(() {
-          score++;
           items.remove(first);
           items.remove(second);
         });
 
         if (items.isEmpty) {
+          setState(() {
+            score += 10;
+          });
           Future.delayed(const Duration(milliseconds: 500), () {
             _showCompletionDialog();
           });
@@ -344,16 +369,24 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: const Text('Play: Matching Tiles'),
+        title: RichText(
+            text: TextSpan(style: const TextStyle(fontSize: 24), children: [
+          const TextSpan(text: "Match the Tiles! "),
+          TextSpan(
+              text: "Score: $score",
+              style: TextStyle(fontWeight: FontWeight.bold))
+        ])),
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: _navigateToCustomPage,
         ),
         actions: [
           Text(
-            "Score: $score",
+            "Best Score: $bestScore",
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
+          Padding(padding: const EdgeInsets.all(5.0)),
           IconButton(
             onPressed: _navigateToHome,
             icon: const Icon(Icons.home),
