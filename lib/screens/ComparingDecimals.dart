@@ -117,15 +117,6 @@ class _ComparingDecimalsPageState extends State<ComparingDecimalsPage> {
             const Spacer(),
             Align(
               alignment: Alignment.bottomRight,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF009688),
-                ),
-                onPressed: () {
-                  // Add next navigation logic here
-                },
-                child: const Text('Next Page'),
-              ),
             ),
           ],
         ),
