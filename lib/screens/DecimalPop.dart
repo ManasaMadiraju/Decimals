@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class DecimalPopGame extends StatefulWidget {
-  const DecimalPopGame({Key? key}) : super(key: key);
+  const DecimalPopGame({super.key});
 
   @override
   _DecimalPopGameState createState() => _DecimalPopGameState();

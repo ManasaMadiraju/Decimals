@@ -360,11 +360,11 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
                               }
                             });
                           },
-                          child: const Text('Next question'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,
                           ),
+                          child: const Text('Next question'),
                         )
                       ],
                     ),

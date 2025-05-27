@@ -4,7 +4,6 @@ import 'package:decimals/screens/birdgame.dart';
 import 'package:decimals/screens/memorygameapp.dart';
 import 'package:decimals/screens/PlaceValueScreenState1.dart';
 import 'package:decimals/screens/ChooseItGameScreen.dart';
-import 'package:decimals/screens/DecimalPop.dart';
 
 class GameSelectionDialog extends StatelessWidget {
   const GameSelectionDialog({super.key});
