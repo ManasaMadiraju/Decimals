@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:audioplayers/audioplayers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChooseItGameScreen extends StatefulWidget {
   const ChooseItGameScreen({super.key});
@@ -14,6 +16,7 @@ class ChooseItGameScreen extends StatefulWidget {
 }
 
 class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
+  late SharedPreferences _preferences;
   final FlutterTts _flutterTts = FlutterTts();
   final Map<String, String> originalTexts = {
     'heading': 'What is the correct description for',
@@ -139,23 +142,28 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
   }
 
   void _navigateToCustomPage() {
+    _saveBestScore(score);
     Navigator.of(context).pop(
       MaterialPageRoute(builder: (context) => GameSelectionDialog()),
     );
   }
 
   void _navigateToHome() {
+    _saveBestScore(score);
     Navigator.popUntil(context, (route) => route.isFirst);
   }
 
   int currentQuestionIndex = 0;
   int score = 0;
+  int bestScore = 0;
+  final AudioPlayer _audioPlayer = AudioPlayer();
   String selectedAnswer = '';
 
   @override
   void initState() {
     super.initState();
     _shuffleQuestions(); // Shuffle questions when the widget initializes
+    _loadBestScore();
   }
 
   // Create a copy to avoid modifying the original
@@ -178,13 +186,42 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
     }
   }
 
+  Future<void> _playSound(String soundPath) async {
+    try {
+      await _audioPlayer.play(AssetSource(soundPath));
+    } catch (e) {
+      print("Error playing sound: $e");
+    }
+  }
+
+  Future<void> _loadBestScore() async {
+    _preferences = await SharedPreferences.getInstance();
+    setState(() {
+      bestScore = _preferences.getInt('bestScore') ?? 0;
+    });
+  }
+
+  Future<void> _saveBestScore(int newBest) async {
+    if (newBest > bestScore) {
+      setState(() {
+        bestScore = newBest;
+      });
+      await _preferences.setInt('bestScore', newBest);
+    }
+  }
+
   void checkAnswer(String answer) async {
     setState(() {
       selectedAnswer = answer;
+      score = score;
+      _saveBestScore(score);
     });
 
     if (answer == questions[currentQuestionIndex]['description']) {
-      score++;
+      score+=10;
+      await _playSound('sounds/success.mp3');
+    } else {
+       await _playSound('sounds/error.mp3');
     }
   }
 
@@ -196,13 +233,25 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Choose It Game'),
+        backgroundColor: Colors.green,
+        title: RichText(
+            text: TextSpan(style: const TextStyle(fontSize: 24), children: [
+          const TextSpan(text: "Choose It Game! "),
+          TextSpan(
+              text: "Score: $score",
+              style: TextStyle(fontWeight: FontWeight.bold))
+        ])),
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: _navigateToCustomPage,
         ),
-        backgroundColor: Colors.green,
         actions: [
+          Text(
+            "Best Score: $bestScore",
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          Padding(padding: const EdgeInsets.all(5.0)),
           IconButton(
             onPressed: _navigateToHome,
             icon: const Icon(Icons.home),
@@ -314,7 +363,7 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
                                         textAlign: TextAlign.center,
                                       ),
                                       content: Text(
-                                        'Your score: $score/${questions.length}',
+                                        'Your score: $score/${(questions.length)*10}',
                                         style: const TextStyle(
                                             color: Colors.lightGreen,
                                             fontSize: 18,
@@ -377,3 +426,4 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
     );
   }
 }
+
