@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LizzieTheBirdGame extends StatefulWidget {
   const LizzieTheBirdGame({super.key});
@@ -12,19 +13,21 @@ class LizzieTheBirdGame extends StatefulWidget {
 }
 
 class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
+  late SharedPreferences _preferences;
   String feedback = "";
   Color feedbackColor = Colors.black;
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool showBubble = false;
   bool birdMoves = false;
-  double birdTop = 400; // Initial position
-  double birdLeft = 400; // Initial position // Initial bird position
+  double birdTop = 200; // Initial position
+  double birdLeft = 450; // Initial position // Initial bird position
   int currentQuestionIndex = 0;
   int score = 0;
+  int bestScore = 0;
   String selectedAnswer = '';
   String correctAnswer = '';
-  double birdTop2 = 200;
-  double birdLeft2 = 450;
+  // double birdTop2 = 200;
+  // double birdLeft2 = 450;
   final GlobalKey _correctFishKey = GlobalKey();
   Set<String> hiddenFishes = {};
   final Map<String, String> originalTexts = {
@@ -32,6 +35,19 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
   };
   Map<String, String> translatedTexts = {};
   bool translated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBestScore();
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
   Future<void> translateTexts() async {
     if (!translated) {
       final response = await http.post(
@@ -151,9 +167,26 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
     }
   }
 
+  Future<void> _loadBestScore() async {
+    _preferences = await SharedPreferences.getInstance();
+    setState(() {
+      bestScore = _preferences.getInt('bestScore') ?? 0;
+    });
+  }
+
+  Future<void> _saveBestScore(int newBest) async {
+    if (newBest > bestScore) {
+      setState(() {
+        bestScore = newBest;
+      });
+      await _preferences.setInt('bestScore', newBest);
+    }
+  }
+
   // Method to navigate to a specific page when back button is pressed
   void _navigateToCustomPage() {
     // Navigate to a specific page - replace BirdGameScreen() with your desired destination
+    _saveBestScore(score);
     Navigator.of(context).pop(
       MaterialPageRoute(builder: (context) => GameSelectionDialog()),
     );
@@ -162,6 +195,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
   // Method to handle home button press
   void _navigateToHome() {
     // Navigate to home screen
+    _saveBestScore(score);
     Navigator.popUntil(context, (route) => route.isFirst);
   }
 
@@ -177,16 +211,19 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
         feedbackColor = Colors.green;
         _playSound('sounds/success.mp3');
         showBubble = true;
-        score++;
+        score += 10;
+        _saveBestScore(score);
 
         // get position of the correct fish
         final renderBox =
             _correctFishKey.currentContext?.findRenderObject() as RenderBox?;
         if (renderBox != null) {
           final Offset position = renderBox.localToGlobal(Offset.zero);
-          birdTop = position.dy - 50;
-          birdLeft = position.dx;
-          birdMoves = true;
+          setState(() {
+            birdTop = position.dy - 50;
+            birdLeft = position.dx;
+            birdMoves = true;
+          });
         }
 
         Future.delayed(const Duration(seconds: 2), () {
@@ -194,6 +231,8 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
           setState(() {
             hiddenFishes.add(answer);
             birdMoves = false;
+            birdTop = MediaQuery.of(context).size.height * 0.2;
+            birdLeft = MediaQuery.of(context).size.width * 0.35;
           });
         });
 
@@ -204,6 +243,9 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
             if (currentQuestionIndex < questions.length - 1) {
               hiddenFishes.clear();
               currentQuestionIndex++;
+            } else {
+              // TODO: end the game dialog when game is finished
+              _saveBestScore(score);
             }
           });
         });
@@ -226,25 +268,31 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
     final screenHeight = MediaQuery.of(context).size.height;
     String question = questions[currentQuestionIndex]['description'];
     String correctAnswer = questions[currentQuestionIndex]['number'].toString();
-    birdLeft = screenWidth < 1200 ? birdLeft - 60 : birdLeft - 160;
+    // birdLeft = screenWidth < 1200 ? birdLeft - 60 : birdLeft - 160;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Play: Lizzie the Bird'),
+        backgroundColor: Colors.green,
+        title: RichText(
+            text: TextSpan(style: const TextStyle(fontSize: 24), children: [
+          const TextSpan(text: "Bird Game! "),
+          TextSpan(
+              text: "Score: $score",
+              style: TextStyle(fontWeight: FontWeight.bold))
+        ])),
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: _navigateToCustomPage,
         ),
-        backgroundColor: Colors.green,
         actions: [
           Text(
-            "Score: $score",
+            "Best Score: $bestScore",
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
+          Padding(padding: const EdgeInsets.all(5.0)),
           IconButton(
             icon: const Icon(Icons.home),
-            onPressed: () {
-              Navigator.popUntil(context, (route) => route.isFirst);
-            },
+            onPressed: _navigateToHome,
           ),
           IconButton(
             icon: const Icon(Icons.translate),
@@ -258,17 +306,15 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
           Center(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                double width = constraints.maxWidth < 1200
-                    ? screenWidth
-                    : screenWidth * 0.4;
+                // double width = constraints.maxWidth < 1200
+                //     ? screenWidth
+                //     : screenWidth * 0.4;
 
                 return Image.asset(
-                  screenWidth > 1200
-                      ? 'assets/backdrop.png'
-                      : 'assets/backdrop2.jpeg',
-                  width: screenWidth * 0.9,
-                  height: screenHeight * 0.9,
-                  fit: BoxFit.fill,
+                  'assets/backdrop2.jpeg',
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  fit: BoxFit.cover,
                 );
               },
             ),
@@ -310,6 +356,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
               'assets/birdnew.png',
               width: screenWidth * 0.3,
               height: screenHeight * 0.2,
+              fit: BoxFit.contain,
             ),
           ),
 
@@ -338,9 +385,9 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
 
           // Fish Buttons
           Positioned(
-            bottom: screenWidth < 500 ? screenWidth * 0.2 : screenWidth * 0.05,
+            bottom: screenWidth * 0.05,
             left: screenWidth * 0.03,
-            right: 0,
+            right: screenWidth * 0.03,
             child: Wrap(
               spacing: screenWidth * 0.03,
               runSpacing: screenHeight * 0.01,
@@ -362,17 +409,17 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
     final String correctValue =
         questions[currentQuestionIndex]['number'].toString();
     final bool isCorrect = value == correctValue;
+    double fishBaseSize = screenWidth * 0.18;
     return GestureDetector(
       onTap: () => checkAnswer(value),
       child: Container(
         // only the correct fish gets the key:
         key: isCorrect ? _correctFishKey : null,
-        width: screenWidth > 1200 ? screenWidth * 0.15 : screenWidth * 0.35,
-        height: screenWidth > 1200 ? screenHeight * 0.2 : screenWidth * 0.3,
+        width: fishBaseSize,
+        height: fishBaseSize * 0.8,
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/fishnew.png'),
-            fit: screenWidth > 1200 ? BoxFit.fitWidth : BoxFit.fitHeight,
           ),
         ),
         alignment: Alignment(0.2, 0),
