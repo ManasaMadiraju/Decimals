@@ -60,11 +60,7 @@ class _ComparingDecimalsPageState extends State<ComparingDecimalsPage> {
       backgroundColor: const Color(0xFFF8F0F8),
       appBar: AppBar(
         backgroundColor: const Color(0xFF4CAF50),
-        title: Text(
-          translated
-              ? translatedTexts['title'] ?? originalTexts['title']!
-              : originalTexts['title']!,
-        ),
+        title: const Text('Comparing Decimals'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
