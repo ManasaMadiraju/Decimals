@@ -25,9 +25,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
   int score = 0;
   int bestScore = 0;
   String selectedAnswer = '';
-  String correctAnswer = '';
-  // double birdTop2 = 200;
-  // double birdLeft2 = 450;
+
   final GlobalKey _correctFishKey = GlobalKey();
   Set<String> hiddenFishes = {};
   final Map<String, String> originalTexts = {
@@ -40,6 +38,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
   void initState() {
     super.initState();
     _loadBestScore();
+    _shuffleQuestions();
   }
 
   @override
@@ -167,6 +166,15 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
     }
   }
 
+  void _shuffleQuestions() {
+    setState(() {
+      questions.shuffle();
+      for (var question in questions) {
+        (question['options'] as List<String>).shuffle();
+      }
+    });
+  }
+
   Future<void> _loadBestScore() async {
     _preferences = await SharedPreferences.getInstance();
     setState(() {
@@ -185,7 +193,6 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
 
   // Method to navigate to a specific page when back button is pressed
   void _navigateToCustomPage() {
-    // Navigate to a specific page - replace BirdGameScreen() with your desired destination
     _saveBestScore(score);
     Navigator.of(context).pop(
       MaterialPageRoute(builder: (context) => GameSelectionDialog()),
@@ -194,9 +201,59 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
 
   // Method to handle home button press
   void _navigateToHome() {
-    // Navigate to home screen
     _saveBestScore(score);
     Navigator.popUntil(context, (route) => route.isFirst);
+  }
+
+  void _showEndGameDialog() {
+    _saveBestScore(score);
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Good Job!"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Your final score: $score'),
+                Text('Best Score: $bestScore'),
+                const SizedBox(height: 20),
+                const Text('Do you want to play again?'),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                  child: const Text("Restart"),
+                  onPressed: () {
+                    _resetGame();
+                    Navigator.of(context).pop();
+                  }),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _navigateToHome();
+                  },
+                  child: const Text("Exit"))
+            ],
+          );
+        });
+  }
+
+  void _resetGame() {
+    setState(() {
+      currentQuestionIndex = 0;
+      // do not clear the score
+      selectedAnswer = '';
+      feedback = '';
+      feedbackColor = Colors.black;
+      showBubble = false;
+      birdMoves = false;
+      hiddenFishes.clear();
+      // Reset bird position to initial values
+      birdTop = MediaQuery.of(context).size.height * 0.2;
+      birdLeft = MediaQuery.of(context).size.width * 0.35;
+    });
   }
 
   void checkAnswer(String answer) {
@@ -244,8 +301,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
               hiddenFishes.clear();
               currentQuestionIndex++;
             } else {
-              // TODO: end the game dialog when game is finished
-              _saveBestScore(score);
+              _showEndGameDialog();
             }
           });
         });
@@ -267,7 +323,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     String question = questions[currentQuestionIndex]['description'];
-    String correctAnswer = questions[currentQuestionIndex]['number'].toString();
+
     // birdLeft = screenWidth < 1200 ? birdLeft - 60 : birdLeft - 160;
     return Scaffold(
       appBar: AppBar(
