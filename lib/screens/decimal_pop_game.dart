@@ -1,9 +1,13 @@
+// Full DecimalPopGame with clean AppBar Score Display
+// This includes the updated AppBar and score logic as discussed
+
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DecimalPopGame extends StatefulWidget {
   const DecimalPopGame({super.key});
@@ -58,6 +62,8 @@ class _DecimalPopGameState extends State<DecimalPopGame>
   ];
 
   int currentQuestionIndex = 0;
+  int score = 0;
+  int bestScore = 0;
   String feedbackText = "";
   String mascotMessage =
       "Hi! I'm Poppy! 🎈 Let's pop the balloons with greatest value together!";
@@ -93,8 +99,6 @@ class _DecimalPopGameState extends State<DecimalPopGame>
           };
           translated = true;
         });
-      } else {
-        print('Failed to fetch translations: \${response.statusCode}');
       }
     } else {
       setState(() {
@@ -116,6 +120,19 @@ class _DecimalPopGameState extends State<DecimalPopGame>
     _mascotBounce = Tween<double>(begin: 0, end: 10).animate(
       CurvedAnimation(parent: _mascotController, curve: Curves.easeInOut),
     );
+    _loadBestScore();
+  }
+
+  Future<void> _loadBestScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      bestScore = prefs.getInt('bestScore') ?? 0;
+    });
+  }
+
+  Future<void> _saveBestScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('bestScore', bestScore);
   }
 
   void _speakMascot(String message) async {
@@ -162,6 +179,13 @@ class _DecimalPopGameState extends State<DecimalPopGame>
     setState(() {
       feedbackText = isCorrect ? "✅ Correct!" : "❌ Incorrect";
       mascotMessage = isCorrect ? "Great job!" : "Try again!";
+      if (isCorrect) {
+        score += 10;
+        if (score > bestScore) {
+          bestScore = score;
+          _saveBestScore();
+        }
+      }
     });
 
     _speakMascot(mascotMessage);
@@ -185,7 +209,7 @@ class _DecimalPopGameState extends State<DecimalPopGame>
     }
   }
 
-  void _showEndDialog() async {
+  void _showEndDialog() {
     String thankYouMessage =
         "Thank you for helping me pop all the balloons! You're amazing!";
     _speakMascot(thankYouMessage);
@@ -202,8 +226,8 @@ class _DecimalPopGameState extends State<DecimalPopGame>
               Text(
                 thankYouMessage,
                 textAlign: TextAlign.center,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -218,6 +242,7 @@ class _DecimalPopGameState extends State<DecimalPopGame>
               onPressed: () {
                 setState(() {
                   currentQuestionIndex = 0;
+                  score = 0;
                   _shuffleOptions();
                   _initAnimations();
                   mascotMessage =
@@ -256,30 +281,55 @@ class _DecimalPopGameState extends State<DecimalPopGame>
 
   @override
   Widget build(BuildContext context) {
-    final current = questions[currentQuestionIndex];
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text(
-          translated
-              ? translatedTexts['title'] ?? originalTexts['title']!
-              : originalTexts['title']!,
-        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              translated
+                  ? translatedTexts['title'] ?? originalTexts['title']!
+                  : originalTexts['title']!,
+              style: const TextStyle(color: Colors.black),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              "Score: $score",
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.black),
+            ),
+          ],
+        ),
+        centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.home),
-            onPressed: () =>
-                Navigator.popUntil(context, (route) => route.isFirst),
-          ),
-          IconButton(
-            icon: const Icon(Icons.translate),
-            onPressed: translateTexts,
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Row(
+              children: [
+                Text(
+                  "Best Score: $bestScore",
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.black),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.home),
+                  onPressed: () =>
+                      Navigator.popUntil(context, (route) => route.isFirst),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.translate),
+                  onPressed: translateTexts,
+                ),
+              ],
+            ),
           ),
         ],
       ),
