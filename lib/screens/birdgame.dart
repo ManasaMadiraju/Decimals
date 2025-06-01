@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class LizzieTheBirdGame extends StatefulWidget {
   const LizzieTheBirdGame({super.key});
@@ -25,6 +26,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
   int score = 0;
   int bestScore = 0;
   String selectedAnswer = '';
+  final FlutterTts _flutterTts = FlutterTts();
 
   final GlobalKey _correctFishKey = GlobalKey();
   Set<String> hiddenFishes = {};
@@ -45,6 +47,11 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
   void dispose() {
     _audioPlayer.dispose();
     super.dispose();
+  }
+  Future<void> _speak(String text) async {
+    await _flutterTts.setLanguage("en-US");
+    await _flutterTts.setPitch(1.0);
+    await _flutterTts.speak(text);
   }
 
   Future<void> translateTexts() async {
@@ -398,7 +405,19 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
                         color: feedbackColor),
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.05),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      left: 488.0),
+                  child: IconButton(
+                    onPressed: () =>
+                        _speak('${originalTexts['heading']} $question?'),
+                    icon: const Icon(Icons.volume_up),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

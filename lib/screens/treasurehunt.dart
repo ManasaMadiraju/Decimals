@@ -31,6 +31,7 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
   int score = 0;
   late String number;
   late String question;
+  late String selectedPlace;
   late int correctAnswer;
 
   final Map<String, String> originalTexts = {
@@ -56,7 +57,7 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
 
   void _generateQuestion() {
     number = (_random.nextDouble() * 1000).toStringAsFixed(3);
-    String selectedPlace = places[_random.nextInt(places.length)];
+    selectedPlace = places[_random.nextInt(places.length)];
     Map<String, int> placeIndex = {
       'Ones': number.indexOf('.') - 1,
       'Tens': number.indexOf('.') - 2,
@@ -70,14 +71,26 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
     correctAnswer = (idx >= 0 && idx < number.length)
         ? int.parse(number[idx])
         : 0;
-
+    question = 'Find the digit in the $selectedPlace place of $number';
+    // final rawTemplate = translated
+    //     ? (translatedTexts['heading'] ?? originalTexts['heading']!)
+    //     : originalTexts['heading']!;
+    // question = rawTemplate
+    //     .replaceAll('{place}', selectedPlace)
+    //     .replaceAll('{number}', number);
+  }
+  void _buildQuestionText() {
+    // Choose the right template (English or Spanish)
     final rawTemplate = translated
         ? (translatedTexts['heading'] ?? originalTexts['heading']!)
         : originalTexts['heading']!;
+
+    // Replace placeholders in that template
     question = rawTemplate
         .replaceAll('{place}', selectedPlace)
         .replaceAll('{number}', number);
   }
+
 
   Future<void> translateTexts() async {
     if (!translated) {
@@ -95,7 +108,7 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
               originalTexts.keys.elementAt(i): data['translations'][i]
           };
           translated = true;
-          _generateQuestion(); // <- regenerate with translated template
+          _buildQuestionText(); // <- regenerate with translated template
         });
       } else {
         print('Failed to fetch translations: ${response.statusCode}');
@@ -104,7 +117,7 @@ class _TreasureHuntScreenState extends State<TreasureHuntScreen> {
       setState(() {
         translatedTexts.clear();
         translated = false;
-        _generateQuestion(); // <- back to original template
+        _buildQuestionText();
       });
     }
   }
