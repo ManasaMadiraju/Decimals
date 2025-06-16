@@ -124,7 +124,6 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
     'Seven',
     'Thousands',
     'Hundreds',
-    'Teen',
     'Oneths',
     'Sevenths',
     'Decimal',
@@ -227,18 +226,20 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              screenWidth > 1200
-                  ? 'assets/matchitbackground.png'
-                  : 'assets/l2.png',
+              'assets/b2.png',
+              // screenWidth > 1200
+              //     ? 'assets/matchitbackground.png'
+              //     : 'assets/l2.png',
               fit: BoxFit.cover,
             ),
           ),
-          shouldRotate
-              ? RotatedBox(
-                  quarterTurns: 3, // Rotate the screen by 90 degrees
-                  child: _buildGameContent(),
-                )
-              : _buildGameContent(),
+          _buildGameContent(),
+          // shouldRotate
+          //     ? RotatedBox(
+          //         quarterTurns: 3, // Rotate the screen by 90 degrees
+          //         child: _buildGameContent(),
+          //       )
+          //     : _buildGameContent(),
         ],
       ),
     );

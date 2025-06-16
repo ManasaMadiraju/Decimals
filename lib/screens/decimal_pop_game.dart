@@ -226,8 +226,8 @@ class _DecimalPopGameState extends State<DecimalPopGame>
               Text(
                 thankYouMessage,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -298,7 +298,7 @@ class _DecimalPopGameState extends State<DecimalPopGame>
               translated
                   ? translatedTexts['title'] ?? originalTexts['title']!
                   : originalTexts['title']!,
-              style: const TextStyle(color: Colors.black),
+              style: TextStyle(fontSize: 24),
             ),
             const SizedBox(width: 10),
             Text(
@@ -316,9 +316,12 @@ class _DecimalPopGameState extends State<DecimalPopGame>
               children: [
                 Text(
                   "Best Score: $bestScore",
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.black),
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
                 ),
+                Padding(padding: const EdgeInsets.all(5.0)),
                 IconButton(
                   icon: const Icon(Icons.home),
                   onPressed: () =>
