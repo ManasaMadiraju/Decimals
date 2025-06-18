@@ -343,7 +343,7 @@ class _DecimalPopGameState extends State<DecimalPopGame>
             height: double.infinity,
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/decimalpopbg.jpeg'),
+                image: AssetImage('assets/decimalpopbg.png'),
                 fit: BoxFit.cover,
               ),
             ),

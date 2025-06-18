@@ -107,28 +107,26 @@ class DecimalsPage extends StatelessWidget {
 
   Widget _buildButton(String text, Color color, BuildContext context,
       String route, double screenWidth, double screenHeight) {
-    return SizedBox(
-      width: screenWidth < 500 ? 120 : 150,
-      height: 150,
-      child: Align(
-        alignment: Alignment.center,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: color,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+    return Padding(
+      // Add padding around the button
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
           ),
-          onPressed: () {
-            Navigator.pushNamed(context, route);
-          },
-          child: Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+          // minimumSize: Size(screenWidth * 0.2, screenHeight * 0.1),
+        ),
+        onPressed: () {
+          Navigator.pushNamed(context, route);
+        },
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),

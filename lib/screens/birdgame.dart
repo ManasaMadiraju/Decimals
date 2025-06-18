@@ -48,6 +48,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
     _audioPlayer.dispose();
     super.dispose();
   }
+
   Future<void> _speak(String text) async {
     await _flutterTts.setLanguage("en-US");
     await _flutterTts.setPitch(1.0);
@@ -297,6 +298,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
             birdMoves = false;
             birdTop = MediaQuery.of(context).size.height * 0.2;
             birdLeft = MediaQuery.of(context).size.width * 0.35;
+            feedbackColor = Colors.black;
           });
         });
 
@@ -320,6 +322,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
         Future.delayed(const Duration(seconds: 1), () {
           if (!mounted) return;
           setState(() => showBubble = false);
+          feedbackColor = Colors.black;
         });
       }
     });
@@ -406,8 +409,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(
-                      left: 488.0),
+                  padding: const EdgeInsets.only(left: 488.0),
                   child: IconButton(
                     onPressed: () =>
                         _speak('${originalTexts['heading']} $question?'),
