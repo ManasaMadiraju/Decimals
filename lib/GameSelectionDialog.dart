@@ -42,7 +42,7 @@ class GameSelectionDialog extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color:  Colors.black.withOpacity(0.3),
+                      color: Colors.black.withOpacity(0.3),
                       blurRadius: 10,
                       spreadRadius: 2,
                     ),
@@ -53,17 +53,25 @@ class GameSelectionDialog extends StatelessWidget {
                   children: [
                     const Text(
                       'Choose a Game',
-                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 30),
-                    _buildGameButton(context, '🃏 Match the Tile', MemoryGameScreen(), Colors.blue),
-                    _buildGameButton(context, '🐦 Lizzie the Bird', LizzieTheBirdGame(), Colors.green),
-                    _buildGameButton(context, '🎯 Place Value Puzzle', PlaceValueScreen1(), Colors.orange),
-                    _buildGameButton(context, '🎤 Choose It', ChooseItGameScreen(), Colors.purple),
-                    _buildGameButton(context, '🎈 Decimal Pop!', const DecimalPopGame(), Colors.teal),
+                    _buildGameButton(context, '🃏 Match the Tiles',
+                        MemoryGameScreen(), Colors.green),
+                    _buildGameButton(context, '🐦 Lizzie the Bird',
+                        LizzieTheBirdGame(), Colors.blue),
+                    _buildGameButton(context, '🎯 Place Value Puzzle',
+                        PlaceValueScreen1(), Colors.orange),
+                    _buildGameButton(context, '🎤 Choose It',
+                        ChooseItGameScreen(), Colors.purple),
+                    _buildGameButton(context, '🎈 Decimal Pop!',
+                        const DecimalPopGame(), Colors.teal),
                     const SizedBox(height: 20),
                     TextButton(
-                      onPressed: (){ Navigator.popUntil(context, (route) => route.isFirst);},
+                      onPressed: () {
+                        Navigator.popUntil(context, (route) => route.isFirst);
+                      },
                       child: const Text(
                         'Cancel',
                         style: TextStyle(fontSize: 18, color: Colors.red),
@@ -79,7 +87,8 @@ class GameSelectionDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildGameButton(BuildContext context, String title, Widget screen, Color color) {
+  Widget _buildGameButton(
+      BuildContext context, String title, Widget screen, Color color) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: ElevatedButton(

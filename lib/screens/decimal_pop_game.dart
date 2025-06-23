@@ -1,6 +1,3 @@
-// Full DecimalPopGame with clean AppBar Score Display
-// This includes the updated AppBar and score logic as discussed
-
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -65,8 +62,8 @@ class _DecimalPopGameState extends State<DecimalPopGame>
   int score = 0;
   int bestScore = 0;
   String feedbackText = "";
-  String mascotMessage =
-      "Hi! I'm Poppy! 🎈 Let's pop the balloons with greatest value together!";
+  String mascotMessage = "Ask me how to say it!";
+  // bool _initialMascotMessageSpoken = false;
   final AudioPlayer _audioPlayer = AudioPlayer();
   final FlutterTts _flutterTts = FlutterTts();
   late List<double> shuffledOptions;
@@ -121,6 +118,11 @@ class _DecimalPopGameState extends State<DecimalPopGame>
       CurvedAnimation(parent: _mascotController, curve: Curves.easeInOut),
     );
     _loadBestScore();
+    // Speak the inital mascot message
+    // if (!_initialMascotMessageSpoken) {
+    //   _speakMascot(mascotMessage);
+    //   _initialMascotMessageSpoken = true;
+    // }
   }
 
   Future<void> _loadBestScore() async {
@@ -140,6 +142,62 @@ class _DecimalPopGameState extends State<DecimalPopGame>
     await _flutterTts.setPitch(1.3);
     await _flutterTts.setSpeechRate(0.4);
     await _flutterTts.speak(message);
+  }
+
+  // Add a function to speak the actual decimal
+  void _speakQuestionAndOptions() async {
+    await _flutterTts.setLanguage("en-US");
+    // Speak each option
+    String optionsText = "The options are: ";
+    for (double option in shuffledOptions) {
+      optionsText += "${pronounceDecimal(option)},  ";
+    }
+    await _flutterTts.speak(optionsText);
+  }
+
+  // This is the helper function that helps TTS to speak the correct decimal
+  // placements. For example, instead of 0.23 it should speak 0 and 23 hundredths.
+  String pronounceDecimal(double decimal) {
+    if (decimal == decimal.toInt()) {
+      return decimal.toInt().toString();
+    }
+
+    String decimalString = decimal.toString();
+    List<String> parts = decimalString.split('.');
+    String wholePart = parts[0];
+    String fractionalPart = parts.length > 1 ? parts[1] : "";
+    String pronunciation = "";
+
+    // Pronounce the whole part
+    if (wholePart == "0") {
+      pronunciation += "zero";
+    } else {
+      pronunciation += wholePart;
+    }
+
+    if (fractionalPart.isNotEmpty) {
+      int numDigits = fractionalPart.length;
+      String placeValue = "";
+
+      switch (numDigits) {
+        case 1:
+          placeValue = "tenths";
+          break;
+        case 2:
+          placeValue = "hundredths";
+          break;
+        case 3:
+          placeValue = "thousandths";
+          break;
+        default:
+          // For very long decimals, might just say "point" and the digits
+          return "$wholePart point ${fractionalPart.split('').join(' ')}";
+      }
+
+      pronunciation += " and ${int.parse(fractionalPart)} $placeValue";
+    }
+
+    return pronunciation;
   }
 
   void _shuffleOptions() {
@@ -178,7 +236,6 @@ class _DecimalPopGameState extends State<DecimalPopGame>
 
     setState(() {
       feedbackText = isCorrect ? "✅ Correct!" : "❌ Incorrect";
-      mascotMessage = isCorrect ? "Great job!" : "Try again!";
       if (isCorrect) {
         score += 10;
         if (score > bestScore) {
@@ -188,14 +245,12 @@ class _DecimalPopGameState extends State<DecimalPopGame>
       }
     });
 
-    _speakMascot(mascotMessage);
-
     if (isCorrect) {
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
           setState(() {
             feedbackText = "";
-            mascotMessage = "Let's pop the next balloons!";
+            mascotMessage = "Ask me how to say it!";
             if (currentQuestionIndex < questions.length - 1) {
               currentQuestionIndex++;
               _shuffleOptions();
@@ -210,8 +265,7 @@ class _DecimalPopGameState extends State<DecimalPopGame>
   }
 
   void _showEndDialog() {
-    String thankYouMessage =
-        "Thank you for helping me pop all the balloons! You're amazing!";
+    String thankYouMessage = "Amazing! You pop all the ballons!";
     _speakMascot(thankYouMessage);
     Future.delayed(const Duration(milliseconds: 500), () {
       showDialog(
@@ -236,7 +290,7 @@ class _DecimalPopGameState extends State<DecimalPopGame>
               onPressed: () {
                 Navigator.popUntil(context, (route) => route.isFirst);
               },
-              child: const Text('🏠 Home'),
+              child: const Text('Home'),
             ),
             TextButton(
               onPressed: () {
@@ -245,12 +299,11 @@ class _DecimalPopGameState extends State<DecimalPopGame>
                   score = 0;
                   _shuffleOptions();
                   _initAnimations();
-                  mascotMessage =
-                      "Hi! I'm Poppy! 🎈 Let's pop the biggest balloons together!";
+                  mascotMessage = "Ask me how to say it!";
                 });
                 Navigator.pop(context);
               },
-              child: const Text('🔁 Play Again'),
+              child: const Text('Play Again'),
             ),
           ],
         ),
@@ -369,18 +422,23 @@ class _DecimalPopGameState extends State<DecimalPopGame>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                AnimatedBuilder(
-                  animation: _mascotBounce,
-                  builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, -_mascotBounce.value),
-                      child: child,
-                    );
+                GestureDetector(
+                  onTap: () {
+                    _speakQuestionAndOptions();
                   },
-                  child: Image.asset(
-                    'assets/poppy.png',
-                    width: 80,
-                    height: 80,
+                  child: AnimatedBuilder(
+                    animation: _mascotBounce,
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0, -_mascotBounce.value),
+                        child: child,
+                      );
+                    },
+                    child: Image.asset(
+                      'assets/poppy.png',
+                      width: 80,
+                      height: 80,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
