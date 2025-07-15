@@ -340,7 +340,7 @@ class _LizzieTheBirdGameState extends State<LizzieTheBirdGame> {
         backgroundColor: Colors.green,
         title: RichText(
             text: TextSpan(style: const TextStyle(fontSize: 24), children: [
-          const TextSpan(text: "Bird Game! "),
+          const TextSpan(text: "Lizzie the Bird! "),
           TextSpan(
               text: "Score: $score",
               style: TextStyle(fontWeight: FontWeight.bold))
