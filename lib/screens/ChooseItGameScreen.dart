@@ -218,10 +218,10 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
     });
 
     if (answer == questions[currentQuestionIndex]['description']) {
-      score+=10;
+      score += 10;
       await _playSound('sounds/success.mp3');
     } else {
-       await _playSound('sounds/error.mp3');
+      await _playSound('sounds/error.mp3');
     }
   }
 
@@ -282,16 +282,18 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        translated
-                            ? '${translatedTexts['heading'] ?? originalTexts['heading']} $question?'
-                            : '${originalTexts['heading']} $question?',
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                      Expanded(
+                        child: Text(
+                          translated
+                              ? '${translatedTexts['heading'] ?? originalTexts['heading']} $question?'
+                              : '${originalTexts['heading']} $question?',
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
                       ),
                       if (selectedAnswer.isNotEmpty)
                         Padding(
@@ -363,7 +365,7 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
                                         textAlign: TextAlign.center,
                                       ),
                                       content: Text(
-                                        'Your score: $score/${(questions.length)*10}',
+                                        'Your score: $score/${(questions.length) * 10}',
                                         style: const TextStyle(
                                             color: Colors.lightGreen,
                                             fontSize: 18,
@@ -426,4 +428,3 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
     );
   }
 }
-

@@ -343,24 +343,13 @@ class _DecimalPopGameState extends State<DecimalPopGame>
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              translated
-                  ? translatedTexts['title'] ?? originalTexts['title']!
-                  : originalTexts['title']!,
-              style: TextStyle(fontSize: 24),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              "Score: $score",
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold, color: Colors.black),
-            ),
-          ],
-        ),
+        title: RichText(
+            text: TextSpan(style: const TextStyle(fontSize: 24), children: [
+          const TextSpan(text: "Decimal Pop Game! "),
+          TextSpan(
+              text: "Score: $score",
+              style: TextStyle(fontWeight: FontWeight.bold))
+        ])),
         centerTitle: true,
         actions: [
           Padding(

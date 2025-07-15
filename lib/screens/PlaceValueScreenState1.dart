@@ -272,38 +272,40 @@ class _PlaceValueScreenState1 extends State<PlaceValueScreen1> {
         ),
       );
     }
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(
-            translated
-                ? translatedTexts['heading'] ?? originalTexts['heading']!
-                : originalTexts['heading']!,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            // change to first because it's been shuffled
-            children: questions.first.keys.map((number) {
-              int colorIndex =
-                  questions.first.keys.toList().indexOf(number) % colors.length;
-              return Column(
-                children: [
-                  _buildColoredNumber(number, colors[colorIndex]),
-                  const SizedBox(height: 10),
-                  _buildDragTarget(number),
-                ],
-              );
-            }).toList(),
-          ),
-          // const SizedBox(height: 40),
-          // _buildFeedbackSection(),
-          const SizedBox(height: 20),
-          _buildDraggableOptions(),
-        ],
+    return SizedBox.expand(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              translated
+                  ? translatedTexts['heading'] ?? originalTexts['heading']!
+                  : originalTexts['heading']!,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            Wrap(
+              children: questions.first.keys.map((number) {
+                int colorIndex = questions.first.keys.toList().indexOf(number) %
+                    colors.length;
+                return Column(
+                  children: [
+                    _buildColoredNumber(number, colors[colorIndex]),
+                    const SizedBox(height: 10),
+                    _buildDragTarget(number),
+                  ],
+                );
+              }).toList(),
+            ),
+            // const SizedBox(height: 40),
+            // _buildFeedbackSection(),
+            const SizedBox(height: 20),
+            _buildDraggableOptions(),
+          ],
+        ),
       ),
     );
   }
