@@ -3,6 +3,7 @@ import 'screens/reading_decimals_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+// this is the Learn Decimal page
 class LearnPage2 extends StatefulWidget {
   const LearnPage2({super.key});
 
@@ -77,7 +78,7 @@ class _LearnPageState2 extends State<LearnPage2> {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.only(left: 50, right: 50),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,

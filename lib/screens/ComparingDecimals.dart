@@ -76,7 +76,7 @@ class _ComparingDecimalsPageState extends State<ComparingDecimalsPage> {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -110,7 +110,6 @@ class _ComparingDecimalsPageState extends State<ComparingDecimalsPage> {
               'assets/comparingdecimals.png',
               height: 200,
             ),
-            const Spacer(),
             Align(
               alignment: Alignment.bottomRight,
             ),

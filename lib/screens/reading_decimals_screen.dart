@@ -112,7 +112,7 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,6 +175,37 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal, // Button color
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ComparingDecimalsPage(),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    translated
+                        ? translatedTexts['NextPage'] ??
+                            originalTexts['NextPage']!
+                        : originalTexts['NextPage']!,
+                    style: const TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

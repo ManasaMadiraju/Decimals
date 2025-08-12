@@ -282,23 +282,23 @@ class _ChooseItGameScreenState extends State<ChooseItGameScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: Text(
-                          translated
-                              ? '${translatedTexts['heading'] ?? originalTexts['heading']} $question?'
-                              : '${originalTexts['heading']} $question?',
-                          style: const TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                          textAlign: TextAlign.center,
+                      // Expanded(
+                      Text(
+                        translated
+                            ? '${translatedTexts['heading'] ?? originalTexts['heading']} $question?'
+                            : '${originalTexts['heading']} $question?',
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
+                        textAlign: TextAlign.center,
                       ),
+
                       if (selectedAnswer.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsets.only(
-                              left: 8.0), // Added padding here
+                          padding:
+                              EdgeInsets.only(left: 8.0), // Added padding here
                           child: IconButton(
                             onPressed: () => _speak(correctAnswer),
                             icon: const Icon(Icons.volume_up),
