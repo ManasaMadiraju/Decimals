@@ -201,11 +201,11 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
         setState(() {
           items.remove(first);
           items.remove(second);
+          score += 10;
         });
 
         if (items.isEmpty) {
           setState(() {
-            score += 10;
           });
           Future.delayed(const Duration(milliseconds: 500), () {
             _showCompletionDialog();
