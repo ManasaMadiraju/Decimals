@@ -160,15 +160,13 @@
 
 
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const FractionsToDecimalsApp());
 }
 
-class FractionsToDecimalsApp extends StatelessWidget {
-  const FractionsToDecimalsApp({super.key});
+class FractionsToDecimalsScreen extends StatefulWidget {
+  const FractionsToDecimalsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -183,82 +181,17 @@ class FractionsToDecimalsApp extends StatelessWidget {
   }
 }
 
-class FractionsToDecimalsScreen extends StatefulWidget {
+class FractionsToDecimalsScreen extends StatelessWidget {
   const FractionsToDecimalsScreen({super.key});
-
-  @override
-  State<FractionsToDecimalsScreen> createState() =>
-      _FractionsToDecimalsScreenState();
-}
-
-class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
-  final Map<String, String> originalTexts = {
-    'title': 'Converting Fractions to Decimals',
-    'instructions':
-        'To convert fractions to decimals:\n'
-        '1️⃣ Divide the numerator by the denominator.\n'
-        '2️⃣ Write the result as a decimal.\n'
-        '3️⃣ If necessary, round the decimal to the desired place value.',
-    'examples': 'Examples:',
-    'NextPage': 'Next Page',
-  };
-
-  Map<String, String> translatedTexts = {};
-  bool translated = false;
-
-  Future<void> translateTexts() async {
-    if (!translated) {
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/translate'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'texts': originalTexts.values.toList()}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          translatedTexts = {
-            for (int i = 0; i < originalTexts.keys.length; i++)
-              originalTexts.keys.elementAt(i): data['translations'][i]
-          };
-          translated = true;
-        });
-      } else {
-        print('Failed to fetch translations: ${response.statusCode}');
-      }
-    } else {
-      setState(() {
-        translatedTexts.clear();
-        translated = false;
-      });
-    }
-  }
-
-  void _navigateToHome(BuildContext context) {
-    Navigator.popUntil(context, (route) => route.isFirst);
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F0F8),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4CAF50),
-        title: Text(originalTexts['title']!),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.home),
-            onPressed: () => _navigateToHome(context),
-          ),
-          IconButton(
-            icon: const Icon(Icons.translate),
-            onPressed: translateTexts,
-          ),
-        ],
+        title: const Text('Converting Fractions to Decimals'),
+        elevation: 2,
+        backgroundColor: Colors.green.shade700,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
@@ -293,12 +226,12 @@ class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
                   ),
                 ],
               ),
-              child: Text(
-                translated
-                    ? translatedTexts['instructions'] ??
-                        originalTexts['instructions']!
-                    : originalTexts['instructions']!,
-                style: const TextStyle(
+              child: const Text(
+                'To convert fractions to decimals:\n'
+                '1️⃣ Divide the numerator by the denominator.\n'
+                '2️⃣ Write the result as a decimal.\n'
+                '3️⃣ If necessary, round the decimal to the desired place value.',
+                style: TextStyle(
                   fontSize: 16.0,
                   height: 1.5,
                 ),
@@ -344,8 +277,7 @@ class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
               alignment: Alignment.centerRight,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.green.shade700,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 25.0, vertical: 12.0),
                   shape: RoundedRectangleBorder(
@@ -356,11 +288,9 @@ class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
                 onPressed: () {
                   // Navigate to another lesson
                 },
-                child: Text(
-                  translated
-                      ? translatedTexts['NextPage'] ?? originalTexts['NextPage']!
-                      : originalTexts['NextPage']!,
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
+                child: const Text(
+                  'Next Page',
+                  style: TextStyle(fontSize: 16),
                 ),
               ),
             ),

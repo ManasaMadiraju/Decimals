@@ -1,6 +1,6 @@
+import 'package:decimals/selection_pages/LearnSelection.dart';
 import 'package:flutter/material.dart';
-import 'learnpage.dart';
-import 'GameSelectionDialog.dart';
+import 'selection_pages/GameSelectionDialog.dart';
 import 'package:decimals/screens/treasurehunt.dart';
 
 void main() {
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const DecimalsPage(),
-        '/learn': (context) => const LearnPage(),
+        '/learn': (context) => const LearnSelection(),
         '/play': (context) => const GameSelectionDialog(),
         '/practice': (context) => DecimalTreasureHuntGame(),
       },

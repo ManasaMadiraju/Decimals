@@ -1,4 +1,4 @@
-import 'package:decimals/learnpage2.dart';
+import 'package:decimals/screens/learnpage2.dart';
 import 'package:decimals/screens/ComparingDecimals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';

@@ -120,8 +120,6 @@
 //   }
 // }
 
-
-
 import 'package:decimals/screens/FractionsToDecimals.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -255,8 +253,7 @@ class _ComparingDecimalsPageState extends State<ComparingDecimalsPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        // builder: (context) => const ComparingDecimalsPage(),
-                         builder: (context) => const FractionsToDecimalsApp(),
+                        builder: (context) => const FractionsToDecimalsScreen(),
                       ),
                     );
                   },
