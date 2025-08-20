@@ -27,6 +27,12 @@ class LearnSelection extends StatelessWidget {
         height: screenSize.height,
         child: Stack(
           children: [
+            Positioned.fill(
+              child: Image.asset(
+                'assets/learnsectionbg.png',
+                fit: BoxFit.cover,
+              ),
+            ),
             Center(
               child: Container(
                 padding: const EdgeInsets.all(20),
