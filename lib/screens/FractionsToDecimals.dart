@@ -1,27 +1,49 @@
+import 'package:decimals/screens/ComparingDecimals.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-void main() {
-  runApp(const FractionsToDecimalsApp());
-}
-
-class FractionsToDecimalsApp extends StatelessWidget {
-  const FractionsToDecimalsApp({super.key});
+class FractionsToDecimalsScreen extends StatefulWidget {
+  const FractionsToDecimalsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Converting Fractions to Decimals',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        scaffoldBackgroundColor: Colors.grey.shade50,
-      ),
-      home: const FractionsToDecimalsScreen(),
-    );
-  }
+  _FractionsToDecimalsScreen createState() => _FractionsToDecimalsScreen();
 }
 
-class FractionsToDecimalsScreen extends StatelessWidget {
-  const FractionsToDecimalsScreen({super.key});
+class _FractionsToDecimalsScreen extends State<FractionsToDecimalsScreen> {
+  // translation part
+  // write the original text here
+  Map<String, String> originalTexts = {};
+  Map<String, String> translatedTexts = {};
+  bool translated = false;
+  Future<void> translateTexts() async {
+    if (!translated) {
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/translate'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'texts': originalTexts.values.toList()}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          translatedTexts = {
+            for (int i = 0; i < originalTexts.keys.length; i++)
+              originalTexts.keys.elementAt(i): data['translations'][i]
+          };
+          translated = true;
+        });
+      } else {
+        print('Failed to fetch translations: ${response.statusCode}');
+      }
+    } else {
+      setState(() {
+        translatedTexts.clear();
+        translated = false; // Mark as untranslated
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +51,28 @@ class FractionsToDecimalsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Converting Fractions to Decimals'),
         elevation: 2,
-        backgroundColor: Colors.green.shade700,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(
+              context,
+              MaterialPageRoute(builder: (context) => ComparingDecimalsPage()),
+            );
+          },
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.popUntil(context, (route) => route.isFirst);
+            },
+            icon: const Icon(Icons.home),
+          ),
+          IconButton(
+            icon: const Icon(Icons.translate),
+            onPressed: translateTexts,
+          ),
+        ],
+        backgroundColor: Colors.green,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
@@ -52,9 +95,9 @@ class FractionsToDecimalsScreen extends StatelessWidget {
               ),
               child: const Text(
                 'To convert fractions to decimals:\n'
-                '1️⃣ Divide the numerator by the denominator.\n'
-                '2️⃣ Write the result as a decimal.\n'
-                '3️⃣ If necessary, round the decimal to the desired place value.',
+                '1. Divide the numerator by the denominator.\n'
+                '2. Write the result as a decimal.\n'
+                '3. If necessary, round the decimal to the desired place value.',
                 style: TextStyle(
                   fontSize: 16.0,
                   height: 1.5,
@@ -98,7 +141,7 @@ class FractionsToDecimalsScreen extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade700,
+                  backgroundColor: Colors.green,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 25.0, vertical: 12.0),
                   shape: RoundedRectangleBorder(
@@ -111,7 +154,7 @@ class FractionsToDecimalsScreen extends StatelessWidget {
                 },
                 child: const Text(
                   'Next Page',
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
             ),

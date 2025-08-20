@@ -1,4 +1,4 @@
-import 'package:decimals/GameSelectionDialog.dart';
+import 'package:decimals/selection_pages/GameSelectionDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:convert';

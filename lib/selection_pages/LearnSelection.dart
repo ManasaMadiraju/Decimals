@@ -1,14 +1,14 @@
-import 'package:decimals/screens/decimal_pop_game.dart';
+import 'package:decimals/screens/learnpage.dart';
+import 'package:decimals/screens/learnpage2.dart';
+import 'package:decimals/screens/ComparingDecimals.dart';
+import 'package:decimals/screens/FractionsToDecimals.dart';
+import 'package:decimals/screens/reading_decimals_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:decimals/screens/birdgame.dart';
-import 'package:decimals/screens/memorygameapp.dart';
-import 'package:decimals/screens/PlaceValueScreenState1.dart';
-import 'package:decimals/screens/ChooseItGameScreen.dart';
 
-class GameSelectionDialog extends StatelessWidget {
-  const GameSelectionDialog({super.key});
+class LearnSelection extends StatelessWidget {
+  const LearnSelection({super.key});
 
-  void _navigateToGame(BuildContext context, Widget screen) {
+  void _navigateToPage(BuildContext context, Widget screen) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => screen),
@@ -27,12 +27,6 @@ class GameSelectionDialog extends StatelessWidget {
         height: screenSize.height,
         child: Stack(
           children: [
-            Positioned.fill(
-              child: Image.asset(
-                'assets/play.jpg',
-                fit: BoxFit.cover,
-              ),
-            ),
             Center(
               child: Container(
                 padding: const EdgeInsets.all(20),
@@ -52,21 +46,21 @@ class GameSelectionDialog extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text(
-                      'Choose a Game',
+                      'Choose a Section',
                       style:
                           TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 30),
-                    _buildGameButton(context, '🃏 Match the Tiles',
-                        MemoryGameScreen(), Colors.green),
-                    _buildGameButton(context, '🐦 Lizzie the Bird',
-                        LizzieTheBirdGame(), Colors.blue),
-                    _buildGameButton(context, '🎯 Place Value Puzzle',
-                        PlaceValueScreen1(), Colors.orange),
-                    _buildGameButton(context, '🎤 Choose It',
-                        ChooseItGameScreen(), Colors.purple),
-                    _buildGameButton(context, '🎈 Decimal Pop!',
-                        const DecimalPopGame(), Colors.teal),
+                    _buildGameButton(
+                        context, 'Introduction', LearnPage(), Colors.green),
+                    _buildGameButton(
+                        context, 'Place Value', LearnPage2(), Colors.blue),
+                    _buildGameButton(context, 'Reading Decimals',
+                        ReadingDecimalScreen(), Colors.orange),
+                    _buildGameButton(context, 'Comparing Decimals',
+                        ComparingDecimalsPage(), Colors.purple),
+                    _buildGameButton(context, 'Fraction to Decimal',
+                        FractionsToDecimalsScreen(), Colors.teal),
                     const SizedBox(height: 20),
                     TextButton(
                       onPressed: () {
@@ -100,7 +94,7 @@ class GameSelectionDialog extends StatelessWidget {
             borderRadius: BorderRadius.circular(15),
           ),
         ),
-        onPressed: () => _navigateToGame(context, screen),
+        onPressed: () => _navigateToPage(context, screen),
         child: Text(title, style: const TextStyle(fontSize: 18)),
       ),
     );
