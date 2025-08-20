@@ -1,26 +1,7 @@
+import 'package:decimals/screens/ComparingDecimals.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
-void main() {
-  runApp(const FractionsToDecimalsApp());
-}
-
-class FractionsToDecimalsApp extends StatelessWidget {
-  const FractionsToDecimalsApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Converting Fractions to Decimals',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        scaffoldBackgroundColor: Colors.grey.shade50,
-      ),
-      home: const FractionsToDecimalsScreen(),
-    );
-  }
-}
 
 class FractionsToDecimalsScreen extends StatefulWidget {
   const FractionsToDecimalsScreen({super.key});
@@ -33,11 +14,10 @@ class FractionsToDecimalsScreen extends StatefulWidget {
 class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
   final Map<String, String> originalTexts = {
     'title': 'Converting Fractions to Decimals',
-    'instructions':
-        'To convert fractions to decimals:\n'
-        '1️⃣ Divide the numerator by the denominator.\n'
-        '2️⃣ Write the result as a decimal.\n'
-        '3️⃣ If necessary, round the decimal to the desired place value.',
+    'instructions': 'To convert fractions to decimals:\n'
+        '1. Divide the numerator by the denominator.\n'
+        '2. Write the result as a decimal.\n'
+        '3. If necessary, round the decimal to the desired place value.',
     'examples': 'Examples:',
     'NextPage': 'Next Page',
   };
@@ -85,9 +65,14 @@ class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
         backgroundColor: const Color(0xFF4CAF50),
         title: Text(originalTexts['title']!),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ComparingDecimalsPage()),
+              );
+            }),
         actions: [
           IconButton(
             icon: const Icon(Icons.home),
@@ -197,7 +182,8 @@ class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
                 },
                 child: Text(
                   translated
-                      ? translatedTexts['NextPage'] ?? originalTexts['NextPage']!
+                      ? translatedTexts['NextPage'] ??
+                          originalTexts['NextPage']!
                       : originalTexts['NextPage']!,
                   style: const TextStyle(fontSize: 16, color: Colors.white),
                 ),

@@ -131,7 +131,7 @@ class _ComparingDecimalsPageState extends State<ComparingDecimalsPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const FractionsToDecimalsApp(),
+                        builder: (context) => const FractionsToDecimalsScreen(),
                       ),
                     );
                   },
