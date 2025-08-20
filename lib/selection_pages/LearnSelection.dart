@@ -60,7 +60,7 @@ class LearnSelection extends StatelessWidget {
                     _buildGameButton(context, 'Comparing Decimals',
                         ComparingDecimalsPage(), Colors.purple),
                     _buildGameButton(context, 'Fraction to Decimal',
-                        FractionsToDecimalsScreen(), Colors.teal),
+                        FractionsToDecimalsApp(), Colors.teal),
                     const SizedBox(height: 20),
                     TextButton(
                       onPressed: () {
