@@ -13,13 +13,14 @@ class FractionsToDecimalsScreen extends StatefulWidget {
 
 class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
   final Map<String, String> originalTexts = {
-    'title': 'Converting Fractions to Decimals',
+    'title': 'Fractions to Decimals',
     'instructions': 'To convert fractions to decimals:\n'
         '1. Divide the numerator by the denominator.\n'
         '2. Write the result as a decimal.\n'
         '3. If necessary, round the decimal to the desired place value.',
     'examples': 'Examples:',
     'NextPage': 'Next Page',
+    'Back': 'Back'
   };
 
   Map<String, String> translatedTexts = {};
@@ -63,7 +64,7 @@ class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
       backgroundColor: const Color(0xFFF8F0F8),
       appBar: AppBar(
         backgroundColor: const Color(0xFF4CAF50),
-        title: Text(originalTexts['title']!),
+        title: const Text('Fractions to Decimals'),
         leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
@@ -85,9 +86,9 @@ class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.only(left: 50, right: 50),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Title
             Text(
@@ -95,7 +96,7 @@ class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
                   ? translatedTexts['title'] ?? originalTexts['title']!
                   : originalTexts['title']!,
               style: const TextStyle(
-                fontSize: 28,
+                fontSize: 42,
                 fontWeight: FontWeight.bold,
                 color: Colors.teal,
               ),
@@ -123,7 +124,7 @@ class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
                         originalTexts['instructions']!
                     : originalTexts['instructions']!,
                 style: const TextStyle(
-                  fontSize: 16.0,
+                  fontSize: 20.0,
                   height: 1.5,
                 ),
               ),
@@ -132,7 +133,7 @@ class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
 
             // Examples Box
             Container(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(18.0),
               decoration: BoxDecoration(
                 color: Colors.blue.shade50,
                 borderRadius: BorderRadius.circular(12.0),
@@ -147,12 +148,12 @@ class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
                             originalTexts['examples']!
                         : originalTexts['examples']!,
                     style: const TextStyle(
-                      fontSize: 18.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.bold,
                       color: Colors.blueAccent,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   exampleRow('1/2', '0.5'),
                   exampleRow('3/4', '0.75'),
                   exampleRow('7/8', '0.875'),
@@ -161,34 +162,54 @@ class _FractionsToDecimalsScreenState extends State<FractionsToDecimalsScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
 
             // Next Page Button
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 25.0, vertical: 12.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  elevation: 3,
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    translated
+                        ? translatedTexts['Back'] ?? originalTexts['Back']!
+                        : originalTexts['Back']!,
+                    style: const TextStyle(fontSize: 18, color: Colors.white),
+                  ),
                 ),
-                onPressed: () {
-                  // Navigate to another lesson
-                },
-                child: Text(
-                  translated
-                      ? translatedTexts['NextPage'] ??
-                          originalTexts['NextPage']!
-                      : originalTexts['NextPage']!,
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    // foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    // Navigate to another lesson
+                  },
+                  child: Text(
+                    translated
+                        ? translatedTexts['NextPage'] ??
+                            originalTexts['NextPage']!
+                        : originalTexts['NextPage']!,
+                    style: const TextStyle(fontSize: 18, color: Colors.white),
+                  ),
                 ),
-              ),
-            ),
+              ],
+            )
           ],
         ),
       ),

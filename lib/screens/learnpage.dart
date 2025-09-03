@@ -17,7 +17,8 @@ class _LearnPageState extends State<LearnPage> {
     'body':
         'Decimals are a way of expressing numbers that are not whole numbers. They are numbers with a dot, called a decimal point.',
     'example': 'Decimal Example: 0.1 means one-tenth.',
-    'NextPage': 'Next Page'
+    'NextPage': 'Next Page',
+    'Back': 'Back'
   };
   Map<String, String> translatedTexts = {};
   bool translated = false;
@@ -89,7 +90,7 @@ class _LearnPageState extends State<LearnPage> {
                     ? translatedTexts['heading'] ?? originalTexts['heading']!
                     : originalTexts['heading']!,
                 style: const TextStyle(
-                  fontSize: 50,
+                  fontSize: 45,
                   fontWeight: FontWeight.bold,
                   color: Colors.teal,
                 ),
@@ -97,20 +98,20 @@ class _LearnPageState extends State<LearnPage> {
               ),
             ),
 
-            const SizedBox(height: 50),
+            const SizedBox(height: 40),
 
             // Description Text
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.grey[200], // Light background for better contrast
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 translated
                     ? translatedTexts['body'] ?? originalTexts['body']!
                     : originalTexts['body']!,
-                style: const TextStyle(fontSize: 18, height: 1.5),
+                style: const TextStyle(fontSize: 22, height: 1.5),
                 textAlign: TextAlign.justify,
               ),
             ),
@@ -152,11 +153,29 @@ class _LearnPageState extends State<LearnPage> {
             const SizedBox(height: 60),
 
             // Next Page Button
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal, // Button color
+                  backgroundColor: Colors.teal,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  translated
+                      ? translatedTexts['Back'] ?? originalTexts['Back']!
+                      : originalTexts['Back']!,
+                  style: const TextStyle(fontSize: 18, color: Colors.white),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   shape: RoundedRectangleBorder(
@@ -177,7 +196,7 @@ class _LearnPageState extends State<LearnPage> {
                   style: const TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
-            ),
+            ])
           ],
         ),
       ),

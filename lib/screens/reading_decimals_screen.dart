@@ -14,6 +14,7 @@ class ReadingDecimalScreen extends StatefulWidget {
 
 class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
   final Map<String, String> originalTexts = {
+    'title': 'Reading Decimals',
     'h1': 'To read decimals:',
     'h2': '1. Say the whole number first.\n'
         '2. Say “and.”\n'
@@ -26,7 +27,8 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
         'description: Thirty Eight and Twenty Nine Hundredths',
     'h6': 'number: 453.01'
         'description: Four Hundred Fifty Three and One Hundredths',
-    'NextPage': 'Next Page'
+    'NextPage': 'Next Page',
+    'Back': 'Back'
   };
 
   // Method to navigate to a specific page when back button is pressed
@@ -113,13 +115,24 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(left: 50, right: 50),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              translated
+                  ? translatedTexts['title'] ?? originalTexts['title']!
+                  : originalTexts['title']!,
+              style: const TextStyle(
+                fontSize: 42,
+                fontWeight: FontWeight.bold,
+                color: Colors.teal,
+              ),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 20),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(12),
@@ -132,19 +145,19 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
                     translated
                         ? translatedTexts['h1'] ?? originalTexts['h1']!
                         : originalTexts['h1']!,
-                    style: const TextStyle(fontSize: 22, color: Colors.black87),
+                    style: const TextStyle(fontSize: 20, color: Colors.black87),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
                   Text(
                     translated
                         ? translatedTexts['h2'] ?? originalTexts['h2']!
                         : originalTexts['h2']!,
-                    style: const TextStyle(fontSize: 22, color: Colors.black87),
+                    style: const TextStyle(fontSize: 20, color: Colors.black87),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -158,9 +171,9 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
                     translated
                         ? translatedTexts['h3'] ?? originalTexts['h3']!
                         : originalTexts['h3']!,
-                    style: const TextStyle(fontSize: 22, color: Colors.black87),
+                    style: const TextStyle(fontSize: 20, color: Colors.black87),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 15),
                   ExampleItem(
                     number: '12.7',
                     description: 'Twelve and seven tenths',
@@ -176,10 +189,29 @@ class _ReadingDecimalScreen extends State<ReadingDecimalScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    translated
+                        ? translatedTexts['Back'] ?? originalTexts['Back']!
+                        : originalTexts['Back']!,
+                    style: const TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal, // Button color

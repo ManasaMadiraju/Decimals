@@ -19,7 +19,8 @@ class _ComparingDecimalsPageState extends State<ComparingDecimalsPage> {
         'So, 3.45 is smaller than 3.5\n\n'
         '📌 Tip: You can write 3.5 as 3.50 to compare easily.\n'
         'Now compare: 3.45 < 3.50',
-    'NextPage': 'Next Page', // ✅ Added this key
+    'NextPage': 'Next Page',
+    'Back': 'Back'
   };
 
   Map<String, String> translatedTexts = {};
@@ -80,7 +81,7 @@ class _ComparingDecimalsPageState extends State<ComparingDecimalsPage> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(left: 50, right: 50),
         child: Column(
           children: [
             Text(
@@ -116,8 +117,27 @@ class _ComparingDecimalsPageState extends State<ComparingDecimalsPage> {
             const SizedBox(height: 20),
             // ✅ Added Next Button Row
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    translated
+                        ? translatedTexts['Back'] ?? originalTexts['Back']!
+                        : originalTexts['Back']!,
+                    style: const TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,

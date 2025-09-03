@@ -16,7 +16,8 @@ class _LearnPageState2 extends State<LearnPage2> {
     'h1': 'Place Values in Decimals',
     'h2': 'Each number after the decimal point has a place value: tenths, hundredths, and thousandths.\n'
         '\n Example : In 0.25, 2 is in the tenths place, and 5 is in the hundredths place.',
-    'NextPage': 'Next Page'
+    'NextPage': 'Next Page',
+    'Back': 'Back'
   };
   Map<String, String> translatedTexts = {};
   bool translated = false;
@@ -124,8 +125,27 @@ class _LearnPageState2 extends State<LearnPage2> {
             ),
             const SizedBox(height: 20),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    translated
+                        ? translatedTexts['Back'] ?? originalTexts['Back']!
+                        : originalTexts['Back']!,
+                    style: const TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal, // Button color
