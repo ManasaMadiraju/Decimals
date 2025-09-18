@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'reading_decimals_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'placevalueexample.dart';
 
 // this is the Learn Decimal page
 class LearnPage2 extends StatefulWidget {
@@ -16,7 +17,7 @@ class _LearnPageState2 extends State<LearnPage2> {
     'h1': 'Place Values in Decimals',
     'h2': 'Each number after the decimal point has a place value: tenths, hundredths, and thousandths.\n'
         '\n Example : In 0.25, 2 is in the tenths place, and 5 is in the hundredths place.',
-    'NextPage': 'Next Page',
+    'NextPage': 'Lets Look at a few examples',
     'Back': 'Back'
   };
   Map<String, String> translatedTexts = {};
@@ -159,7 +160,7 @@ class _LearnPageState2 extends State<LearnPage2> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const ReadingDecimalScreen(),
+                        builder: (context) => const placevalueexample(),
                       ),
                     );
                   },
