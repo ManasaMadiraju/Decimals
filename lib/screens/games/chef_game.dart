@@ -1,4 +1,7 @@
 import 'package:decimals/selection_pages/GameSelectionDialog.dart';
+import 'package:decimals/screens/games/chef_game/data/chef_game_data.dart';
+import 'package:decimals/screens/games/chef_game/models/recipe.dart';
+import 'package:decimals/screens/games/chef_game/painters/chef_game_painters.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -11,38 +14,6 @@ class ChefGameScreen extends StatefulWidget {
 
   @override
   _ChefGameScreenState createState() => _ChefGameScreenState();
-}
-
-class Recipe {
-  final String name;
-  final String description;
-  final List<CookingStep> steps;
-
-  Recipe({
-    required this.name,
-    required this.description,
-    required this.steps,
-  });
-}
-
-class CookingStep {
-  final String type;
-  final String instruction;
-  final String question;
-  final String correctAnswer;
-  final List<String> options;
-  final String ingredient;
-  final double measurement;
-
-  CookingStep({
-    required this.type,
-    required this.instruction,
-    required this.question,
-    required this.correctAnswer,
-    required this.options,
-    required this.ingredient,
-    required this.measurement,
-  });
 }
 
 class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStateMixin {
@@ -67,229 +38,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
   Map<String, String> translatedTexts = {};
   bool translated = false;
 
-  final List<Recipe> recipes = [
-    // Recipe 1: Pancakes (7 steps)
-    Recipe(
-      name: "Pancakes",
-      description: "Let's make delicious pancakes!",
-      steps: [
-        CookingStep(
-          type: 'reading',
-          instruction: "First, we need flour",
-          question: "What does 0.5 cup mean?",
-          options: ["Half a cup", "Five cups", "One cup", "Two cups"],
-          correctAnswer: "Half a cup",
-          ingredient: "Flour",
-          measurement: 0.5,
-        ),
-        CookingStep(
-          type: 'comparison',
-          instruction: "Now we need milk",
-          question: "Which is more: 0.7 cup or 0.65 cup?",
-          options: ["0.7 cup", "0.65 cup", "They are equal", "I don't know"],
-          correctAnswer: "0.7 cup",
-          ingredient: "Milk",
-          measurement: 0.7,
-        ),
-        CookingStep(
-          type: 'place_value',
-          instruction: "Add some sugar",
-          question: "What is the tenths place in 0.25 cup?",
-          options: ["2", "5", "0", "25"],
-          correctAnswer: "2",
-          ingredient: "Sugar",
-          measurement: 0.25,
-        ),
-        CookingStep(
-          type: 'fraction_conversion',
-          instruction: "Add eggs",
-          question: "Convert 1/4 cup to a decimal",
-          options: ["0.25 cup", "0.4 cup", "0.5 cup", "1.4 cups"],
-          correctAnswer: "0.25 cup",
-          ingredient: "Eggs",
-          measurement: 0.25,
-        ),
-        CookingStep(
-          type: 'rounding',
-          instruction: "Add oil",
-          question: "Round 0.33 cup to the nearest tenth",
-          options: ["0.3 cup", "0.4 cup", "0.33 cup", "0.2 cup"],
-          correctAnswer: "0.3 cup",
-          ingredient: "Oil",
-          measurement: 0.33,
-        ),
-        CookingStep(
-          type: 'comparison',
-          instruction: "Add baking powder",
-          question: "Which is more: 0.15 tsp or 0.2 tsp?",
-          options: ["0.15 tsp", "0.2 tsp", "They are equal", "I don't know"],
-          correctAnswer: "0.2 tsp",
-          ingredient: "Baking Powder",
-          measurement: 0.2,
-        ),
-        CookingStep(
-          type: 'reading',
-          instruction: "Add salt",
-          question: "What does 0.1 tsp mean?",
-          options: ["One tenth teaspoon", "One teaspoon", "Ten teaspoons", "One hundredth teaspoon"],
-          correctAnswer: "One tenth teaspoon",
-          ingredient: "Salt",
-          measurement: 0.1,
-        ),
-      ],
-    ),
-
-    // Recipe 2: Chocolate Cake (8 steps)
-    Recipe(
-      name: "Chocolate Cake",
-      description: "Let's bake a chocolate cake!",
-      steps: [
-        CookingStep(
-          type: 'fraction_conversion',
-          instruction: "First, measure the flour",
-          question: "Convert 1/2 cup to a decimal",
-          options: ["0.5 cup", "0.2 cup", "0.25 cup", "2.0 cups"],
-          correctAnswer: "0.5 cup",
-          ingredient: "Flour",
-          measurement: 0.5,
-        ),
-        CookingStep(
-          type: 'reading',
-          instruction: "Add cocoa powder",
-          question: "What does 0.75 cup mean?",
-          options: ["Three quarters cup", "Seven cups", "Seventy five cups", "Half a cup"],
-          correctAnswer: "Three quarters cup",
-          ingredient: "Cocoa Powder",
-          measurement: 0.75,
-        ),
-        CookingStep(
-          type: 'rounding',
-          instruction: "Measure the sugar",
-          question: "Round 0.47 cup to the nearest tenth",
-          options: ["0.5 cup", "0.4 cup", "0.47 cup", "0.6 cup"],
-          correctAnswer: "0.5 cup",
-          ingredient: "Sugar",
-          measurement: 0.47,
-        ),
-        CookingStep(
-          type: 'comparison',
-          instruction: "Add butter",
-          question: "Which is more: 0.8 cup or 0.75 cup?",
-          options: ["0.8 cup", "0.75 cup", "They are equal", "I don't know"],
-          correctAnswer: "0.8 cup",
-          ingredient: "Butter",
-          measurement: 0.8,
-        ),
-        CookingStep(
-          type: 'place_value',
-          instruction: "Add milk",
-          question: "What is the hundredths place in 0.5 cup?",
-          options: ["5", "0", "50", "0.5"],
-          correctAnswer: "0",
-          ingredient: "Milk",
-          measurement: 0.5,
-        ),
-        CookingStep(
-          type: 'fraction_conversion',
-          instruction: "Add eggs",
-          question: "Convert 1/3 cup to a decimal",
-          options: ["0.33 cup", "0.3 cup", "0.4 cup", "1.3 cups"],
-          correctAnswer: "0.33 cup",
-          ingredient: "Eggs",
-          measurement: 0.33,
-        ),
-        CookingStep(
-          type: 'rounding',
-          instruction: "Add vanilla extract",
-          question: "Round 0.67 tsp to the nearest tenth",
-          options: ["0.7 tsp", "0.6 tsp", "0.67 tsp", "0.8 tsp"],
-          correctAnswer: "0.7 tsp",
-          ingredient: "Vanilla Extract",
-          measurement: 0.67,
-        ),
-        CookingStep(
-          type: 'comparison',
-          instruction: "Add baking soda",
-          question: "Which is more: 0.25 tsp or 0.3 tsp?",
-          options: ["0.25 tsp", "0.3 tsp", "They are equal", "I don't know"],
-          correctAnswer: "0.3 tsp",
-          ingredient: "Baking Soda",
-          measurement: 0.3,
-        ),
-      ],
-    ),
-
-    // Recipe 3: Cookies (7 steps)
-    Recipe(
-      name: "Cookies",
-      description: "Let's make chocolate chip cookies!",
-      steps: [
-        CookingStep(
-          type: 'fraction_conversion',
-          instruction: "Measure the flour",
-          question: "Convert 1/4 cup to a decimal",
-          options: ["0.25 cup", "0.4 cup", "0.5 cup", "1.4 cups"],
-          correctAnswer: "0.25 cup",
-          ingredient: "Flour",
-          measurement: 0.25,
-        ),
-        CookingStep(
-          type: 'place_value',
-          instruction: "Add sugar",
-          question: "What is the hundredths place in 0.75 cup?",
-          options: ["7", "5", "0", "75"],
-          correctAnswer: "5",
-          ingredient: "Sugar",
-          measurement: 0.75,
-        ),
-        CookingStep(
-          type: 'rounding',
-          instruction: "Add butter",
-          question: "Round 0.33 cup to the nearest tenth",
-          options: ["0.3 cup", "0.4 cup", "0.33 cup", "0.2 cup"],
-          correctAnswer: "0.3 cup",
-          ingredient: "Butter",
-          measurement: 0.33,
-        ),
-        CookingStep(
-          type: 'reading',
-          instruction: "Add chocolate chips",
-          question: "What does 0.5 cup mean?",
-          options: ["Half a cup", "Five cups", "One cup", "Two cups"],
-          correctAnswer: "Half a cup",
-          ingredient: "Chocolate Chips",
-          measurement: 0.5,
-        ),
-        CookingStep(
-          type: 'comparison',
-          instruction: "Add baking soda",
-          question: "Which is more: 0.25 tsp or 0.2 tsp?",
-          options: ["0.25 tsp", "0.2 tsp", "They are equal", "I don't know"],
-          correctAnswer: "0.25 tsp",
-          ingredient: "Baking Soda",
-          measurement: 0.25,
-        ),
-        CookingStep(
-          type: 'fraction_conversion',
-          instruction: "Add salt",
-          question: "Convert 1/2 tsp to a decimal",
-          options: ["0.5 tsp", "0.2 tsp", "0.25 tsp", "2.0 tsp"],
-          correctAnswer: "0.5 tsp",
-          ingredient: "Salt",
-          measurement: 0.5,
-        ),
-        CookingStep(
-          type: 'place_value',
-          instruction: "Add vanilla extract",
-          question: "What is the tenths place in 0.1 tsp?",
-          options: ["1", "0", "10", "0.1"],
-          correctAnswer: "1",
-          ingredient: "Vanilla Extract",
-          measurement: 0.1,
-        ),
-      ],
-    ),
-  ];
+  List<Recipe> get recipes => chefGameRecipes;
 
   @override
   void initState() {
@@ -299,7 +48,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    _ingredientScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _ingredientScaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
       CurvedAnimation(
         parent: _ingredientAnimationController,
         curve: Curves.elasticOut,
@@ -507,17 +256,15 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
   }
 
   String _getScaledOption(String baseOption, List<String> baseOptions) {
-    // Find the index to preserve order
     int index = baseOptions.indexOf(baseOption);
     if (index == -1) {
-      // If not found, try to scale directly
       if (baseOption.contains('.') && baseOption.split('.').length == 2) {
         try {
           double? value = double.tryParse(baseOption.split(' ')[0]);
           if (value != null) {
             double scaledValue = _getScaledMeasurement(value);
-            String unit = baseOption.contains('cup') 
-                ? 'cup' 
+            String unit = baseOption.contains('cup')
+                ? 'cup'
                 : (baseOption.contains('tsp') ? 'tsp' : '');
             return "${_formatMeasurement(scaledValue)} $unit";
           }
@@ -527,16 +274,15 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
       }
       return baseOption;
     }
-    
-    // Scale the option at this index
+
     String option = baseOptions[index];
     if (option.contains('.') && option.split('.').length == 2) {
       try {
         double? value = double.tryParse(option.split(' ')[0]);
         if (value != null) {
           double scaledValue = _getScaledMeasurement(value);
-          String unit = option.contains('cup') 
-              ? 'cup' 
+          String unit = option.contains('cup')
+              ? 'cup'
               : (option.contains('tsp') ? 'tsp' : '');
           return "${_formatMeasurement(scaledValue)} $unit";
         }
@@ -553,7 +299,6 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
 
   void checkAnswer(String scaledAnswer, String baseAnswer) async {
     final currentStep = recipes[currentRecipeIndex].steps[currentStepIndex];
-    // Since we're not scaling anymore, compare directly with the base correct answer
     String correctAnswer = currentStep.correctAnswer;
 
     setState(() {
@@ -569,7 +314,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
         _saveBestScore(score);
         _addedIngredients.add(currentStep.ingredient);
       });
-      _ingredientAnimationController.forward(from: 0.0).then((_) {
+      _ingredientAnimationController.forward().then((_) {
         _ingredientAnimationController.reverse();
       });
 
@@ -596,43 +341,129 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
   }
 
   void _showRecipeCompleteDialog() {
-    String message = "Amazing! You completed the ${recipes[currentRecipeIndex].name} recipe!";
+    final String recipeName = recipes[currentRecipeIndex].name;
+    final String message = "Amazing! You completed the $recipeName recipe!";
     _speak(message);
+    final RecipeCompletionData? completionData = recipeCompletionData[recipeName];
+    if (completionData != null) {
+      Future.delayed(const Duration(milliseconds: 2500), () {
+        if (mounted) _speak(completionData.message);
+      });
+    }
     Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
+          backgroundColor: const Color(0xFFFFFBF7),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(24),
           ),
-          title: const Text('Recipe Complete!'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                message,
-                style: const TextStyle(
-                  fontSize: 18,
+              Icon(Icons.celebration, color: Colors.orange.shade700, size: 28),
+              const SizedBox(width: 10),
+              const Text(
+                'Recipe Complete!',
+                style: TextStyle(
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              _buildBowl(),
-              const SizedBox(height: 20),
-              Text(
-                'Score: $score',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF5D4037),
                 ),
               ),
             ],
           ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  message,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF4E342E),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                _buildBowl(),
+                const SizedBox(height: 20),
+                if (completionData != null) ...[
+                  Divider(height: 28, color: Colors.brown.shade200, thickness: 1),
+                  Text(
+                    completionData.message,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown.shade800,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.grey.shade100,
+                            Colors.grey.shade200,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.brown.withValues(alpha: 0.15),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: _buildCompletionVisual(completionData.visualType),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.amber.shade200, width: 1),
+                  ),
+                  child: Text(
+                    'Score: $score',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown.shade800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
-              child: const Text('Home'),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0, right: 8.0),
+              child: ElevatedButton.icon(
+                onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
+                icon: const Icon(Icons.home_rounded, size: 20),
+                label: const Text('Home'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange.shade700,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -699,142 +530,202 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
         return Colors.yellow.shade200;
       case 'chocolate chips':
         return Colors.brown.shade900;
+      case 'chickpeas':
+        return const Color(0xFFD2B48C);
+      case 'tahini':
+        return const Color(0xFFC4A574);
+      case 'lemon juice':
+        return const Color(0xFFFFF8DC);
+      case 'olive oil':
+        return const Color(0xFFB8860B);
+      case 'garlic':
+        return const Color(0xFFF5F5DC);
+      case 'salt':
+        return Colors.white;
+      case 'cumin':
+        return Colors.brown.shade700;
+      case 'banana':
+        return const Color(0xFFFFE135);
+      case 'yogurt':
+        return Colors.white;
+      case 'honey':
+        return const Color(0xFFE6A336);
+      case 'berries':
+        return const Color(0xFF4A0E4E);
+      case 'orange juice':
+        return const Color(0xFFFFA500);
       default:
         return Colors.grey;
     }
   }
 
-  Widget _buildBowl() {
-    return Container(
-      width: 220,
-      height: 220,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          // Bowl shadow (elliptical, wider)
-          Positioned(
-            bottom: 0,
-            child: Container(
-              width: 200,
-              height: 8,
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-          ),
-          // Bowl outer shape (U-shape cross-section)
-          Positioned(
-            bottom: 5,
-            left: 10,
-            right: 10,
-            child: CustomPaint(
-              size: const Size(200, 180),
-              painter: BowlPainter(),
-            ),
-          ),
-          // Ingredients layers (increasing width)
-          if (_addedIngredients.isNotEmpty)
-            ..._addedIngredients.asMap().entries.map((entry) {
-              int index = entry.key;
-              String ingredient = entry.value;
-              Color ingredientColor = _getIngredientColor(ingredient);
-              double layerHeight = 25.0;
-              double bottomOffset = 25 + (index * layerHeight);
-              
-              // Calculate width based on bowl radius at this height
-              // Bowl is wider at top (200px) and narrower at bottom (120px)
-              double bowlTopWidth = 200.0;
-              double bowlBottomWidth = 120.0;
-              double bowlHeight = 180.0;
-              double currentHeight = bottomOffset - 25; // Height from bottom
-              double progress = currentHeight / bowlHeight; // 0 at bottom, 1 at top
-              double layerWidth = bowlBottomWidth + (progress * (bowlTopWidth - bowlBottomWidth));
-              
-              return Positioned(
-                bottom: bottomOffset,
-                left: (220 - layerWidth) / 2, // Center the layer
-                child: AnimatedBuilder(
-                  animation: _ingredientScaleAnimation,
-                  builder: (context, child) {
-                    double scale = index == _addedIngredients.length - 1 
-                        ? _ingredientScaleAnimation.value 
-                        : 1.0;
-                    return Transform.scale(
-                      scale: scale,
-                      child: Container(
-                        width: layerWidth,
-                        height: layerHeight,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              ingredientColor,
-                              ingredientColor.withOpacity(0.8),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            topRight: Radius.circular(12),
-                            bottomLeft: Radius.circular(4),
-                            bottomRight: Radius.circular(4),
-                          ),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
-                            width: 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            ingredient,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black.withOpacity(0.5),
-                                  blurRadius: 2,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            }).toList(),
-          // Empty bowl message
-          if (_addedIngredients.isEmpty)
-            Positioned(
-              bottom: 90,
-              child: Text(
-                "Empty Bowl",
-                style: TextStyle(
-                  color: Colors.brown.shade700,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  shadows: [
-                    Shadow(
-                      color: Colors.white.withOpacity(0.8),
-                      blurRadius: 4,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
+  Color _getBlendedMixtureColor() {
+    if (_addedIngredients.isEmpty) return Colors.transparent;
+    Color blended = _getIngredientColor(_addedIngredients.first);
+    for (int i = 1; i < _addedIngredients.length; i++) {
+      blended = Color.lerp(
+        blended,
+        _getIngredientColor(_addedIngredients[i]),
+        0.3,
+      )!;
+    }
+    return blended;
+  }
+
+  Widget _buildPanIllustration() {
+    return SizedBox(
+      width: 160,
+      height: 100,
+      child: CustomPaint(
+        painter: PanPainter(),
       ),
+    );
+  }
+
+  Widget _buildOvenIllustration(String variant) {
+    return SizedBox(
+      width: 170,
+      height: 120,
+      child: CustomPaint(
+        painter: OvenPainter(variant: variant),
+      ),
+    );
+  }
+
+  Widget _buildHummusCupIllustration() {
+    return SizedBox(
+      width: 120,
+      height: 100,
+      child: CustomPaint(
+        painter: HummusCupPainter(),
+      ),
+    );
+  }
+
+  Widget _buildSmoothieGlassIllustration() {
+    return SizedBox(
+      width: 100,
+      height: 120,
+      child: CustomPaint(
+        painter: SmoothieGlassPainter(),
+      ),
+    );
+  }
+
+  Widget _buildCompletionVisual(String visualType) {
+    switch (visualType) {
+      case 'pan':
+        return _buildPanIllustration();
+      case 'oven_cookies':
+        return _buildOvenIllustration('cookies');
+      case 'oven_cake':
+        return _buildOvenIllustration('cake');
+      case 'cup_hummus':
+        return _buildHummusCupIllustration();
+      case 'glass_smoothie':
+        return _buildSmoothieGlassIllustration();
+      default:
+        return _buildPanIllustration();
+    }
+  }
+
+  Widget _buildBowl() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 220,
+          height: 220,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              Positioned(
+                bottom: 0,
+                child: Container(
+                  width: 200,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 5,
+                left: 10,
+                right: 10,
+                child: CustomPaint(
+                  size: const Size(200, 180),
+                  painter: BowlPainter(),
+                ),
+              ),
+              if (_addedIngredients.isNotEmpty)
+                Positioned(
+                  bottom: 5,
+                  left: 10,
+                  right: 10,
+                  child: AnimatedBuilder(
+                    animation: _ingredientScaleAnimation,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale: _ingredientScaleAnimation.value,
+                        alignment: Alignment.bottomCenter,
+                        child: CustomPaint(
+                          size: const Size(200, 180),
+                          painter: BowlContentsPainter(
+                            fillHeight: (_addedIngredients.length * 25.0).clamp(0.0, 176.0),
+                            fillColor: _getBlendedMixtureColor(),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              if (_addedIngredients.isEmpty)
+                Positioned(
+                  bottom: 90,
+                  child: Text(
+                    "Empty Bowl",
+                    style: TextStyle(
+                      color: Colors.brown.shade700,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          color: Colors.white.withOpacity(0.8),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        if (_addedIngredients.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 4,
+            runSpacing: 4,
+            children: _addedIngredients.map((ing) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.brown.shade300.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                ing,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            )).toList(),
+          ),
+        ],
+      ],
     );
   }
 
@@ -1153,103 +1044,4 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
       ),
     );
   }
-}
-
-// Custom painter for U-shape bowl cross-section
-class BowlPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Create gradient shader
-    final gradient = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        Colors.brown.shade300,
-        Colors.brown.shade600,
-      ],
-    );
-    
-    final paint = Paint()
-      ..style = PaintingStyle.fill
-      ..shader = gradient.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-    
-    final path = Path();
-    // Create U-shape: wider at top, narrower at bottom
-    double topWidth = size.width;
-    double bottomWidth = size.width * 0.6; // 60% of top width
-    double height = size.height;
-    double leftStart = (size.width - topWidth) / 2;
-    double rightStart = (size.width + topWidth) / 2;
-    double leftBottom = (size.width - bottomWidth) / 2;
-    double rightBottom = (size.width + bottomWidth) / 2;
-    
-    // Start at top-left
-    path.moveTo(leftStart, 0);
-    
-    // Left side (curved inward)
-    path.quadraticBezierTo(
-      leftStart + (leftBottom - leftStart) * 0.5,
-      height * 0.3,
-      leftBottom,
-      height,
-    );
-    
-    // Bottom (flat)
-    path.lineTo(rightBottom, height);
-    
-    // Right side (curved outward)
-    path.quadraticBezierTo(
-      rightBottom + (rightStart - rightBottom) * 0.5,
-      height * 0.3,
-      rightStart,
-      0,
-    );
-    
-    // Top rim (flat)
-    path.lineTo(leftStart, 0);
-    path.close();
-    
-    canvas.drawPath(path, paint);
-    
-    // Rim highlight (outer border)
-    final rimPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..color = Colors.brown.shade800
-      ..strokeWidth = 3;
-    canvas.drawPath(path, rimPaint);
-    
-    // Inner highlight for depth
-    final innerPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..color = Colors.brown.shade200.withOpacity(0.5)
-      ..strokeWidth = 1;
-    
-    final innerPath = Path();
-    double innerTopWidth = topWidth * 0.95;
-    double innerBottomWidth = bottomWidth * 0.95;
-    double innerLeftStart = (size.width - innerTopWidth) / 2;
-    double innerRightStart = (size.width + innerTopWidth) / 2;
-    double innerLeftBottom = (size.width - innerBottomWidth) / 2;
-    double innerRightBottom = (size.width + innerBottomWidth) / 2;
-    
-    innerPath.moveTo(innerLeftStart, 2);
-    innerPath.quadraticBezierTo(
-      innerLeftStart + (innerLeftBottom - innerLeftStart) * 0.5,
-      height * 0.3,
-      innerLeftBottom,
-      height - 2,
-    );
-    innerPath.lineTo(innerRightBottom, height - 2);
-    innerPath.quadraticBezierTo(
-      innerRightBottom + (innerRightStart - innerRightBottom) * 0.5,
-      height * 0.3,
-      innerRightStart,
-      2,
-    );
-    innerPath.lineTo(innerLeftStart, 2);
-    canvas.drawPath(innerPath, innerPaint);
-  }
-  
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
