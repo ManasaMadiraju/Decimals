@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:decimals/selection_pages/GameSelectionDialog.dart';
 import 'package:decimals/screens/games/chef_game/data/chef_game_data.dart';
 import 'package:decimals/screens/games/chef_game/models/recipe.dart';
@@ -30,6 +31,23 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
   late AnimationController _ingredientAnimationController;
   late Animation<double> _ingredientScaleAnimation;
   List<String> _addedIngredients = [];
+  List<String> _shuffledScaledOptions = [];
+  late AnimationController _entranceController;
+  final List<Animation<double>> _entranceAnimations = [];
+  int _pressedChoiceIndex = -1;
+  late AnimationController _correctPulseController;
+  late Animation<double> _correctPulseAnimation;
+  late AnimationController _wrongShakeController;
+  int _wrongShakeIndex = -1;
+  bool _allCompleteDialogShown = false;
+
+  static const String _decimalChef = 'Decimal Chef!';
+  static const String _score = 'Score';
+  static const String _bestScore = 'Best Score';
+  static const String _listen = 'Listen';
+  static const String _emptyBowl = 'Empty Bowl';
+  static const String _step = 'Step';
+  static const String _of = 'of';
 
   final Map<String, String> originalTexts = {
     'heading': 'Let\'s cook with decimals!',
@@ -54,6 +72,34 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
         curve: Curves.elasticOut,
       ),
     );
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    for (int i = 0; i < 4; i++) {
+      _entranceAnimations.add(
+        Tween<double>(begin: 0.0, end: 1.0).animate(
+          CurvedAnimation(
+            parent: _entranceController,
+            curve: Interval(i * 0.2, 0.2 + i * 0.2, curve: Curves.easeOut),
+          ),
+        ),
+      );
+    }
+    _correctPulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _correctPulseAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(
+      CurvedAnimation(
+        parent: _correctPulseController,
+        curve: Curves.elasticOut,
+      ),
+    );
+    _wrongShakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
   }
 
   @override
@@ -61,13 +107,16 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     _audioPlayer.dispose();
     _flutterTts.stop();
     _ingredientAnimationController.dispose();
+    _entranceController.dispose();
+    _correctPulseController.dispose();
+    _wrongShakeController.dispose();
     super.dispose();
   }
 
   Future<void> _speak(String text) async {
     await _flutterTts.stop();
-    await _flutterTts.setLanguage("en-US");
-    await _flutterTts.setPitch(1.3);
+    await _flutterTts.setLanguage(translated ? "es-ES" : "en-US");
+    await _flutterTts.setPitch(1);
     await _flutterTts.setSpeechRate(1);
     await _flutterTts.speak(text);
   }
@@ -114,25 +163,34 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
   }
 
   Future<void> _speakRecipeStep(CookingStep step) async {
-    String scaledQuestion = _scaleAllDecimalsInText(step.question);
-    String instruction = step.instruction + ". " + scaledQuestion;
-    String options = "Your options are: ";
-    for (String option in step.options) {
-      if (option.contains('.') && option.split('.').length == 2) {
-        try {
-          double? value = double.tryParse(option.split(' ')[0]);
-          if (value != null) {
-            double scaledValue = _getScaledMeasurement(value);
-            String unit = option.contains('cup') ? 'cup' : (option.contains('tsp') ? 'tsp' : '');
-            options += "${pronounceDecimal(scaledValue)} $unit, ";
-          } else {
+    String instruction;
+    String options;
+    if (translated && translatedTexts.isNotEmpty) {
+      instruction = '${translatedTexts['current_instruction'] ?? step.instruction}. ${translatedTexts['current_question'] ?? _scaleAllDecimalsInText(step.question)}';
+      final prompt = translatedTexts['options_prompt'] ?? _optionsPrompt;
+      options = prompt +
+          [0, 1, 2, 3].map((i) => translatedTexts['option_$i'] ?? '').where((s) => s.isNotEmpty).join(', ');
+    } else {
+      String scaledQuestion = _scaleAllDecimalsInText(step.question);
+      instruction = step.instruction + ". " + scaledQuestion;
+      options = _optionsPrompt;
+      for (String option in step.options) {
+        if (option.contains('.') && option.split('.').length == 2) {
+          try {
+            double? value = double.tryParse(option.split(' ')[0]);
+            if (value != null) {
+              double scaledValue = _getScaledMeasurement(value);
+              String unit = option.contains('cup') ? 'cup' : (option.contains('tsp') ? 'tsp' : '');
+              options += "${pronounceDecimal(scaledValue)} $unit, ";
+            } else {
+              options += "$option, ";
+            }
+          } catch (e) {
             options += "$option, ";
           }
-        } catch (e) {
+        } else {
           options += "$option, ";
         }
-      } else {
-        options += "$option, ";
       }
     }
     await _speak(instruction + ". " + options);
@@ -150,13 +208,6 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     return baseMeasurement; // Always return base value for 1 person
   }
 
-  String _formatMeasurement(double measurement) {
-    if (measurement == measurement.toInt()) {
-      return measurement.toInt().toString();
-    }
-    return measurement.toStringAsFixed(measurement < 1 ? 2 : 1);
-  }
-
   String _scaleAllDecimalsInText(String text) {
     return text; // No scaling needed for 1 person
   }
@@ -170,20 +221,59 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     }
   }
 
+  List<String> _buildShuffledScaledOptionsForCurrentStep() {
+    if (currentRecipeIndex >= recipes.length) return [];
+    final step = recipes[currentRecipeIndex].steps[currentStepIndex];
+    final scaled = step.options.map((o) => _scaleSingleOption(o)).toList();
+    scaled.shuffle(Random());
+    return scaled;
+  }
+
   void _selectRecipe(int recipeIndex) {
     setState(() {
       currentRecipeIndex = recipeIndex;
       currentStepIndex = 0;
       _showRecipeSelection = false;
       _addedIngredients = [];
+      _shuffledScaledOptions = _buildShuffledScaledOptionsForCurrentStep();
+      _entranceController.reset();
+      _entranceController.forward();
     });
-    String intro = "Let's make ${recipes[recipeIndex].name}! ${recipes[recipeIndex].description}";
+    String intro = "Let's make ${recipes[recipeIndex].name}!";
     _speak(intro);
+    if (translated) {
+      _refetchTranslationsForCurrentStep();
+    }
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         _speakCurrentStep();
       }
     });
+  }
+
+  /// Re-fetches translations for the current step and updates [translatedTexts]. Keeps [translated] true.
+  Future<void> _refetchTranslationsForCurrentStep() async {
+    final keys = <String>[];
+    final values = <String>[];
+    _buildTranslationPayload(keys, values);
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/translate'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'texts': values}),
+      );
+      if (response.statusCode == 200 && mounted) {
+        final data = jsonDecode(response.body);
+        final translations = List<String>.from(data['translations'] as List);
+        if (translations.length == keys.length) {
+          setState(() {
+            translatedTexts = {for (int i = 0; i < keys.length; i++) keys[i]: translations[i]};
+          });
+        }
+      }
+    } catch (_) {
+      // Keep existing translatedTexts; new step may show mixed until next manual translate
+    }
   }
 
   Future<void> _loadBestScore() async {
@@ -214,83 +304,113 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     Navigator.popUntil(context, (route) => route.isFirst);
   }
 
+  static const String _optionsPrompt = 'Your options are: ';
+
+  /// Builds ordered [keys] and [values] for the current game screen for translation.
+  void _buildTranslationPayload(List<String> keys, List<String> values) {
+    keys.addAll([
+      'decimal_chef', 'score', 'best_score', 'listen', 'empty_bowl', 'step', 'of', 'heading',
+      'options_prompt',
+      'recipe_name', 'current_instruction', 'current_question',
+      'option_0', 'option_1', 'option_2', 'option_3',
+    ]);
+    final recipe = recipes[currentRecipeIndex];
+    final step = recipe.steps[currentStepIndex];
+    final scaledQuestion = _scaleAllDecimalsInText(step.question);
+    final displayOpts = _shuffledScaledOptions.length == step.options.length
+        ? _shuffledScaledOptions
+        : step.options.map((o) => _scaleSingleOption(o)).toList();
+    values.addAll([
+      _decimalChef, _score, _bestScore, _listen, _emptyBowl, _step, _of, originalTexts['heading']!,
+      _optionsPrompt,
+      recipe.name, step.instruction, scaledQuestion,
+      displayOpts.length > 0 ? displayOpts[0] : '', displayOpts.length > 1 ? displayOpts[1] : '',
+      displayOpts.length > 2 ? displayOpts[2] : '', displayOpts.length > 3 ? displayOpts[3] : '',
+    ]);
+    for (int i = 0; i < _addedIngredients.length; i++) {
+      keys.add('ingredient_$i');
+      values.add(_addedIngredients[i]);
+    }
+  }
+
   Future<void> translateTexts() async {
     if (!translated) {
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/translate'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'texts': originalTexts.values.toList()}),
-      );
+      final keys = <String>[];
+      final values = <String>[];
+      _buildTranslationPayload(keys, values);
+      try {
+        final response = await http.post(
+          Uri.parse('http://localhost:3000/translate'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'texts': values}),
+        );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          translatedTexts = {
-            for (int i = 0; i < originalTexts.keys.length; i++)
-              originalTexts.keys.elementAt(i): data['translations'][i]
-          };
-          translated = true;
-        });
-      } else {
-        print('Failed to fetch translations: ${response.statusCode}');
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final translations = List<String>.from(data['translations'] as List);
+          if (mounted && translations.length == keys.length) {
+            setState(() {
+              translatedTexts = {for (int i = 0; i < keys.length; i++) keys[i]: translations[i]};
+              translated = true;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Translated to Spanish')),
+            );
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Translation failed: ${response.statusCode}')),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Translation unavailable. Start the backend server (see README).'),
+            ),
+          );
+        }
       }
     } else {
       setState(() {
         translatedTexts.clear();
         translated = false;
       });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Switched back to English')),
+        );
+      }
     }
   }
 
   void _nextStep() {
+    final didAdvance = currentStepIndex < recipes[currentRecipeIndex].steps.length - 1;
     setState(() {
       selectedAnswer = '';
       feedbackText = '';
-      if (currentStepIndex < recipes[currentRecipeIndex].steps.length - 1) {
+      if (didAdvance) {
         currentStepIndex++;
-        _speakCurrentStep();
+        _shuffledScaledOptions = _buildShuffledScaledOptionsForCurrentStep();
+        _entranceController.reset();
+        _entranceController.forward();
+        _correctPulseController.reset();
       } else {
         _showRecipeCompleteDialog();
       }
     });
-  }
-
-  String _getScaledOption(String baseOption, List<String> baseOptions) {
-    int index = baseOptions.indexOf(baseOption);
-    if (index == -1) {
-      if (baseOption.contains('.') && baseOption.split('.').length == 2) {
-        try {
-          double? value = double.tryParse(baseOption.split(' ')[0]);
-          if (value != null) {
-            double scaledValue = _getScaledMeasurement(value);
-            String unit = baseOption.contains('cup')
-                ? 'cup'
-                : (baseOption.contains('tsp') ? 'tsp' : '');
-            return "${_formatMeasurement(scaledValue)} $unit";
-          }
-        } catch (e) {
-          // Keep original if parsing fails
-        }
-      }
-      return baseOption;
-    }
-
-    String option = baseOptions[index];
-    if (option.contains('.') && option.split('.').length == 2) {
-      try {
-        double? value = double.tryParse(option.split(' ')[0]);
-        if (value != null) {
-          double scaledValue = _getScaledMeasurement(value);
-          String unit = option.contains('cup')
-              ? 'cup'
-              : (option.contains('tsp') ? 'tsp' : '');
-          return "${_formatMeasurement(scaledValue)} $unit";
-        }
-      } catch (e) {
-        // Keep original if parsing fails
+    if (didAdvance) {
+      if (translated) {
+        // Fetch new step's translations first, then speak so we don't speak the old question.
+        _refetchTranslationsForCurrentStep().then((_) {
+          if (mounted) _speakCurrentStep();
+        });
+      } else {
+        _speakCurrentStep();
       }
     }
-    return option;
   }
 
   String _scaleSingleOption(String option) {
@@ -314,6 +434,9 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
         _saveBestScore(score);
         _addedIngredients.add(currentStep.ingredient);
       });
+      _correctPulseController.forward(from: 0).then((_) {
+        _correctPulseController.reverse();
+      });
       _ingredientAnimationController.forward().then((_) {
         _ingredientAnimationController.reverse();
       });
@@ -326,21 +449,27 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     } else {
       await _playSound('sounds/error.mp3');
       await _speak("Try again!");
+      final wrongIndex = _shuffledScaledOptions.indexOf(scaledAnswer);
       setState(() {
         feedbackText = "Try again!";
+        _wrongShakeIndex = wrongIndex >= 0 ? wrongIndex : -1;
       });
+      if (_wrongShakeIndex >= 0) {
+        _wrongShakeController.forward(from: 0);
+      }
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
           setState(() {
             feedbackText = '';
             selectedAnswer = '';
+            _wrongShakeIndex = -1;
           });
         }
       });
     }
   }
 
-  void _showRecipeCompleteDialog() {
+  Future<void> _showRecipeCompleteDialog() async {
     final String recipeName = recipes[currentRecipeIndex].name;
     final String message = "Amazing! You completed the $recipeName recipe!";
     _speak(message);
@@ -350,143 +479,205 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
         if (mounted) _speak(completionData.message);
       });
     }
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (!mounted) return;
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          backgroundColor: const Color(0xFFFFFBF7),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.celebration, color: Colors.orange.shade700, size: 28),
-              const SizedBox(width: 10),
-              const Text(
-                'Recipe Complete!',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF5D4037),
-                ),
-              ),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  message,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF4E342E),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                _buildBowl(),
-                const SizedBox(height: 20),
-                if (completionData != null) ...[
-                  Divider(height: 28, color: Colors.brown.shade200, thickness: 1),
-                  Text(
-                    completionData.message,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.brown.shade800,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.grey.shade100,
-                            Colors.grey.shade200,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.brown.withValues(alpha: 0.15),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: _buildCompletionVisual(completionData.visualType),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.amber.shade200, width: 1),
-                  ),
-                  child: Text(
-                    'Score: $score',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.brown.shade800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0, right: 8.0),
-              child: ElevatedButton.icon(
-                onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
-                icon: const Icon(Icons.home_rounded, size: 20),
-                label: const Text('Home'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange.shade700,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+
+    String dialogTitle = 'Recipe Complete!';
+    String dialogMessage = message;
+    String dialogStatus = completionData?.message ?? '';
+    String scoreLabel = 'Score';
+    String homeLabel = 'Home';
+
+    if (translated) {
+      final toTranslate = <String>[dialogTitle, dialogMessage];
+      if (completionData != null) toTranslate.add(dialogStatus);
+      toTranslate.addAll([scoreLabel, homeLabel]);
+      try {
+        final response = await http.post(
+          Uri.parse('http://localhost:3000/translate'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'texts': toTranslate}),
+        );
+        if (response.statusCode == 200 && mounted) {
+          final data = jsonDecode(response.body);
+          final t = List<String>.from(data['translations'] as List);
+          if (t.length == toTranslate.length) {
+            dialogTitle = t[0];
+            dialogMessage = t[1];
+            int i = 2;
+            if (completionData != null) {
+              dialogStatus = t[i++];
+            }
+            scoreLabel = t[i++];
+            homeLabel = t[i];
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFFFFFBF7),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.celebration, color: Colors.orange.shade700, size: 28),
+            const SizedBox(width: 10),
+            Text(
+              dialogTitle,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF5D4037),
               ),
             ),
           ],
         ),
-      );
-    });
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                dialogMessage,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF4E342E),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              _buildBowl(),
+              const SizedBox(height: 20),
+              if (completionData != null) ...[
+                Divider(height: 28, color: Colors.brown.shade200, thickness: 1),
+                Text(
+                  dialogStatus,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.brown.shade800,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.grey.shade100,
+                          Colors.grey.shade200,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.brown.withValues(alpha: 0.15),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: _buildCompletionVisual(completionData.visualType),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.amber.shade200, width: 1),
+                ),
+                child: Text(
+                  '$scoreLabel: $score',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.brown.shade800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0, right: 8.0),
+            child: ElevatedButton.icon(
+              onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
+              icon: const Icon(Icons.home_rounded, size: 20),
+              label: Text(homeLabel),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange.shade700,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  void _showAllRecipesCompleteDialog() {
+  Future<void> _showAllRecipesCompleteDialog() async {
     String message = "Congratulations! You completed all recipes!";
     _speak(message);
+
+    String dialogTitle = 'All Recipes Complete!';
+    String dialogMessage = message;
+    String finalScoreLabel = 'Final Score';
+    String homeLabel = 'Home';
+
+    if (translated) {
+      try {
+        final response = await http.post(
+          Uri.parse('http://localhost:3000/translate'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'texts': [dialogTitle, dialogMessage, finalScoreLabel, homeLabel],
+          }),
+        );
+        if (response.statusCode == 200 && mounted) {
+          final data = jsonDecode(response.body);
+          final t = List<String>.from(data['translations'] as List);
+          if (t.length >= 4) {
+            dialogTitle = t[0];
+            dialogMessage = t[1];
+            finalScoreLabel = t[2];
+            homeLabel = t[3];
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (!mounted) return;
     Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Text('All Recipes Complete!'),
+          title: Text(dialogTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                message,
+                dialogMessage,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -497,7 +688,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
               _buildBowl(),
               const SizedBox(height: 20),
               Text(
-                'Final Score: $score',
+                '$finalScoreLabel: $score',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -508,7 +699,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
           actions: [
             TextButton(
               onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
-              child: const Text('Home'),
+              child: Text(homeLabel),
             ),
           ],
         ),
@@ -685,7 +876,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                 Positioned(
                   bottom: 90,
                   child: Text(
-                    "Empty Bowl",
+                    translated ? (translatedTexts['empty_bowl'] ?? _emptyBowl) : _emptyBowl,
                     style: TextStyle(
                       color: Colors.brown.shade700,
                       fontSize: 18,
@@ -708,21 +899,24 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
             alignment: WrapAlignment.center,
             spacing: 4,
             runSpacing: 4,
-            children: _addedIngredients.map((ing) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.brown.shade300.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                ing,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+            children: _addedIngredients.asMap().entries.map((e) {
+              final label = translated ? (translatedTexts['ingredient_${e.key}'] ?? e.value) : e.value;
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.brown.shade300.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ),
-            )).toList(),
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ],
       ],
@@ -824,6 +1018,51 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     );
   }
 
+  Widget _buildChoiceWithFeedback({
+    required int choiceIndex,
+    required String choiceLabel,
+    required List<String> displayOptions,
+    required CookingStep currentStep,
+    required double pulseScale,
+    required double shakeOffsetX,
+  }) {
+    final i = choiceIndex;
+    Widget child = Transform.scale(
+      scale: _pressedChoiceIndex == i ? 0.96 : 1.0,
+      child: GestureDetector(
+        onTapDown: (_) {
+          if (selectedAnswer.isEmpty) {
+            setState(() => _pressedChoiceIndex = i);
+          }
+        },
+        onTapUp: (_) => setState(() => _pressedChoiceIndex = -1),
+        onTapCancel: () => setState(() => _pressedChoiceIndex = -1),
+        child: _ChefChoiceButton(
+          label: choiceLabel,
+          isCorrect: selectedAnswer.isNotEmpty &&
+              displayOptions[i] == currentStep.correctAnswer,
+          isWrong: selectedAnswer == displayOptions[i] &&
+              displayOptions[i] != currentStep.correctAnswer,
+          isDisabled: selectedAnswer.isNotEmpty,
+          onTap: selectedAnswer.isEmpty
+              ? () => checkAnswer(displayOptions[i], displayOptions[i])
+              : null,
+        ),
+      ),
+    );
+    if (selectedAnswer.isNotEmpty &&
+        displayOptions[i] == currentStep.correctAnswer) {
+      child = Transform.scale(scale: pulseScale, child: child);
+    }
+    if (i == _wrongShakeIndex) {
+      child = Transform.translate(
+        offset: Offset(shakeOffsetX, 0),
+        child: child,
+      );
+    }
+    return child;
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -833,6 +1072,12 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     }
 
     if (currentRecipeIndex >= recipes.length) {
+      if (!_allCompleteDialogShown) {
+        _allCompleteDialogShown = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _showAllRecipesCompleteDialog();
+        });
+      }
       return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.green,
@@ -847,18 +1092,20 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     final currentRecipe = recipes[currentRecipeIndex];
     final currentStep = currentRecipe.steps[currentStepIndex];
     String scaledQuestion = _scaleAllDecimalsInText(currentStep.question);
-    List<String> scaledOptions = currentStep.options.map((option) {
-      return _scaleSingleOption(option);
-    }).toList();
+    final List<String> displayOptions = _shuffledScaledOptions.length == currentStep.options.length
+        ? _shuffledScaledOptions
+        : currentStep.options.map((o) => _scaleSingleOption(o)).toList();
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
         title: RichText(
           text: TextSpan(style: const TextStyle(fontSize: 24), children: [
-            const TextSpan(text: "Decimal Chef! "),
             TextSpan(
-              text: "Score: $score",
+              text: '${translated ? (translatedTexts['decimal_chef'] ?? _decimalChef) : _decimalChef} ',
+            ),
+            TextSpan(
+              text: '${translated ? (translatedTexts['score'] ?? _score) : _score}: $score',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ]),
@@ -870,7 +1117,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
         ),
         actions: [
           Text(
-            "Best Score: $bestScore",
+            '${translated ? (translatedTexts['best_score'] ?? _bestScore) : _bestScore}: $bestScore',
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           Padding(padding: const EdgeInsets.all(5.0)),
@@ -902,7 +1149,19 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                   child: Column(
                     children: [
                       Text(
-                        currentRecipe.name,
+                        translated
+                            ? (translatedTexts['heading'] ?? originalTexts['heading']!)
+                            : originalTexts['heading']!,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.brown.shade700,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        translated ? (translatedTexts['recipe_name'] ?? currentRecipe.name) : currentRecipe.name,
                         style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -912,7 +1171,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        "Step ${currentStepIndex + 1} of ${currentRecipe.steps.length}",
+                        '${translated ? (translatedTexts['step'] ?? _step) : _step} ${currentStepIndex + 1} ${translated ? (translatedTexts['of'] ?? _of) : _of} ${currentRecipe.steps.length}',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -922,53 +1181,104 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                       _buildBowl(),
                       const SizedBox(height: 20),
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(15),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.amber.shade50,
+                              Colors.orange.shade50,
+                              Colors.amber.shade100,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: Colors.orange.shade200,
+                            width: 2,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 5,
-                              spreadRadius: 1,
+                              color: Colors.orange.withOpacity(0.2),
+                              blurRadius: 12,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
                         child: Column(
                           children: [
-                            Text(
-                              currentStep.instruction,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              scaledQuestion,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  onPressed: _speakCurrentStep,
-                                  icon: const Icon(Icons.volume_up),
-                                  iconSize: 32,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.orange,
-                                    foregroundColor: Colors.white,
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade100,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border(
+                                  left: BorderSide(
+                                    color: Colors.orange.shade700,
+                                    width: 4,
                                   ),
                                 ),
-                              ],
+                              ),
+                              child: Text(
+                                translated ? (translatedTexts['current_instruction'] ?? currentStep.instruction) : currentStep.instruction,
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.shade900,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            Text(
+                              translated ? (translatedTexts['current_question'] ?? scaledQuestion) : scaledQuestion,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF3E2723),
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.white54,
+                                    offset: Offset(0, 1),
+                                    blurRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 14),
+                            Material(
+                              color: Colors.orange.shade400,
+                              borderRadius: BorderRadius.circular(28),
+                              elevation: 2,
+                              child: InkWell(
+                                onTap: _speakCurrentStep,
+                                borderRadius: BorderRadius.circular(28),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.volume_up,
+                                        size: 28,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        translated ? (translatedTexts['listen'] ?? _listen) : _listen,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -976,12 +1286,28 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                       if (feedbackText.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 16.0),
-                          child: Text(
-                            feedbackText,
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: feedbackText == "Correct!" ? Colors.green : Colors.red,
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 200),
+                            opacity: 1,
+                            child: TweenAnimationBuilder<double>(
+                              key: ValueKey(feedbackText),
+                              tween: Tween(begin: 0.8, end: 1.0),
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.elasticOut,
+                              builder: (context, scale, child) => Transform.scale(
+                                scale: scale,
+                                child: child,
+                              ),
+                              child: Text(
+                                feedbackText,
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: feedbackText == "Correct!"
+                                      ? Colors.green
+                                      : Colors.red,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -992,47 +1318,51 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                   child: SingleChildScrollView(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        children: [
-                          for (int i = 0; i < scaledOptions.length; i++)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0),
-                              child: SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: selectedAnswer.isEmpty
-                                      ? () => checkAnswer(scaledOptions[i], currentStep.options[i])
-                                      : null,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: selectedAnswer.isEmpty
-                                        ? Colors.orange
-                                        : scaledOptions[i] == currentStep.correctAnswer
-                                            ? Colors.green
-                                            : selectedAnswer == scaledOptions[i]
-                                                ? Colors.red
-                                                : Colors.grey,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                      horizontal: 20,
+                      child: AnimatedBuilder(
+                        animation: Listenable.merge([
+                          _entranceController,
+                          _correctPulseController,
+                          _wrongShakeController,
+                        ]),
+                        builder: (context, child) {
+                          final pulseScale = selectedAnswer.isNotEmpty
+                              ? _correctPulseAnimation.value
+                              : 1.0;
+                          final shakeX = _wrongShakeIndex >= 0
+                              ? 6 * sin(4 * pi * _wrongShakeController.value)
+                              : 0.0;
+                          return Column(
+                            children: [
+                              for (int i = 0; i < displayOptions.length; i++)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Transform.translate(
+                                    offset: Offset(
+                                      0,
+                                      24 * (1 - (i < _entranceAnimations.length
+                                          ? _entranceAnimations[i].value
+                                          : 1.0)),
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
+                                    child: Opacity(
+                                      opacity: i < _entranceAnimations.length
+                                          ? _entranceAnimations[i].value
+                                          : 1.0,
+                                      child: _buildChoiceWithFeedback(
+                                        choiceIndex: i,
+                                        choiceLabel: translated
+                                            ? (translatedTexts['option_$i'] ?? displayOptions[i])
+                                            : displayOptions[i],
+                                        displayOptions: displayOptions,
+                                        currentStep: currentStep,
+                                        pulseScale: pulseScale,
+                                        shakeOffsetX: shakeX,
+                                      ),
                                     ),
-                                    minimumSize: const Size(0, 60),
-                                  ),
-                                  child: Text(
-                                    scaledOptions[i],
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
                                   ),
                                 ),
-                              ),
-                            ),
-                        ],
+                            ],
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -1041,6 +1371,97 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ChefChoiceButton extends StatelessWidget {
+  const _ChefChoiceButton({
+    required this.label,
+    required this.isCorrect,
+    required this.isWrong,
+    required this.isDisabled,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isCorrect;
+  final bool isWrong;
+  final bool isDisabled;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Color> gradientColors;
+    final IconData? icon;
+    if (isCorrect) {
+      gradientColors = [Colors.green.shade400, Colors.green.shade700];
+      icon = Icons.check_circle;
+    } else if (isWrong) {
+      gradientColors = [Colors.red.shade400, Colors.red.shade700];
+      icon = Icons.cancel;
+    } else if (isDisabled) {
+      gradientColors = [Colors.grey.shade400, Colors.grey.shade600];
+      icon = null;
+    } else {
+      gradientColors = [Colors.orange.shade400, Colors.deepOrange.shade600];
+      icon = Icons.restaurant;
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      height: 64,
+      child: Material(
+        borderRadius: BorderRadius.circular(24),
+        elevation: 4,
+        shadowColor: (isCorrect ? Colors.green : isWrong ? Colors.red : Colors.orange)
+            .withOpacity(0.4),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  gradientColors[0],
+                  gradientColors[1],
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.3),
+                  blurRadius: 2,
+                  offset: const Offset(0, -1),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, color: Colors.white, size: 28),
+                  const SizedBox(width: 12),
+                ],
+                Expanded(
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                if (icon != null && (isCorrect || isWrong)) const SizedBox(width: 40),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
