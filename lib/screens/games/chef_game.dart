@@ -3,6 +3,7 @@ import 'package:decimals/selection_pages/GameSelectionDialog.dart';
 import 'package:decimals/screens/games/chef_game/data/chef_game_data.dart';
 import 'package:decimals/screens/games/chef_game/models/recipe.dart';
 import 'package:decimals/screens/games/chef_game/painters/chef_game_painters.dart';
+import 'package:decimals/screens/games/chef_game/widgets/chef_game_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -39,7 +40,17 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
   late Animation<double> _correctPulseAnimation;
   late AnimationController _wrongShakeController;
   int _wrongShakeIndex = -1;
+  late AnimationController _correctSparkleController;
+  late Animation<double> _correctSparkleAnimation;
   bool _allCompleteDialogShown = false;
+  bool _isSpeaking = false;
+  String _currentSpokenText = '';
+  late AnimationController _chefMumbleController;
+  late Animation<double> _chefMumbleAnimation;
+  int _pressedRecipeIndex = -1;
+  bool _recipeEntranceStarted = false;
+  late AnimationController _recipeEntranceController;
+  final List<Animation<double>> _recipeEntranceAnimations = [];
 
   static const String _decimalChef = 'Decimal Chef!';
   static const String _score = 'Score';
@@ -100,6 +111,48 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
+    _correctSparkleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _correctSparkleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _correctSparkleController,
+        curve: Curves.easeOut,
+      ),
+    );
+    _chefMumbleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _chefMumbleAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(
+      CurvedAnimation(parent: _chefMumbleController, curve: Curves.easeInOut),
+    );
+    _flutterTts.setCompletionHandler(() {
+      if (mounted) {
+        _chefMumbleController.stop();
+        _chefMumbleController.reset();
+        setState(() {
+          _isSpeaking = false;
+          _currentSpokenText = '';
+        });
+      }
+    });
+    _recipeEntranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    final n = recipes.length;
+    for (int i = 0; i < n; i++) {
+      _recipeEntranceAnimations.add(
+        Tween<double>(begin: 0.0, end: 1.0).animate(
+          CurvedAnimation(
+            parent: _recipeEntranceController,
+            curve: Interval(i / n, (i + 1) / n, curve: Curves.easeOut),
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -110,11 +163,21 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     _entranceController.dispose();
     _correctPulseController.dispose();
     _wrongShakeController.dispose();
+    _correctSparkleController.dispose();
+    _chefMumbleController.dispose();
+    _recipeEntranceController.dispose();
     super.dispose();
   }
 
   Future<void> _speak(String text) async {
     await _flutterTts.stop();
+    if (mounted) {
+      setState(() {
+        _currentSpokenText = text;
+        _isSpeaking = true;
+      });
+      _chefMumbleController.repeat(reverse: true);
+    }
     await _flutterTts.setLanguage(translated ? "es-ES" : "en-US");
     await _flutterTts.setPitch(1);
     await _flutterTts.setSpeechRate(1);
@@ -212,8 +275,23 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     return text; // No scaling needed for 1 person
   }
 
-  void _speakCurrentStep() {
+  void _stopSpeaking() {
     _flutterTts.stop();
+    _chefMumbleController.stop();
+    _chefMumbleController.reset();
+    if (mounted) {
+      setState(() {
+        _isSpeaking = false;
+        _currentSpokenText = '';
+      });
+    }
+  }
+
+  void _speakCurrentStep() {
+    if (_isSpeaking) {
+      _stopSpeaking();
+      return;
+    }
     if (currentRecipeIndex < recipes.length &&
         currentStepIndex < recipes[currentRecipeIndex].steps.length) {
       CookingStep step = recipes[currentRecipeIndex].steps[currentStepIndex];
@@ -437,6 +515,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
       _correctPulseController.forward(from: 0).then((_) {
         _correctPulseController.reverse();
       });
+      _correctSparkleController.forward(from: 0);
       _ingredientAnimationController.forward().then((_) {
         _ingredientAnimationController.reverse();
       });
@@ -565,7 +644,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                 ),
                 const SizedBox(height: 16),
                 Center(
-                  child: Container(
+            child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -613,16 +692,40 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
         actions: [
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0, right: 8.0),
-            child: ElevatedButton.icon(
-              onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
-              icon: const Icon(Icons.home_rounded, size: 20),
-              label: Text(homeLabel),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange.shade700,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            child: Material(
+              borderRadius: BorderRadius.circular(24),
+              elevation: 4,
+              shadowColor: Colors.orange.withOpacity(0.4),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFFF9800), Color(0xFFE65100)],
+                  ),
+                ),
+                child: InkWell(
+                  onTap: () => Navigator.popUntil(context, (route) => route.isFirst),
+                  borderRadius: BorderRadius.circular(24),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.home_rounded, size: 22, color: Colors.white),
+                        const SizedBox(width: 10),
+                        Text(
+                          homeLabel,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -669,10 +772,18 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
+          backgroundColor: const Color(0xFFFFFBF7),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(24),
           ),
-          title: Text(dialogTitle),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.celebration, color: Colors.orange.shade700, size: 28),
+              const SizedBox(width: 10),
+              Flexible(child: Text(dialogTitle, textAlign: TextAlign.center)),
+            ],
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -697,9 +808,42 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
-              child: Text(homeLabel),
+            Material(
+              borderRadius: BorderRadius.circular(24),
+              elevation: 4,
+              shadowColor: Colors.orange.withOpacity(0.4),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFFF9800), Color(0xFFE65100)],
+                  ),
+                ),
+                child: InkWell(
+                  onTap: () => Navigator.popUntil(context, (route) => route.isFirst),
+                  borderRadius: BorderRadius.circular(24),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.home_rounded, size: 22, color: Colors.white),
+                        const SizedBox(width: 10),
+                        Text(
+                          homeLabel,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -925,6 +1069,15 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
 
   Widget _buildRecipeSelectionScreen() {
     final screenWidth = MediaQuery.of(context).size.width;
+    if (!_recipeEntranceStarted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _showRecipeSelection) {
+          _recipeEntranceController.reset();
+          _recipeEntranceController.forward();
+          setState(() => _recipeEntranceStarted = true);
+        }
+      });
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
@@ -968,45 +1121,46 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                         ),
                       ),
                       const SizedBox(height: 30),
-                      for (int i = 0; i < recipes.length; i++)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12.0),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () => _selectRecipe(i),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 20,
-                                  horizontal: 20,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    recipes[i].name,
-                                    style: const TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
+                      AnimatedBuilder(
+                        animation: _recipeEntranceController,
+                        builder: (context, child) {
+                          return Column(
+                            children: [
+                              for (int i = 0; i < recipes.length; i++)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                  child: Transform.translate(
+                                    offset: Offset(
+                                      0,
+                                      24 * (1 - (i < _recipeEntranceAnimations.length
+                                          ? _recipeEntranceAnimations[i].value
+                                          : 1.0)),
+                                    ),
+                                    child: Opacity(
+                                      opacity: i < _recipeEntranceAnimations.length
+                                          ? _recipeEntranceAnimations[i].value
+                                          : 1.0,
+                                      child: Transform.scale(
+                                        scale: _pressedRecipeIndex == i ? 0.96 : 1.0,
+                                        child: RecipeSelectionCard(
+                                          name: recipes[i].name,
+                                          description: recipes[i].description,
+                                          onTap: () => _selectRecipe(i),
+                                          onTapDown: () =>
+                                              setState(() => _pressedRecipeIndex = i),
+                                          onTapUp: () =>
+                                              setState(() => _pressedRecipeIndex = -1),
+                                          onTapCancel: () =>
+                                              setState(() => _pressedRecipeIndex = -1),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    recipes[i].description,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -1025,8 +1179,12 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     required CookingStep currentStep,
     required double pulseScale,
     required double shakeOffsetX,
+    required double sparkleValue,
+    required double wrongBorderValue,
   }) {
     final i = choiceIndex;
+    final isCorrect = selectedAnswer.isNotEmpty &&
+        displayOptions[i] == currentStep.correctAnswer;
     Widget child = Transform.scale(
       scale: _pressedChoiceIndex == i ? 0.96 : 1.0,
       child: GestureDetector(
@@ -1037,22 +1195,44 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
         },
         onTapUp: (_) => setState(() => _pressedChoiceIndex = -1),
         onTapCancel: () => setState(() => _pressedChoiceIndex = -1),
-        child: _ChefChoiceButton(
+        child: ChefChoiceButton(
           label: choiceLabel,
-          isCorrect: selectedAnswer.isNotEmpty &&
-              displayOptions[i] == currentStep.correctAnswer,
+          isCorrect: isCorrect,
           isWrong: selectedAnswer == displayOptions[i] &&
               displayOptions[i] != currentStep.correctAnswer,
           isDisabled: selectedAnswer.isNotEmpty,
+          wrongBorderValue: i == _wrongShakeIndex ? wrongBorderValue : 0.0,
           onTap: selectedAnswer.isEmpty
               ? () => checkAnswer(displayOptions[i], displayOptions[i])
               : null,
         ),
       ),
     );
-    if (selectedAnswer.isNotEmpty &&
-        displayOptions[i] == currentStep.correctAnswer) {
+    if (isCorrect) {
       child = Transform.scale(scale: pulseScale, child: child);
+      if (sparkleValue < 1.0) {
+        child = Stack(
+          clipBehavior: Clip.none,
+          children: [
+            child,
+            Positioned(
+              top: -4,
+              right: 12,
+              child: _buildSparkle(sparkleValue, 0.3),
+            ),
+            Positioned(
+              top: 8,
+              left: 8,
+              child: _buildSparkle(sparkleValue, 0.5),
+            ),
+            Positioned(
+              bottom: 4,
+              right: 24,
+              child: _buildSparkle(sparkleValue, 0.4),
+            ),
+          ],
+        );
+      }
     }
     if (i == _wrongShakeIndex) {
       child = Transform.translate(
@@ -1061,6 +1241,115 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
       );
     }
     return child;
+  }
+
+  Widget _buildSparkle(double value, double delay) {
+    final t = ((value - delay) / (1 - delay)).clamp(0.0, 1.0);
+    final opacity = (1 - t);
+    final scale = Curves.easeOut.transform(t);
+    return IgnorePointer(
+      child: Opacity(
+        opacity: opacity,
+        child: Transform.scale(
+          scale: scale,
+          child: Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.amber.shade100,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.amber.withOpacity(0.8),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChefWithCloud({
+    required bool isSpeaking,
+    required double mumbleScale,
+    required String spokenText,
+    required String chefExpression,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Transform.scale(
+          scale: mumbleScale,
+          alignment: Alignment.topLeft,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(44),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.orange.shade200.withOpacity(0.7),
+                  blurRadius: 14,
+                  spreadRadius: 3,
+                ),
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.85),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: ChefNarrator(size: 72, expression: chefExpression),
+          ),
+        ),
+        const SizedBox(width: 6),
+        if (isSpeaking && spokenText.isNotEmpty)
+          Expanded(child: SpeechCloud(text: spokenText))
+        else
+          const SizedBox.shrink(),
+      ],
+    );
+  }
+
+  Widget _buildStepProgressDots(int totalSteps) {
+    return AnimatedBuilder(
+      animation: _entranceController,
+      builder: (context, child) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(totalSteps, (index) {
+            final isCompleted = index < currentStepIndex;
+            final isCurrent = index == currentStepIndex;
+            final scale = isCurrent
+                ? 1.0 + 0.2 * (1.0 - Curves.easeOut.transform(_entranceController.value))
+                : 1.0;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Transform.scale(
+                scale: scale,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isCompleted || isCurrent
+                        ? Colors.orange.shade700
+                        : Colors.transparent,
+                    border: Border.all(
+                      color: isCompleted || isCurrent
+                          ? Colors.orange.shade700
+                          : Colors.orange.shade300,
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+        );
+      },
+    );
   }
 
   @override
@@ -1099,16 +1388,38 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: RichText(
-          text: TextSpan(style: const TextStyle(fontSize: 24), children: [
-            TextSpan(
-              text: '${translated ? (translatedTexts['decimal_chef'] ?? _decimalChef) : _decimalChef} ',
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              translated ? (translatedTexts['decimal_chef'] ?? _decimalChef) : _decimalChef,
+              style: const TextStyle(fontSize: 22),
             ),
-            TextSpan(
-              text: '${translated ? (translatedTexts['score'] ?? _score) : _score}: $score',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                '${translated ? (translatedTexts['score'] ?? _score) : _score}: $score',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2E7D32),
+                ),
+              ),
             ),
-          ]),
+          ],
         ),
         centerTitle: true,
         leading: IconButton(
@@ -1116,9 +1427,28 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
           onPressed: _navigateToCustomPage,
         ),
         actions: [
-          Text(
-            '${translated ? (translatedTexts['best_score'] ?? _bestScore) : _bestScore}: $bestScore',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Container(
+            margin: const EdgeInsets.only(top: 8, right: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Text(
+              '${translated ? (translatedTexts['best_score'] ?? _bestScore) : _bestScore}: $bestScore',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2E7D32),
+              ),
+            ),
           ),
           Padding(padding: const EdgeInsets.all(5.0)),
           IconButton(
@@ -1142,73 +1472,82 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
             ),
           ),
           SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        translated
-                            ? (translatedTexts['heading'] ?? originalTexts['heading']!)
-                            : originalTexts['heading']!,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.brown.shade700,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        translated ? (translatedTexts['recipe_name'] ?? currentRecipe.name) : currentRecipe.name,
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.brown,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        '${translated ? (translatedTexts['step'] ?? _step) : _step} ${currentStepIndex + 1} ${translated ? (translatedTexts['of'] ?? _of) : _of} ${currentRecipe.steps.length}',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      _buildBowl(),
-                      const SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Colors.amber.shade50,
-                              Colors.orange.shade50,
-                              Colors.amber.shade100,
-                            ],
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                          translated
+                              ? (translatedTexts['heading'] ?? originalTexts['heading']!)
+                              : originalTexts['heading']!,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.brown.shade700,
                           ),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: Colors.orange.shade200,
-                            width: 2,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          translated ? (translatedTexts['recipe_name'] ?? currentRecipe.name) : currentRecipe.name,
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.orange.withOpacity(0.2),
-                              blurRadius: 12,
-                              spreadRadius: 2,
-                              offset: const Offset(0, 4),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 10),
+                        Center(
+                          child: Text(
+                            '${translated ? (translatedTexts['step'] ?? _step) : _step} ${currentStepIndex + 1} ${translated ? (translatedTexts['of'] ?? _of) : _of} ${currentRecipe.steps.length}',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
                             ),
-                          ],
+                          ),
                         ),
-                        child: Column(
-                          children: [
-                            Container(
+                        const SizedBox(height: 8),
+                        Center(child: _buildStepProgressDots(currentRecipe.steps.length)),
+                        const SizedBox(height: 16),
+                        _buildBowl(),
+                        const SizedBox(height: 20),
+                        Center(
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(20),
+                                constraints: BoxConstraints(maxWidth: screenWidth * 0.85),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Colors.amber.shade50,
+                                      Colors.orange.shade50,
+                                      Colors.amber.shade100,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: Colors.orange.shade200,
+                                    width: 2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.orange.withOpacity(0.2),
+                                      blurRadius: 12,
+                                      spreadRadius: 2,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               decoration: BoxDecoration(
                                 color: Colors.orange.shade100,
@@ -1219,6 +1558,13 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                                     width: 4,
                                   ),
                                 ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.orange.withOpacity(0.15),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               child: Text(
                                 translated ? (translatedTexts['current_instruction'] ?? currentStep.instruction) : currentStep.instruction,
@@ -1283,7 +1629,10 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                           ],
                         ),
                       ),
-                      if (feedbackText.isNotEmpty)
+                        ],
+                      ),
+                        ),
+                        if (feedbackText.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 16.0),
                           child: AnimatedOpacity(
@@ -1311,25 +1660,27 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                             ),
                           ),
                         ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
+                        Expanded(
+                          child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: EdgeInsets.zero,
                       child: AnimatedBuilder(
                         animation: Listenable.merge([
                           _entranceController,
                           _correctPulseController,
+                          _correctSparkleController,
                           _wrongShakeController,
                         ]),
                         builder: (context, child) {
                           final pulseScale = selectedAnswer.isNotEmpty
                               ? _correctPulseAnimation.value
                               : 1.0;
+                          final sparkleValue = _correctSparkleAnimation.value;
                           final shakeX = _wrongShakeIndex >= 0
                               ? 6 * sin(4 * pi * _wrongShakeController.value)
+                              : 0.0;
+                          final wrongBorderValue = _wrongShakeIndex >= 0
+                              ? _wrongShakeController.value
                               : 0.0;
                           return Column(
                             children: [
@@ -1356,6 +1707,8 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                                         currentStep: currentStep,
                                         pulseScale: pulseScale,
                                         shakeOffsetX: shakeX,
+                                        sparkleValue: sparkleValue,
+                                        wrongBorderValue: wrongBorderValue,
                                       ),
                                     ),
                                   ),
@@ -1367,101 +1720,40 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                     ),
                   ),
                 ),
-              ],
+                      ],
+                    ),
+                  ),
+            ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: EdgeInsets.only(left: screenWidth * 0.02, top: 16),
+                child: SizedBox(
+                  width: screenWidth * 0.33,
+                  child: AnimatedBuilder(
+                    animation: _chefMumbleController,
+                    builder: (_, __) {
+                      final isCorrect = feedbackText == 'Correct!';
+                      final isWrong = feedbackText == 'Try again!';
+                      final chefExpression = isCorrect
+                          ? 'happy'
+                          : isWrong
+                              ? 'sad'
+                              : 'neutral';
+                      return _buildChefWithCloud(
+                        isSpeaking: _isSpeaking,
+                        mumbleScale: _isSpeaking ? _chefMumbleAnimation.value : 1.0,
+                        spokenText: _currentSpokenText,
+                        chefExpression: chefExpression,
+                      );
+                    },
+                  ),
+                ),
+              ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ChefChoiceButton extends StatelessWidget {
-  const _ChefChoiceButton({
-    required this.label,
-    required this.isCorrect,
-    required this.isWrong,
-    required this.isDisabled,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool isCorrect;
-  final bool isWrong;
-  final bool isDisabled;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final List<Color> gradientColors;
-    final IconData? icon;
-    if (isCorrect) {
-      gradientColors = [Colors.green.shade400, Colors.green.shade700];
-      icon = Icons.check_circle;
-    } else if (isWrong) {
-      gradientColors = [Colors.red.shade400, Colors.red.shade700];
-      icon = Icons.cancel;
-    } else if (isDisabled) {
-      gradientColors = [Colors.grey.shade400, Colors.grey.shade600];
-      icon = null;
-    } else {
-      gradientColors = [Colors.orange.shade400, Colors.deepOrange.shade600];
-      icon = Icons.restaurant;
-    }
-
-    return SizedBox(
-      width: double.infinity,
-      height: 64,
-      child: Material(
-        borderRadius: BorderRadius.circular(24),
-        elevation: 4,
-        shadowColor: (isCorrect ? Colors.green : isWrong ? Colors.red : Colors.orange)
-            .withOpacity(0.4),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(24),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  gradientColors[0],
-                  gradientColors[1],
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.white.withOpacity(0.3),
-                  blurRadius: 2,
-                  offset: const Offset(0, -1),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Row(
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, color: Colors.white, size: 28),
-                  const SizedBox(width: 12),
-                ],
-                Expanded(
-                  child: Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                if (icon != null && (isCorrect || isWrong)) const SizedBox(width: 40),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
