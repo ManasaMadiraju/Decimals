@@ -235,7 +235,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
           [0, 1, 2, 3].map((i) => translatedTexts['option_$i'] ?? '').where((s) => s.isNotEmpty).join(', ');
     } else {
       String scaledQuestion = _scaleAllDecimalsInText(step.question);
-      instruction = step.instruction + ". " + scaledQuestion;
+      instruction = "${step.instruction}. $scaledQuestion";
       options = _optionsPrompt;
       for (String option in step.options) {
         if (option.contains('.') && option.split('.').length == 2) {
@@ -256,7 +256,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
         }
       }
     }
-    await _speak(instruction + ". " + options);
+    await _speak("$instruction. $options");
   }
 
   Future<void> _playSound(String soundPath) async {
@@ -402,7 +402,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
       _decimalChef, _score, _bestScore, _listen, _emptyBowl, _step, _of, originalTexts['heading']!,
       _optionsPrompt,
       recipe.name, step.instruction, scaledQuestion,
-      displayOpts.length > 0 ? displayOpts[0] : '', displayOpts.length > 1 ? displayOpts[1] : '',
+      displayOpts.isNotEmpty ? displayOpts[0] : '', displayOpts.length > 1 ? displayOpts[1] : '',
       displayOpts.length > 2 ? displayOpts[2] : '', displayOpts.length > 3 ? displayOpts[3] : '',
     ]);
     for (int i = 0; i < _addedIngredients.length; i++) {
@@ -968,7 +968,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
+        SizedBox(
           width: 220,
           height: 220,
           child: Stack(
