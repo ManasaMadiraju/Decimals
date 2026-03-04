@@ -1,4 +1,5 @@
 import 'package:decimals/screens/games/decimal_pop_game.dart';
+import 'package:decimals/screens/games/cashier_game.dart';
 import 'package:flutter/material.dart';
 import 'package:decimals/screens/games/birdgame.dart';
 import 'package:decimals/screens/games/memorygameapp.dart';
@@ -38,11 +39,11 @@ class GameSelectionDialog extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 10,
                       spreadRadius: 2,
                     ),
@@ -67,6 +68,8 @@ class GameSelectionDialog extends StatelessWidget {
                         ChooseItGameScreen(), Colors.purple),
                     _buildGameButton(context, '🎈 Decimal Pop!',
                         const DecimalPopGame(), Colors.teal),
+                    _buildGameButton(context, '🛒 Decimal Cashier',
+                      const CashierGameScreen(), Colors.deepOrange),
                     const SizedBox(height: 20),
                     TextButton(
                       onPressed: () {
