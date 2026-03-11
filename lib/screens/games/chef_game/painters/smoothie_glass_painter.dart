@@ -144,7 +144,7 @@ class SmoothieGlassPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
     for (int i = 0; i < 8; i++) {
-      final double angle = -3.14159 / 2 + (i / 8) * 3.14159;
+      final double angle = -math.pi / 2 + (i / 8) * math.pi;
       canvas.drawLine(
         canopyCenter,
         Offset(

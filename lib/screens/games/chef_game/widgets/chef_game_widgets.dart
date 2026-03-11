@@ -1,5 +1,4 @@
-/// Barrel file for chef game widgets.
-library;
+// Barrel file for chef game widgets.
 
 export 'recipe_selection_card.dart';
 export 'speech_cloud.dart';

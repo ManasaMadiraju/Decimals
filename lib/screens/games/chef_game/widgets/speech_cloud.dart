@@ -7,21 +7,21 @@ class SpeechCloud extends StatelessWidget {
 
   final String text;
 
-  static const double _height = 88;
+  static const double _height = 116;
 
   @override
   Widget build(BuildContext context) {
     final textStyle = TextStyle(
-      fontSize: 18,
+      fontSize: 15,
       fontWeight: FontWeight.w600,
       color: Colors.brown.shade800,
-      height: 1.28,
+      height: 1.25,
     );
     return LayoutBuilder(
       builder: (context, constraints) {
         final cloudWidth = constraints.maxWidth > 0 ? constraints.maxWidth : 120.0;
         const contentWidthPadding = 100.0;
-        const padding = 14.0;
+        const padding = 12.0;
         // On very narrow screens, shrink the horizontal padding so we never
         // end up with negative or zero content width.
         final horizontalPadding =
@@ -34,7 +34,7 @@ class SpeechCloud extends StatelessWidget {
           width: cloudWidth,
           height: _height,
           child: Stack(
-            clipBehavior: Clip.hardEdge,
+            clipBehavior: Clip.none,
             children: [
               CustomPaint(
                 size: Size(cloudWidth, _height),
@@ -45,17 +45,20 @@ class SpeechCloud extends StatelessWidget {
                 right: horizontalPadding,
                 top: padding,
                 bottom: padding,
-                child: ClipRect(
-                  child: SizedBox(
-                    width: contentWidth,
-                    height: contentHeight,
+                child: SizedBox(
+                  width: contentWidth,
+                  height: contentHeight,
+                  child: Scrollbar(
                     child: SingleChildScrollView(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: textMaxWidth),
-                        child: Text(
-                          text,
-                          style: textStyle,
-                          softWrap: true,
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: textMaxWidth),
+                          child: Text(
+                            text,
+                            style: textStyle,
+                            softWrap: true,
+                          ),
                         ),
                       ),
                     ),
@@ -103,7 +106,7 @@ class CloudShapePainter extends CustomPainter {
     path.quadraticBezierTo(w * 0.12, h * 0.88, w * 0.15, h * 0.6);
     path.close();
 
-    canvas.drawShadow(path, Colors.black.withOpacity(0.08), 8, true);
+    canvas.drawShadow(path, Colors.black.withValues(alpha: 0.08), 8, true);
     canvas.drawPath(path, fill);
     canvas.drawPath(path, stroke);
   }

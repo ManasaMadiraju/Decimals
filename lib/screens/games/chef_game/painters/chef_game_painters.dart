@@ -1,5 +1,4 @@
-/// Barrel file for chef game custom painters.
-library;
+// Barrel file for chef game custom painters.
 
 export 'bowl_painter.dart';
 export 'bowl_contents_painter.dart';

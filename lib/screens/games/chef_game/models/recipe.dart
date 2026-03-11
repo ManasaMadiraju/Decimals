@@ -1,5 +1,4 @@
-/// Chef game recipe and step models.
-library;
+// Chef game recipe and step models.
 
 class Recipe {
   final String name;
@@ -35,7 +34,7 @@ class CookingStep {
 
 class RecipeCompletionData {
   final String message;
-  final String visualType; // 'pan' | 'oven_cookies' | 'oven_cake'
+  final String visualType; // Visual key used by rendering logic (e.g. 'pan', 'oven_cookies', 'oven_cake', 'cup_hummus', 'glass_smoothie')
 
   RecipeCompletionData({required this.message, required this.visualType});
 }

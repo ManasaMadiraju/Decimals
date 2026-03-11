@@ -15,7 +15,7 @@ class ChefGameScreen extends StatefulWidget {
   const ChefGameScreen({super.key});
 
   @override
-  _ChefGameScreenState createState() => _ChefGameScreenState();
+  State<ChefGameScreen> createState() => _ChefGameScreenState();
 }
 
 class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStateMixin {
@@ -263,7 +263,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     try {
       await _audioPlayer.play(AssetSource(soundPath));
     } catch (e) {
-      print("Error playing sound: $e");
+      debugPrint("Error playing sound: $e");
     }
   }
 
@@ -495,7 +495,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
     return option; // No scaling needed for 1 person
   }
 
-  void checkAnswer(String scaledAnswer, String baseAnswer) async {
+  void checkAnswer(String scaledAnswer) async {
     final currentStep = recipes[currentRecipeIndex].steps[currentStepIndex];
     String correctAnswer = currentStep.correctAnswer;
 
@@ -695,7 +695,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
             child: Material(
               borderRadius: BorderRadius.circular(24),
               elevation: 4,
-              shadowColor: Colors.orange.withOpacity(0.4),
+              shadowColor: Colors.orange.withValues(alpha: 0.4),
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
@@ -811,7 +811,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
             Material(
               borderRadius: BorderRadius.circular(24),
               elevation: 4,
-              shadowColor: Colors.orange.withOpacity(0.4),
+              shadowColor: Colors.orange.withValues(alpha: 0.4),
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
@@ -980,7 +980,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                   width: 200,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -1027,7 +1027,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                       fontWeight: FontWeight.bold,
                       shadows: [
                         Shadow(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           blurRadius: 4,
                         ),
                       ],
@@ -1048,7 +1048,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.brown.shade300.withOpacity(0.9),
+                  color: Colors.brown.shade300.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -1203,7 +1203,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
           isDisabled: selectedAnswer.isNotEmpty,
           wrongBorderValue: i == _wrongShakeIndex ? wrongBorderValue : 0.0,
           onTap: selectedAnswer.isEmpty
-              ? () => checkAnswer(displayOptions[i], displayOptions[i])
+              ? () => checkAnswer(displayOptions[i])
               : null,
         ),
       ),
@@ -1260,7 +1260,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
               color: Colors.amber.shade100,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.amber.withOpacity(0.8),
+                  color: Colors.amber.withValues(alpha: 0.8),
                   blurRadius: 4,
                 ),
               ],
@@ -1289,12 +1289,12 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
               borderRadius: BorderRadius.circular(44),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.orange.shade200.withOpacity(0.7),
+                  color: Colors.orange.shade200.withValues(alpha: 0.7),
                   blurRadius: 14,
                   spreadRadius: 3,
                 ),
                 BoxShadow(
-                  color: Colors.white.withOpacity(0.85),
+                  color: Colors.white.withValues(alpha: 0.85),
                   blurRadius: 6,
                   spreadRadius: 1,
                 ),
@@ -1355,6 +1355,8 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isCompactHeight = screenHeight < 820;
 
     if (_showRecipeSelection) {
       return _buildRecipeSelectionScreen();
@@ -1400,11 +1402,11 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
@@ -1431,11 +1433,11 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
             margin: const EdgeInsets.only(top: 8, right: 4),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
@@ -1472,8 +1474,11 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
             ),
           ),
           SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: 16),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.04,
+                  vertical: isCompactHeight ? 10 : 16,
+                ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -1482,43 +1487,43 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                               ? (translatedTexts['heading'] ?? originalTexts['heading']!)
                               : originalTexts['heading']!,
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: isCompactHeight ? 14 : 16,
                             fontWeight: FontWeight.w600,
                             color: Colors.brown.shade700,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: isCompactHeight ? 4 : 8),
                         Text(
                           translated ? (translatedTexts['recipe_name'] ?? currentRecipe.name) : currentRecipe.name,
-                          style: const TextStyle(
-                            fontSize: 28,
+                          style: TextStyle(
+                            fontSize: isCompactHeight ? 24 : 28,
                             fontWeight: FontWeight.bold,
                             color: Colors.brown,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 10),
+                        SizedBox(height: isCompactHeight ? 6 : 10),
                         Center(
                           child: Text(
                             '${translated ? (translatedTexts['step'] ?? _step) : _step} ${currentStepIndex + 1} ${translated ? (translatedTexts['of'] ?? _of) : _of} ${currentRecipe.steps.length}',
-                            style: const TextStyle(
-                              fontSize: 18,
+                            style: TextStyle(
+                              fontSize: isCompactHeight ? 16 : 18,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: isCompactHeight ? 6 : 8),
                         Center(child: _buildStepProgressDots(currentRecipe.steps.length)),
-                        const SizedBox(height: 16),
+                        SizedBox(height: isCompactHeight ? 8 : 16),
                         _buildBowl(),
-                        const SizedBox(height: 20),
+                        SizedBox(height: isCompactHeight ? 10 : 20),
                         Center(
                           child: Stack(
                             clipBehavior: Clip.none,
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(20),
+                                padding: EdgeInsets.all(isCompactHeight ? 14 : 20),
                                 constraints: BoxConstraints(maxWidth: screenWidth * 0.85),
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
@@ -1537,7 +1542,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.orange.withOpacity(0.2),
+                                      color: Colors.orange.withValues(alpha: 0.2),
                                       blurRadius: 12,
                                       spreadRadius: 2,
                                       offset: const Offset(0, 4),
@@ -1560,7 +1565,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.orange.withOpacity(0.15),
+                                    color: Colors.orange.withValues(alpha: 0.15),
                                     blurRadius: 6,
                                     offset: const Offset(0, 2),
                                   ),
@@ -1569,18 +1574,18 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                               child: Text(
                                 translated ? (translatedTexts['current_instruction'] ?? currentStep.instruction) : currentStep.instruction,
                                 style: TextStyle(
-                                  fontSize: 22,
+                                  fontSize: isCompactHeight ? 18 : 22,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.orange.shade900,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                            const SizedBox(height: 14),
+                            SizedBox(height: isCompactHeight ? 8 : 14),
                             Text(
                               translated ? (translatedTexts['current_question'] ?? scaledQuestion) : scaledQuestion,
-                              style: const TextStyle(
-                                fontSize: 24,
+                              style: TextStyle(
+                                fontSize: isCompactHeight ? 20 : 24,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF3E2723),
                                 shadows: [
@@ -1593,7 +1598,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 14),
+                            SizedBox(height: isCompactHeight ? 8 : 14),
                             Material(
                               color: Colors.orange.shade400,
                               borderRadius: BorderRadius.circular(28),
@@ -1602,21 +1607,24 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                                 onTap: _speakCurrentStep,
                                 borderRadius: BorderRadius.circular(28),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isCompactHeight ? 18 : 24,
+                                    vertical: isCompactHeight ? 10 : 14,
+                                  ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(
                                         Icons.volume_up,
-                                        size: 28,
+                                        size: isCompactHeight ? 24 : 28,
                                         color: Colors.white,
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
                                         translated ? (translatedTexts['listen'] ?? _listen) : _listen,
                                         style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: isCompactHeight ? 16 : 18,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                         ),
@@ -1634,7 +1642,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                         ),
                         if (feedbackText.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsets.only(top: 16.0),
+                          padding: EdgeInsets.only(top: isCompactHeight ? 10.0 : 16.0),
                           child: AnimatedOpacity(
                             duration: const Duration(milliseconds: 200),
                             opacity: 1,
@@ -1650,7 +1658,7 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                               child: Text(
                                 feedbackText,
                                 style: TextStyle(
-                                  fontSize: 24,
+                                  fontSize: isCompactHeight ? 20 : 24,
                                   fontWeight: FontWeight.bold,
                                   color: feedbackText == "Correct!"
                                       ? Colors.green
@@ -1660,11 +1668,13 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                             ),
                           ),
                         ),
+                        const SizedBox(height: 8),
                         Expanded(
-                          child: SingleChildScrollView(
-                    child: Padding(
-                      padding: EdgeInsets.zero,
-                      child: AnimatedBuilder(
+                          child: Scrollbar(
+                            child: SingleChildScrollView(
+                              child: Padding(
+                                padding: EdgeInsets.zero,
+                                child: AnimatedBuilder(
                         animation: Listenable.merge([
                           _entranceController,
                           _correctPulseController,
@@ -1686,7 +1696,9 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                             children: [
                               for (int i = 0; i < displayOptions.length; i++)
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: isCompactHeight ? 5.0 : 8.0,
+                                  ),
                                   child: Transform.translate(
                                     offset: Offset(
                                       0,
@@ -1717,9 +1729,10 @@ class _ChefGameScreenState extends State<ChefGameScreen> with TickerProviderStat
                           );
                         },
                       ),
-                    ),
-                  ),
-                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),

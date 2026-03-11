@@ -41,7 +41,7 @@ class ChefChoiceButton extends StatelessWidget {
       iconColor = Colors.white;
       boxShadows = [
         const BoxShadow(color: Colors.white24, blurRadius: 2, offset: Offset(0, -1)),
-        BoxShadow(color: Colors.green.withOpacity(0.45), blurRadius: 14, spreadRadius: 1),
+        BoxShadow(color: Colors.green.withValues(alpha: 0.45), blurRadius: 14, spreadRadius: 1),
       ];
     } else if (isWrong) {
       final borderWidth = 2.0 + 3.0 * (0.5 + 0.5 * sin(pi * wrongBorderValue));
@@ -73,7 +73,7 @@ class ChefChoiceButton extends StatelessWidget {
       iconColor = Colors.orange.shade700;
       boxShadows = [
         BoxShadow(
-          color: Colors.orange.shade200.withOpacity(0.6),
+          color: Colors.orange.shade200.withValues(alpha: 0.6),
           blurRadius: 8,
           offset: const Offset(0, 3),
         ),
@@ -83,12 +83,12 @@ class ChefChoiceButton extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      height: 72,
+      height: 62,
       child: Material(
         borderRadius: BorderRadius.circular(24),
         elevation: isIdle ? 2 : 4,
         shadowColor: (isCorrect ? Colors.green : isWrong ? Colors.red : Colors.orange)
-            .withOpacity(0.35),
+            .withValues(alpha: 0.35),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(24),
@@ -106,25 +106,25 @@ class ChefChoiceButton extends StatelessWidget {
               border: border,
               boxShadow: boxShadows,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
                 if (icon != null) ...[
-                  Icon(icon, color: iconColor ?? Colors.white, size: 28),
-                  const SizedBox(width: 12),
+                  Icon(icon, color: iconColor ?? Colors.white, size: 22),
+                  const SizedBox(width: 8),
                 ],
                 Expanded(
                   child: Text(
                     label,
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
                       color: textColor,
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
-                if (icon != null && (isCorrect || isWrong)) const SizedBox(width: 40),
+                if (icon != null && (isCorrect || isWrong)) const SizedBox(width: 28),
               ],
             ),
           ),
