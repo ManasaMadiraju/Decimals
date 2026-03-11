@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
@@ -12,41 +12,6 @@ import 'cashier/models.dart';
 import 'cashier/register_panel.dart';
 import 'cashier/right_panel.dart';
 import 'cashier/store_panel.dart';
-
-class _StoreItem extends StoreItem {
-  const _StoreItem({
-    required super.id,
-    required super.name,
-    required super.icon,
-    required super.priceCents,
-  });
-}
-
-class _CustomerOrder extends CustomerOrder {
-  const _CustomerOrder({
-    required super.id,
-    required super.name,
-    required super.emoji,
-    required super.items,
-    required super.paidCents,
-  });
-}
-
-class _MoneyToken extends MoneyToken {
-  _MoneyToken({
-    required super.id,
-    required super.cents,
-    required super.position,
-  });
-}
-
-enum _CheckoutStage {
-  scanning,
-  paymentInfo,
-  makingChange,
-  checkedOut,
-  sessionComplete,
-}
 
 class CashierGameScreen extends StatefulWidget {
   const CashierGameScreen({super.key});
@@ -117,20 +82,20 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   Map<String, String> translatedTexts = {};
   bool translated = false;
 
-  final List<_StoreItem> _catalog = const [
-    _StoreItem(id: 'milk', name: 'Milk', icon: '🥛', priceCents: 150),
-    _StoreItem(id: 'bread', name: 'Bread', icon: '🍞', priceCents: 225),
-    _StoreItem(id: 'apple', name: 'Apple', icon: '🍎', priceCents: 75),
-    _StoreItem(id: 'juice', name: 'Juice', icon: '🧃', priceCents: 125),
-    _StoreItem(id: 'cereal', name: 'Cereal', icon: '🥣', priceCents: 340),
-    _StoreItem(id: 'eggs', name: 'Eggs', icon: '🥚', priceCents: 260),
-    _StoreItem(id: 'banana', name: 'Banana', icon: '🍌', priceCents: 90),
-    _StoreItem(id: 'cheese', name: 'Cheese', icon: '🧀', priceCents: 315),
-    _StoreItem(id: 'chips', name: 'Chips', icon: '🍟', priceCents: 185),
+  final List<StoreItem> _catalog = const [
+    StoreItem(id: 'milk', name: 'Milk', icon: '🥛', priceCents: 150),
+    StoreItem(id: 'bread', name: 'Bread', icon: '🍞', priceCents: 225),
+    StoreItem(id: 'apple', name: 'Apple', icon: '🍎', priceCents: 75),
+    StoreItem(id: 'juice', name: 'Juice', icon: '🧃', priceCents: 125),
+    StoreItem(id: 'cereal', name: 'Cereal', icon: '🥣', priceCents: 340),
+    StoreItem(id: 'eggs', name: 'Eggs', icon: '🥚', priceCents: 260),
+    StoreItem(id: 'banana', name: 'Banana', icon: '🍌', priceCents: 90),
+    StoreItem(id: 'cheese', name: 'Cheese', icon: '🧀', priceCents: 315),
+    StoreItem(id: 'chips', name: 'Chips', icon: '🍟', priceCents: 185),
   ];
 
   final List<int> _denominations = [100, 50, 25, 10, 5, 1];
-  final List<_MoneyToken> _registerTokens = [];
+  final List<MoneyToken> _registerTokens = [];
   final Map<int, int> _drawerStock = {
     100: 8,
     50: 10,
@@ -143,9 +108,9 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   final List<String> _customerNames = ['Mia', 'Leo', 'Ava', 'Noah', 'Ella'];
   final List<String> _customerEmojis = ['🙂', '😀', '🛒', '👧', '👦'];
 
-  final List<_CustomerOrder> _customers = [];
+  final List<CustomerOrder> _customers = [];
   int _currentCustomerIndex = 0;
-  _CheckoutStage _stage = _CheckoutStage.scanning;
+  CheckoutStage _stage = CheckoutStage.scanning;
 
   final Set<String> _scannedItemIds = <String>{};
   int _subtotalCents = 0;
@@ -168,7 +133,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   late AnimationController _changeShakeController;
   late Animation<double> _changeBounceAnimation;
 
-  _CustomerOrder get _currentCustomer => _customers[_currentCustomerIndex];
+  CustomerOrder get _currentCustomer => _customers[_currentCustomerIndex];
 
   int get _trayTotalCents => _registerTokens
       .where((token) => token.inTray)
@@ -238,7 +203,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   }
 
   bool _isChangeCurrentlyIncorrect() {
-    return _stage == _CheckoutStage.makingChange && _trayTotalCents != _changeDueCents;
+    return _stage == CheckoutStage.makingChange && _trayTotalCents != _changeDueCents;
   }
 
   void _updateChangeAnimations() {
@@ -257,22 +222,38 @@ class _CashierGameScreenState extends State<CashierGameScreen>
 
   Future<void> _loadBestScore() async {
     _preferences = await SharedPreferences.getInstance();
+    if (!mounted) {
+      return;
+    }
     setState(() {
       _bestScore = _preferences?.getInt('cashier_session_best_score') ?? 0;
     });
   }
 
   Future<void> _saveBestScore() async {
-    final prefs = _preferences;
-    if (prefs == null) {
-      return;
-    }
+    final prefs = _preferences ?? await SharedPreferences.getInstance();
+    _preferences ??= prefs;
     if (_score > _bestScore) {
-      setState(() {
+      if (mounted) {
+        setState(() {
+          _bestScore = _score;
+        });
+      } else {
         _bestScore = _score;
-      });
+      }
       await prefs.setInt('cashier_session_best_score', _score);
     }
+  }
+
+  void _showTranslationError() {
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Translation unavailable. Showing original text.'),
+      ),
+    );
   }
 
   Future<void> _playSound(String soundPath) async {
@@ -285,43 +266,62 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     if (!_speechEnabled || text.trim().isEmpty) {
       return;
     }
-    if (kIsWeb && !userInitiated) {
-      return;
-    }
     try {
       await _flutterTts.stop();
       await _flutterTts.setLanguage('en-US');
       await _flutterTts.setSpeechRate(0.8);
       await _flutterTts.setPitch(1.00);
       await _flutterTts.speak(text);
-    } catch (_) {
-      _speechEnabled = false;
+    } catch (e) {
+      debugPrint('Cashier TTS error: $e');
     }
   }
 
   Future<void> translateTexts() async {
-    if (!translated) {
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/translate'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'texts': originalTexts.values.toList()}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          translatedTexts = {
-            for (int index = 0; index < originalTexts.keys.length; index++)
-              originalTexts.keys.elementAt(index): data['translations'][index],
-          };
-          translated = true;
-        });
-      }
-    } else {
+    if (translated) {
       setState(() {
         translatedTexts.clear();
         translated = false;
       });
+      return;
+    }
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse('http://localhost:3000/translate'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'texts': originalTexts.values.toList()}),
+          )
+          .timeout(const Duration(seconds: 8));
+
+      if (response.statusCode != 200) {
+        _showTranslationError();
+        return;
+      }
+
+      final data = jsonDecode(response.body);
+      final translations = data['translations'];
+      if (translations is! List ||
+          translations.length != originalTexts.keys.length) {
+        _showTranslationError();
+        return;
+      }
+
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        translatedTexts = {
+          for (int index = 0; index < originalTexts.keys.length; index++)
+            originalTexts.keys.elementAt(index): '${translations[index]}',
+        };
+        translated = true;
+      });
+    } on TimeoutException {
+      _showTranslationError();
+    } catch (_) {
+      _showTranslationError();
     }
   }
 
@@ -362,13 +362,13 @@ class _CashierGameScreenState extends State<CashierGameScreen>
 
     for (int customerId = 0; customerId < 3; customerId++) {
       final int itemCount = 2 + _random.nextInt(3);
-      final List<_StoreItem> shuffled = [..._catalog]..shuffle(_random);
-      final List<_StoreItem> selected = shuffled.take(itemCount).toList();
+      final List<StoreItem> shuffled = [..._catalog]..shuffle(_random);
+      final List<StoreItem> selected = shuffled.take(itemCount).toList();
       final int total = selected.fold(0, (sum, item) => sum + item.priceCents);
       final int paid = _wholeDollarPaymentAbove(total);
 
       _customers.add(
-        _CustomerOrder(
+        CustomerOrder(
           id: customerId,
           name: _customerNames[_random.nextInt(_customerNames.length)],
           emoji: _customerEmojis[_random.nextInt(_customerEmojis.length)],
@@ -388,7 +388,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     _registerTokens.clear();
     _dragVisualByTokenId.clear();
     _drawerScrollOffset = 0;
-    _stage = _CheckoutStage.scanning;
+    _stage = CheckoutStage.scanning;
     _activeTokenId = null;
     _changeShakeController.value = 0;
     _updateChangeAnimations();
@@ -396,7 +396,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   }
 
   void _scanItem(StoreItem item) async {
-    if (_stage != _CheckoutStage.scanning) {
+    if (_stage != CheckoutStage.scanning) {
       return;
     }
     if (_scannedItemIds.contains(item.id)) {
@@ -414,10 +414,10 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     if (allScanned) {
       setState(() {
         _changeDueCents = _currentCustomer.paidCents - _subtotalCents;
-        _stage = _CheckoutStage.paymentInfo;
+        _stage = CheckoutStage.paymentInfo;
       });
       _updateChangeAnimations();
-      await _speak(_instructionText());
+      await _speak(_instructionText(), userInitiated: true);
     }
   }
 
@@ -515,14 +515,14 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     );
   }
 
-  Offset _tokenSettledVisualPosition(_MoneyToken token) {
+  Offset _tokenSettledVisualPosition(MoneyToken token) {
     if (token.inTray) {
       return token.position;
     }
     return Offset(token.position.dx, token.position.dy - _drawerScrollOffset);
   }
 
-  Offset _tokenVisualPosition(_MoneyToken token) {
+  Offset _tokenVisualPosition(MoneyToken token) {
     return _dragVisualByTokenId[token.id] ?? _tokenSettledVisualPosition(token);
   }
 
@@ -614,7 +614,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   }
 
   void _settleTokenFromVisual(
-    _MoneyToken token,
+    MoneyToken token,
     Offset releaseVisualPosition,
     Offset releaseVelocity,
   ) {
@@ -681,7 +681,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
 
     for (int i = 0; i < drawerContents.length; i++) {
       _registerTokens.add(
-        _MoneyToken(
+        MoneyToken(
           id: _tokenIdCounter++,
           cents: drawerContents[i],
           position: drawerSlots[i],
@@ -719,12 +719,12 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   }
 
   void _openRegister() {
-    if (_stage != _CheckoutStage.paymentInfo) {
+    if (_stage != CheckoutStage.paymentInfo) {
       return;
     }
 
     setState(() {
-      _stage = _CheckoutStage.makingChange;
+      _stage = CheckoutStage.makingChange;
       if (_registerSize != Size.zero) {
         _buildRegisterTokens();
       }
@@ -733,20 +733,20 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     _speak(_instructionText(), userInitiated: true);
   }
 
-  void _applyTokenMomentum(_MoneyToken token, Offset velocity) {
+  void _applyTokenMomentum(MoneyToken token, Offset velocity) {
     final Offset releaseVisual = _dragVisualByTokenId[token.id] ?? _tokenSettledVisualPosition(token);
     _settleTokenFromVisual(token, releaseVisual, velocity);
   }
 
   void _checkChange() async {
-    if (_stage != _CheckoutStage.makingChange) {
+    if (_stage != CheckoutStage.makingChange) {
       return;
     }
 
     final bool correct = _trayTotalCents == _changeDueCents;
     if (correct) {
       setState(() {
-        _stage = _CheckoutStage.checkedOut;
+        _stage = CheckoutStage.checkedOut;
         _score += 20;
         _streak += 1;
       });
@@ -754,7 +754,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       _updateChangeAnimations();
       _saveBestScore();
       await _playSound('sounds/success.mp3');
-      await _speak(_t('correct'));
+      await _speak(_t('correct'), userInitiated: true);
     } else {
       setState(() {
         _streak = 0;
@@ -764,12 +764,12 @@ class _CashierGameScreenState extends State<CashierGameScreen>
         ..forward(from: 0);
       _updateChangeAnimations();
       await _playSound('sounds/error.mp3');
-      await _speak(_t('incorrect'));
+      await _speak(_t('incorrect'), userInitiated: true);
     }
   }
 
   void _nextCustomer() {
-    if (_stage != _CheckoutStage.checkedOut) {
+    if (_stage != CheckoutStage.checkedOut) {
       return;
     }
 
@@ -778,25 +778,25 @@ class _CashierGameScreenState extends State<CashierGameScreen>
         _currentCustomerIndex += 1;
       });
       _prepareCurrentCustomer();
-      _speak(_instructionText());
+      _speak(_instructionText(), userInitiated: true);
     } else {
       setState(() {
-        _stage = _CheckoutStage.sessionComplete;
+        _stage = CheckoutStage.sessionComplete;
       });
       _updateChangeAnimations();
       _saveBestScore();
-      _speak(_t('sessionDone'));
+      _speak(_t('sessionDone'), userInitiated: true);
     }
   }
 
   String _instructionText() {
     switch (_stage) {
-      case _CheckoutStage.scanning:
+      case CheckoutStage.scanning:
         return _template(
           'promptScan',
           {'name': _currentCustomer.name},
         );
-      case _CheckoutStage.paymentInfo:
+      case CheckoutStage.paymentInfo:
         return _template(
           'promptPay',
           {
@@ -804,23 +804,23 @@ class _CashierGameScreenState extends State<CashierGameScreen>
             'paid': _money(_currentCustomer.paidCents),
           },
         );
-      case _CheckoutStage.makingChange:
+      case CheckoutStage.makingChange:
         return _template(
           'promptChange',
           {'change': _money(_changeDueCents)},
         );
-      case _CheckoutStage.checkedOut:
+      case CheckoutStage.checkedOut:
         return _template(
           'promptDone',
           {'name': _currentCustomer.name},
         );
-      case _CheckoutStage.sessionComplete:
+      case CheckoutStage.sessionComplete:
         return _t('sessionDone');
     }
   }
 
   String _hintText() {
-    if (_stage == _CheckoutStage.scanning) {
+    if (_stage == CheckoutStage.scanning) {
       return _t('hintScan');
     }
     return _t('hintChange');
@@ -886,7 +886,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       scanPromptLabel: _t('scanPrompt'),
       customer: _currentCustomer,
       scannedItemIds: _scannedItemIds,
-      isScanningStage: _stage == _CheckoutStage.scanning,
+      isScanningStage: _stage == CheckoutStage.scanning,
       characterFloat: _characterFloat,
       onScanItem: _scanItem,
       moneyText: _money,
@@ -904,11 +904,11 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       drawerRectForSize: _drawerRect,
       trayRectForSize: _trayRect,
       drawerOpen:
-          _stage == _CheckoutStage.makingChange || _stage == _CheckoutStage.checkedOut,
+          _stage == CheckoutStage.makingChange || _stage == CheckoutStage.checkedOut,
       showTokens:
-          _stage == _CheckoutStage.makingChange || _stage == _CheckoutStage.checkedOut,
+          _stage == CheckoutStage.makingChange || _stage == CheckoutStage.checkedOut,
       registerTokens: _registerTokens,
-      buildToken: (token) => _buildRegisterToken(token as _MoneyToken),
+        buildToken: (token) => _buildRegisterToken(token),
       drawerScrollOffset: _drawerScrollOffset,
       drawerScrollMaxExtent: _drawerScrollMaxExtent,
       onScrollDrawerBy: _scrollDrawerBy,
@@ -920,7 +920,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       onSizeChanged: (size) {
         if (_registerSize != size) {
           _registerSize = size;
-          if (_stage == _CheckoutStage.makingChange && _registerTokens.isEmpty) {
+          if (_stage == CheckoutStage.makingChange && _registerTokens.isEmpty) {
             _buildRegisterTokens();
           }
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -933,7 +933,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     );
   }
 
-  Widget _buildRegisterToken(_MoneyToken token) {
+  Widget _buildRegisterToken(MoneyToken token) {
     final bool inDrawer = !token.inTray;
     final Offset visualPosition = _tokenVisualPosition(token);
     final bool isActiveDrag = _activeTokenId == token.id;
@@ -956,7 +956,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       top: visualPosition.dy,
       child: GestureDetector(
         onPanStart: (_) {
-          if (_stage != _CheckoutStage.makingChange) {
+          if (_stage != CheckoutStage.makingChange) {
             return;
           }
           setState(() {
@@ -965,7 +965,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
           });
         },
         onPanUpdate: (details) {
-          if (_stage != _CheckoutStage.makingChange) {
+          if (_stage != CheckoutStage.makingChange) {
             return;
           }
           setState(() {
@@ -976,7 +976,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
           });
         },
         onPanEnd: (details) {
-          if (_stage != _CheckoutStage.makingChange) {
+          if (_stage != CheckoutStage.makingChange) {
             return;
           }
           setState(() {
@@ -1050,7 +1050,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       scannedItemIds: _scannedItemIds,
       subtotalCents: _subtotalCents,
       changeDueCents: _changeDueCents,
-      isSessionComplete: _stage == _CheckoutStage.sessionComplete,
+      isSessionComplete: _stage == CheckoutStage.sessionComplete,
       moneyText: _money,
     );
   }
@@ -1073,9 +1073,9 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       onCheckChange: _checkChange,
       onNextCustomer: _nextCustomer,
       onRestart: _startNewSession,
-      canOpenRegister: _stage == _CheckoutStage.paymentInfo,
-      canCheckChange: _stage == _CheckoutStage.makingChange,
-      canNextCustomer: _stage == _CheckoutStage.checkedOut,
+      canOpenRegister: _stage == CheckoutStage.paymentInfo,
+      canCheckChange: _stage == CheckoutStage.makingChange,
+      canNextCustomer: _stage == CheckoutStage.checkedOut,
     );
   }
 

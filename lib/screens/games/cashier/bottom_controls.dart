@@ -143,7 +143,10 @@ class CashierBottomControls extends StatelessWidget {
           }
 
           final double buttonWidth =
-              max(140.0, ((constraints.maxWidth - 8) / 2).floorToDouble());
+              min(
+                constraints.maxWidth,
+                max(140.0, ((constraints.maxWidth - 8) / 2).floorToDouble()),
+              );
           return Wrap(
             spacing: 8,
             runSpacing: 8,
