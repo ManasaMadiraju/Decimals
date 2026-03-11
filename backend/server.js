@@ -18,14 +18,18 @@ app.post('/translate', async (req, res) => {
     }
 
     const params = new URLSearchParams();
-    params.append('auth_key', authKey);
     params.append('target_lang', 'ES');
     texts.forEach((text) => params.append('text', text));
 
     const response = await axios.post(
       'https://api-free.deepl.com/v2/translate',
       params.toString(),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `DeepL-Auth-Key ${authKey}`,
+        },
+      }
     );
 
     res.json({ translations: response.data.translations.map((t) => t.text) });
