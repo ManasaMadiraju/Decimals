@@ -57,6 +57,18 @@ class CashierGameScreen extends StatefulWidget {
 
 class _CashierGameScreenState extends State<CashierGameScreen>
     with TickerProviderStateMixin {
+  static const double _kTokenSize = 34;
+  static const double _kDrawerColGap = 5;
+  static const double _kDrawerRowGap = 5;
+  static const double _kDrawerContentInset = 10;
+  static const double _kDrawerContentReduction = 40;
+  static const double _kDrawerMinViewportWidth = 24;
+  static const double _kDrawerMinViewportHeight = 22;
+  static const double _kTrayContentInset = 3;
+  static const double _kTrayMinViewportWidth = 24;
+  static const double _kTrayMinViewportHeight = 22;
+  static const double _kTrayHitInflate = 8;
+
   final Random _random = Random();
   final AudioPlayer _audioPlayer = AudioPlayer();
   final FlutterTts _flutterTts = FlutterTts();
@@ -152,12 +164,26 @@ class _CashierGameScreenState extends State<CashierGameScreen>
 
   late AnimationController _characterController;
   late Animation<double> _characterFloat;
+  late AnimationController _changeBounceController;
+  late AnimationController _changeShakeController;
+  late Animation<double> _changeBounceAnimation;
 
   _CustomerOrder get _currentCustomer => _customers[_currentCustomerIndex];
 
   int get _trayTotalCents => _registerTokens
       .where((token) => token.inTray)
       .fold(0, (sum, token) => sum + token.cents);
+
+  double get _changeTextScale => _changeBounceAnimation.value;
+
+  double get _changeTextShakeX {
+    final double t = _changeShakeController.value;
+    if (t == 0) {
+      return 0;
+    }
+    final double decay = 1 - t;
+    return sin(t * pi * 10) * 10 * decay;
+  }
 
   @override
   void initState() {
@@ -170,6 +196,27 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     _characterFloat = Tween<double>(begin: -4, end: 4).animate(
       CurvedAnimation(parent: _characterController, curve: Curves.easeInOut),
     );
+    _changeBounceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 950),
+    );
+    _changeBounceAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(
+      CurvedAnimation(parent: _changeBounceController, curve: Curves.easeInOut),
+    );
+    _changeShakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 380),
+    );
+    _changeBounceController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    _changeShakeController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
 
     _loadBestScore();
     _startNewSession();
@@ -185,7 +232,27 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     _audioPlayer.dispose();
     _flutterTts.stop();
     _characterController.dispose();
+    _changeBounceController.dispose();
+    _changeShakeController.dispose();
     super.dispose();
+  }
+
+  bool _isChangeCurrentlyIncorrect() {
+    return _stage == _CheckoutStage.makingChange && _trayTotalCents != _changeDueCents;
+  }
+
+  void _updateChangeAnimations() {
+    if (_isChangeCurrentlyIncorrect()) {
+      if (!_changeBounceController.isAnimating) {
+        _changeBounceController.repeat(reverse: true);
+      }
+      return;
+    }
+
+    if (_changeBounceController.isAnimating || _changeBounceController.value != 0) {
+      _changeBounceController.stop();
+      _changeBounceController.value = 0;
+    }
   }
 
   Future<void> _loadBestScore() async {
@@ -323,6 +390,8 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     _drawerScrollOffset = 0;
     _stage = _CheckoutStage.scanning;
     _activeTokenId = null;
+    _changeShakeController.value = 0;
+    _updateChangeAnimations();
     setState(() {});
   }
 
@@ -347,16 +416,18 @@ class _CashierGameScreenState extends State<CashierGameScreen>
         _changeDueCents = _currentCustomer.paidCents - _subtotalCents;
         _stage = _CheckoutStage.paymentInfo;
       });
+      _updateChangeAnimations();
       await _speak(_instructionText());
     }
   }
 
   Rect _drawerRect(Size size) {
-    final double drawerHeight = (size.height * 0.30).clamp(132.0, 200.0);
+    final double drawerHeight = (size.height * 0.33).clamp(124.0, 236.0);
     final double top = _registerSectionTop(size, drawerHeight);
-    final double drawerWidth = size.width * 0.40;
+    final double drawerWidth =
+        (size.width * 0.44).clamp(126.0, size.width * 0.52).toDouble();
     return Rect.fromLTWH(
-      18,
+      14,
       top,
       drawerWidth,
       drawerHeight,
@@ -364,10 +435,16 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   }
 
   Rect _trayRect(Size size) {
-    final double trayHeight = (size.height * 0.30).clamp(132.0, 200.0);
+    final double trayHeight = (size.height * 0.33).clamp(124.0, 236.0);
     final double top = _registerSectionTop(size, trayHeight);
-    final double left = size.width * 0.54;
-    final double width = max(120.0, size.width - left - 18);
+    final Rect drawer = _drawerRect(size);
+    final double minTrayWidth = min(120.0, max(84.0, size.width * 0.30));
+    double left = drawer.right + 12;
+    final double maxLeft = size.width - minTrayWidth - 12;
+    if (left > maxLeft) {
+      left = max(12.0, maxLeft);
+    }
+    final double width = max(minTrayWidth, size.width - left - 12);
     return Rect.fromLTWH(
       left,
       top,
@@ -377,16 +454,65 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   }
 
   double _registerSectionTop(Size size, double sectionHeight) {
-    final double maxVisibleTop = size.height - sectionHeight - 12;
-    final double compactness = ((520 - size.height) / 220).clamp(0.0, 1.0);
-    final double targetFactor = 0.42 - (0.14 * compactness);
-    final double desiredTop = size.height * targetFactor;
-    const double minTop = 170;
-
-    if (maxVisibleTop <= minTop) {
-      return max(16.0, maxVisibleTop);
+    final double maxVisibleTop = size.height - sectionHeight - 14;
+    if (maxVisibleTop <= 20) {
+      return 8;
     }
+
+    final double minTop = (size.height * 0.26).clamp(72.0, 170.0).toDouble();
+    final double targetFactor = size.height < 500 ? 0.34 : 0.40;
+    final double desiredTop = size.height * targetFactor;
     return desiredTop.clamp(minTop, maxVisibleTop).toDouble();
+  }
+
+  Rect _drawerTokenViewportRect(Size size) {
+    final Rect drawer = _drawerRect(size);
+    return Rect.fromLTWH(
+      drawer.left + _kDrawerContentInset,
+      drawer.top + _kDrawerContentInset,
+      max(_kDrawerMinViewportWidth, drawer.width - _kDrawerContentReduction),
+      max(_kDrawerMinViewportHeight, drawer.height - _kDrawerContentReduction),
+    );
+  }
+
+  Rect _trayTokenViewportRect(Size size) {
+    final Rect tray = _trayRect(size);
+    return Rect.fromLTWH(
+      tray.left + _kTrayContentInset,
+      tray.top + _kTrayContentInset,
+      max(_kTrayMinViewportWidth, tray.width - (_kTrayContentInset * 2)),
+      max(_kTrayMinViewportHeight, tray.height - (_kTrayContentInset * 2)),
+    );
+  }
+
+  Offset _clampTopLeftInRect(
+    Offset position,
+    Rect bounds, {
+    double tokenSize = _kTokenSize,
+  }) {
+    final double clampedX =
+        position.dx.clamp(bounds.left, bounds.right - tokenSize).toDouble();
+    final double clampedY =
+        position.dy.clamp(bounds.top, bounds.bottom - tokenSize).toDouble();
+    return Offset(clampedX, clampedY);
+  }
+
+  double _clampDrawerSlotX(
+    double x,
+    Rect drawerContentRect, {
+    double tokenSize = _kTokenSize,
+  }) {
+    return x
+        .clamp(drawerContentRect.left, drawerContentRect.right - tokenSize)
+        .toDouble();
+  }
+
+  int _drawerColumnCount(Rect drawerContentRect) {
+    return max(
+      2,
+      ((drawerContentRect.width + _kDrawerColGap) / (_kTokenSize + _kDrawerColGap))
+          .floor(),
+    );
   }
 
   Offset _tokenSettledVisualPosition(_MoneyToken token) {
@@ -405,48 +531,51 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   }
 
   bool _tokenWouldBeInTrayAt(Offset visualPosition) {
-    const double tokenSize = 34;
-    final tray = _trayRect(_registerSize).inflate(10);
-    final center = visualPosition + const Offset(tokenSize / 2, tokenSize / 2);
+    final tray = _trayTokenViewportRect(_registerSize).inflate(_kTrayHitInflate);
+    final center = visualPosition + const Offset(_kTokenSize / 2, _kTokenSize / 2);
     return tray.contains(center);
   }
 
   Offset _clampVisualTokenPosition(Offset visualPosition) {
-    const double tokenSize = 34;
-    final double clampedX = visualPosition.dx.clamp(6.0, _registerSize.width - tokenSize - 6);
-    final double clampedY = visualPosition.dy.clamp(6.0, _registerSize.height - tokenSize - 6);
+    final double clampedX =
+        visualPosition.dx.clamp(6.0, _registerSize.width - _kTokenSize - 6);
+    final double clampedY =
+        visualPosition.dy.clamp(6.0, _registerSize.height - _kTokenSize - 6);
     return Offset(clampedX, clampedY);
   }
 
   List<Offset> _traySlots(Rect tray) {
-    const double tokenSize = 34;
     final slotX = <double>[0.18, 0.40, 0.62, 0.84]
-        .map((factor) => tray.left + (tray.width * factor) - (tokenSize / 2))
+        .map((factor) => tray.left + (tray.width * factor) - (_kTokenSize / 2))
         .toList();
     final slotY = <double>[0.20, 0.42, 0.64, 0.84]
-        .map((factor) => tray.top + (tray.height * factor) - (tokenSize / 2))
+        .map((factor) => tray.top + (tray.height * factor) - (_kTokenSize / 2))
         .toList();
 
     final slots = <Offset>[];
     for (final y in slotY) {
       for (final x in slotX) {
-        slots.add(Offset(x, y));
+        slots.add(_clampTopLeftInRect(Offset(x, y), tray));
       }
     }
     return slots;
   }
 
-  List<Offset> _drawerSlots(Rect drawer, int slotCount) {
-    const double tokenSize = 34;
-    const double gap = 5;
-    final int columns = max(4, ((drawer.width - 16) / (tokenSize + gap)).floor());
+  List<Offset> _drawerSlots(Rect drawerContentRect, int slotCount) {
+    final int columns = _drawerColumnCount(drawerContentRect);
+    final double stepX = columns <= 1
+        ? 0
+        : (drawerContentRect.width - _kTokenSize) / (columns - 1);
     final slots = <Offset>[];
 
     for (int index = 0; index < slotCount; index++) {
       final int col = index % columns;
       final int row = index ~/ columns;
-      final double x = drawer.left + 10 + (col * (tokenSize + gap));
-      final double y = drawer.top + 10 + (row * (tokenSize + gap));
+      final double x = _clampDrawerSlotX(
+        drawerContentRect.left + (col * stepX),
+        drawerContentRect,
+      );
+      final double y = drawerContentRect.top + (row * (_kTokenSize + _kDrawerRowGap));
       slots.add(Offset(x, y));
     }
     return slots;
@@ -498,7 +627,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     );
 
     if (_tokenWouldBeInTrayAt(momentumAdjusted)) {
-      final Rect tray = _trayRect(_registerSize);
+      final Rect tray = _trayTokenViewportRect(_registerSize);
       final List<Offset> slots = _traySlots(tray);
       final List<Offset> occupied = _registerTokens
           .where((other) => other.id != token.id && other.inTray)
@@ -515,10 +644,11 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       return;
     }
 
-    final Rect drawer = _drawerRect(_registerSize);
+    final Rect drawerContentRect = _drawerTokenViewportRect(_registerSize);
     final Offset contentTarget = _drawerContentPositionFromVisual(momentumAdjusted);
     final int drawerTokenCount = _registerTokens.where((other) => !other.inTray).length;
-    final List<Offset> slots = _drawerSlots(drawer, max(drawerTokenCount + 8, 24));
+    final List<Offset> slots =
+      _drawerSlots(drawerContentRect, max(drawerTokenCount + 8, 24));
     final List<Offset> occupied = _registerTokens
         .where((other) => other.id != token.id && !other.inTray)
         .map((other) => other.position)
@@ -536,7 +666,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   void _buildRegisterTokens() {
     _registerTokens.clear();
     _dragVisualByTokenId.clear();
-    final drawer = _drawerRect(_registerSize);
+    final Rect drawerContentRect = _drawerTokenViewportRect(_registerSize);
 
     final List<int> drawerContents = <int>[];
     for (final denomination in _denominations) {
@@ -546,7 +676,8 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       }
     }
 
-    final List<Offset> drawerSlots = _drawerSlots(drawer, drawerContents.length + 12);
+    final List<Offset> drawerSlots =
+      _drawerSlots(drawerContentRect, drawerContents.length + 12);
 
     for (int i = 0; i < drawerContents.length; i++) {
       _registerTokens.add(
@@ -566,14 +697,14 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       return 0;
     }
 
-    final drawer = _drawerRect(_registerSize);
-    const double tokenSize = 34;
-    const double gap = 5;
-    final int columns = max(4, ((drawer.width - 16) / (tokenSize + gap)).floor());
+    final Rect drawerContentRect = _drawerTokenViewportRect(_registerSize);
+    final int columns = _drawerColumnCount(drawerContentRect);
     final int tokenCount = _registerTokens.where((token) => !token.inTray).length;
     final int rows = (tokenCount / columns).ceil();
-    final double contentHeight = 10 + (rows * (tokenSize + gap));
-    final double viewportHeight = drawer.height - 16;
+    final double contentHeight = rows <= 0
+        ? 0
+      : _kTokenSize + ((rows - 1) * (_kTokenSize + _kDrawerRowGap));
+    final double viewportHeight = drawerContentRect.height;
     return max(0.0, contentHeight - viewportHeight);
   }
 
@@ -598,6 +729,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
         _buildRegisterTokens();
       }
     });
+    _updateChangeAnimations();
     _speak(_instructionText(), userInitiated: true);
   }
 
@@ -618,6 +750,8 @@ class _CashierGameScreenState extends State<CashierGameScreen>
         _score += 20;
         _streak += 1;
       });
+      _changeShakeController.value = 0;
+      _updateChangeAnimations();
       _saveBestScore();
       await _playSound('sounds/success.mp3');
       await _speak(_t('correct'));
@@ -625,6 +759,10 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       setState(() {
         _streak = 0;
       });
+      _changeShakeController
+        ..stop()
+        ..forward(from: 0);
+      _updateChangeAnimations();
       await _playSound('sounds/error.mp3');
       await _speak(_t('incorrect'));
     }
@@ -645,6 +783,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       setState(() {
         _stage = _CheckoutStage.sessionComplete;
       });
+      _updateChangeAnimations();
       _saveBestScore();
       _speak(_t('sessionDone'));
     }
@@ -758,6 +897,8 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       drawerClosedLabel: _t('drawerClosed'),
       customerTrayLabel: _t('customerTray'),
       trayTotalText: '${_money(_trayTotalCents)} / ${_money(_changeDueCents)}',
+      changeTextScale: _changeTextScale,
+      changeTextShakeX: _changeTextShakeX,
       drawerRectForSize: _drawerRect,
       trayRectForSize: _trayRect,
       drawerOpen:
@@ -791,18 +932,22 @@ class _CashierGameScreenState extends State<CashierGameScreen>
   }
 
   Widget _buildRegisterToken(_MoneyToken token) {
-    const double tokenSize = 34;
-    final bool isBill = token.cents >= 100;
-    final drawer = _drawerRect(_registerSize);
     final bool inDrawer = !token.inTray;
     final Offset visualPosition = _tokenVisualPosition(token);
-    final bool hiddenInDrawer = inDrawer &&
-      token.id != _activeTokenId &&
-      (visualPosition.dy + tokenSize < drawer.top || visualPosition.dy > drawer.bottom);
+    final bool isActiveDrag = _activeTokenId == token.id;
+    final Rect bounds = inDrawer
+        ? _drawerTokenViewportRect(_registerSize)
+        : _trayTokenViewportRect(_registerSize);
+    final bool hiddenOutsideBounds = visualPosition.dx < bounds.left ||
+      visualPosition.dx + _kTokenSize > bounds.right ||
+      visualPosition.dy < bounds.top ||
+      visualPosition.dy + _kTokenSize > bounds.bottom;
 
-    if (hiddenInDrawer) {
+    if (!isActiveDrag && hiddenOutsideBounds) {
       return const SizedBox.shrink();
     }
+
+    final bool isBill = token.cents >= 100;
 
     return Positioned(
       left: visualPosition.dx,
@@ -837,6 +982,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
             _dragVisualByTokenId.remove(token.id);
             _activeTokenId = null;
           });
+          _updateChangeAnimations();
         },
         onPanCancel: () {
           setState(() {
@@ -846,11 +992,12 @@ class _CashierGameScreenState extends State<CashierGameScreen>
             }
             _activeTokenId = null;
           });
+          _updateChangeAnimations();
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 140),
-          width: tokenSize,
-          height: tokenSize,
+          width: _kTokenSize,
+          height: _kTokenSize,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: isBill
@@ -890,6 +1037,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     return CashierRightPanel(
       questionPanelLabel: _t('questionPanel'),
       instructionText: _instructionText(),
+      showInstruction: false,
       subtotalLabel: _t('subtotal'),
       paidLabel: _t('paid'),
       changeDueLabel: _t('changeDue'),
@@ -926,6 +1074,25 @@ class _CashierGameScreenState extends State<CashierGameScreen>
       canOpenRegister: _stage == _CheckoutStage.paymentInfo,
       canCheckChange: _stage == _CheckoutStage.makingChange,
       canNextCustomer: _stage == _CheckoutStage.checkedOut,
+    );
+  }
+
+  Widget _buildTopInstructionBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.86),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.deepOrange.withValues(alpha: 0.24)),
+      ),
+      child: Text(
+        _instructionText(),
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 
@@ -981,15 +1148,41 @@ class _CashierGameScreenState extends State<CashierGameScreen>
               children: [
                 _buildTopBadges(),
                 const SizedBox(height: 10),
+                _buildTopInstructionBanner(),
+                const SizedBox(height: 10),
                 Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(flex: 4, child: _buildStoreScene()),
-                      const SizedBox(width: 10),
-                      Expanded(flex: 5, child: _buildRegisterScene()),
-                      const SizedBox(width: 10),
-                      Expanded(flex: 4, child: _buildRightPanel()),
-                    ],
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final bool useStackedLayout = constraints.maxWidth < 980;
+                      if (!useStackedLayout) {
+                        return Row(
+                          children: [
+                            Expanded(flex: 4, child: _buildStoreScene()),
+                            const SizedBox(width: 10),
+                            Expanded(flex: 5, child: _buildRegisterScene()),
+                            const SizedBox(width: 10),
+                            Expanded(flex: 4, child: _buildRightPanel()),
+                          ],
+                        );
+                      }
+
+                      final double storeHeight =
+                          max(220.0, constraints.maxHeight * 0.34);
+                      final double registerHeight =
+                          max(250.0, constraints.maxHeight * 0.42);
+                      final double rightHeight =
+                          max(210.0, constraints.maxHeight * 0.30);
+
+                      return ListView(
+                        children: [
+                          SizedBox(height: storeHeight, child: _buildStoreScene()),
+                          const SizedBox(height: 10),
+                          SizedBox(height: registerHeight, child: _buildRegisterScene()),
+                          const SizedBox(height: 10),
+                          SizedBox(height: rightHeight, child: _buildRightPanel()),
+                        ],
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 10),

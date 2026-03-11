@@ -11,6 +11,8 @@ class CashierRegisterPanel extends StatelessWidget {
     required this.drawerClosedLabel,
     required this.customerTrayLabel,
     required this.trayTotalText,
+    required this.changeTextScale,
+    required this.changeTextShakeX,
     required this.drawerRectForSize,
     required this.trayRectForSize,
     required this.drawerOpen,
@@ -28,6 +30,8 @@ class CashierRegisterPanel extends StatelessWidget {
   final String drawerClosedLabel;
   final String customerTrayLabel;
   final String trayTotalText;
+  final double changeTextScale;
+  final double changeTextShakeX;
   final Rect Function(Size size) drawerRectForSize;
   final Rect Function(Size size) trayRectForSize;
   final bool drawerOpen;
@@ -50,10 +54,44 @@ class CashierRegisterPanel extends StatelessWidget {
         final drawerRect = drawerRectForSize(size);
         final trayRect = trayRectForSize(size);
         final bool compactLayout = size.height < 420 || size.width < 380;
-        final double trayLabelTop = max(8.0, trayRect.top - 30);
+        final double machineTop = compactLayout ? 50 : 44;
+        final double machineHeight = compactLayout ? 100 : 112;
+        final double miniDisplayWidth = compactLayout ? 96 : 112;
+        final double miniDisplayHeight = compactLayout ? 52 : 60;
+        final double miniDisplayRight = compactLayout ? 12 : 16;
+        final double miniDisplayTop = compactLayout ? 4 : 2;
+        final double longDisplayLeft = compactLayout ? 84 : 94;
+        final double longDisplayRight =
+          miniDisplayRight + miniDisplayWidth + (compactLayout ? 10 : 14);
+        final double longDisplayTop = compactLayout ? 12 : 10;
+        final double longDisplayHeight = compactLayout ? 20 : 22;
+        const double drawerTokenSize = 34;
+        const double drawerColGap = 5;
+        const double drawerRowGap = 5;
+        const double drawerContentLeftInset = 10;
+        const double drawerContentTopInset = 10;
+        final double drawerContentWidth = max(24.0, drawerRect.width - 40);
+        final double drawerContentHeight = max(22.0, drawerRect.height - 40);
+        final int drawerColumns = max(
+          2,
+          ((drawerContentWidth + drawerColGap) / (drawerTokenSize + drawerColGap))
+              .floor(),
+        );
+        final double drawerStepX = drawerColumns <= 1
+          ? 0
+          : (drawerContentWidth - drawerTokenSize) / (drawerColumns - 1);
+        final int drawerTokenCount =
+          registerTokens.where((token) => !token.inTray).length;
+        final int drawerSocketCount = max(20, drawerTokenCount + 5);
+        final double trayLabelTop =
+          min(size.height - 30, trayRect.bottom + (compactLayout ? 6 : 8));
+        final double trayLabelLeft =
+          (trayRect.left + (trayRect.width / 2)).clamp(60.0, size.width - 60.0);
         final bool showFlowArrows = !compactLayout;
         final double flowArrowLeft = ((drawerRect.right + trayRect.left) / 2) - 12;
-        final double flowArrowTop = max(drawerRect.top + 24, trayLabelTop + 40);
+        final double flowCenterY =
+          ((drawerRect.top + drawerRect.bottom) + (trayRect.top + trayRect.bottom)) / 4;
+        final double flowArrowTop = max(24.0, flowCenterY - 38);
 
         return Container(
           decoration: BoxDecoration(
@@ -101,19 +139,23 @@ class CashierRegisterPanel extends StatelessWidget {
                 ),
               ),
               Positioned(
-                left: 12,
-                top: 10,
+                left: 0,
+                right: 0,
+                top: 8,
                 child: Text(
                   registerLabel,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                 ),
               ),
               Positioned(
                 left: 14,
-                top: 44,
+                top: machineTop,
                 right: 14,
                 child: Container(
-                  height: 112,
+                  height: machineHeight,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFFE6E8EB), Color(0xFFCBCFD5)],
@@ -133,13 +175,13 @@ class CashierRegisterPanel extends StatelessWidget {
                   child: Stack(
                     children: [
                       Positioned(
-                        right: 16,
-                        top: 2,
+                        right: miniDisplayRight,
+                        top: miniDisplayTop,
                         child: Column(
                           children: [
                             Container(
-                              width: 80,
-                              height: 48,
+                              width: miniDisplayWidth,
+                              height: miniDisplayHeight,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [Color(0xFFC4D5EA), Color(0xFFA9C0DB)],
@@ -152,7 +194,7 @@ class CashierRegisterPanel extends StatelessWidget {
                             ),
                             Container(
                               width: 8,
-                              height: 14,
+                              height: compactLayout ? 12 : 14,
                               color: Colors.black54,
                             )
                           ],
@@ -177,11 +219,11 @@ class CashierRegisterPanel extends StatelessWidget {
                         ),
                       ),
                       Positioned(
-                        left: 94,
-                        right: 16,
-                        top: 10,
+                        left: longDisplayLeft,
+                        right: longDisplayRight,
+                        top: longDisplayTop,
                         child: Container(
-                          height: 22,
+                          height: longDisplayHeight,
                           decoration: BoxDecoration(
                             color: const Color(0xFF86B9DF),
                             borderRadius: BorderRadius.circular(6),
@@ -207,6 +249,40 @@ class CashierRegisterPanel extends StatelessWidget {
                                     : const Color(0xFFFDFDFD),
                                 borderRadius: BorderRadius.circular(3),
                                 border: Border.all(color: Colors.black26),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        right: miniDisplayRight,
+                        top: miniDisplayTop,
+                        child: IgnorePointer(
+                          child: SizedBox(
+                            width: miniDisplayWidth,
+                            height: miniDisplayHeight,
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 6),
+                                child: Transform.translate(
+                                  offset: Offset(changeTextShakeX, 0),
+                                  child: Transform.scale(
+                                    scale: changeTextScale,
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        trayTotalText,
+                                        maxLines: 1,
+                                        style: TextStyle(
+                                          fontSize: compactLayout ? 14 : 16,
+                                          fontWeight: FontWeight.w900,
+                                          color: const Color(0xFF1E2430),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -258,24 +334,41 @@ class CashierRegisterPanel extends StatelessWidget {
                     children: [
                       if (drawerOpen)
                         Positioned.fill(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(10, 10, 10, 30),
-                            child: GridView.count(
-                              physics: const NeverScrollableScrollPhysics(),
-                              crossAxisCount: 4,
-                              crossAxisSpacing: 6,
-                              mainAxisSpacing: 6,
-                              children: List.generate(
-                                12,
-                                (index) => Container(
+                          child: Stack(
+                            clipBehavior: Clip.hardEdge,
+                            children: List.generate(drawerSocketCount, (index) {
+                              final int col = index % drawerColumns;
+                              final int row = index ~/ drawerColumns;
+                              final double x =
+                                  drawerContentLeftInset + (col * drawerStepX);
+                              final double y = drawerContentTopInset +
+                                  (row * (drawerTokenSize + drawerRowGap)) -
+                                  drawerScrollOffset;
+
+                              final bool hidden =
+                                  y < drawerContentTopInset ||
+                                      y + drawerTokenSize >
+                                          drawerContentTopInset + drawerContentHeight;
+                              if (hidden) {
+                                return const SizedBox.shrink();
+                              }
+
+                              return Positioned(
+                                left: x,
+                                top: y,
+                                child: Container(
+                                  width: drawerTokenSize,
+                                  height: drawerTokenSize,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF3A3D45),
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: Colors.black45),
+                                    color: const Color(0xFF343843),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.black.withValues(alpha: 0.40),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
+                              );
+                            }),
                           ),
                         )
                       else
@@ -347,18 +440,7 @@ class CashierRegisterPanel extends StatelessWidget {
                 ),
               ),
               Positioned(
-                right: 12,
-                top: 14,
-                child: Text(
-                  trayTotalText,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 18,
+                left: trayLabelLeft - 58,
                 top: trayLabelTop,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -389,10 +471,10 @@ class CashierRegisterPanel extends StatelessWidget {
               if (showTokens) ...registerTokens.map(buildToken),
               if (drawerOpen)
                 Positioned(
-                  left: drawerRect.right - 6,
+                  left: drawerRect.right - 24,
                   top: drawerRect.top + 6,
                   child: Container(
-                    width: 20,
+                    width: 18,
                     height: drawerRect.height - 12,
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.24),

@@ -8,6 +8,7 @@ class CashierRightPanel extends StatelessWidget {
     super.key,
     required this.questionPanelLabel,
     required this.instructionText,
+    required this.showInstruction,
     required this.subtotalLabel,
     required this.paidLabel,
     required this.changeDueLabel,
@@ -24,6 +25,7 @@ class CashierRightPanel extends StatelessWidget {
 
   final String questionPanelLabel;
   final String instructionText;
+  final bool showInstruction;
   final String subtotalLabel;
   final String paidLabel;
   final String changeDueLabel;
@@ -70,21 +72,24 @@ class CashierRightPanel extends StatelessWidget {
               questionPanelLabel,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
             ),
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.blue.shade100),
+            if (showInstruction) ...[
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.blue.shade100),
+                ),
+                child: Text(
+                  instructionText,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
               ),
-              child: Text(
-                instructionText,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-              ),
-            ),
-            const SizedBox(height: 10),
+              const SizedBox(height: 10),
+            ] else
+              const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(

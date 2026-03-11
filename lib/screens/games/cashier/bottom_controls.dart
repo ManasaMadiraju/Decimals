@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class CashierBottomControls extends StatelessWidget {
@@ -42,16 +44,26 @@ class CashierBottomControls extends StatelessWidget {
     required String label,
     required Color color,
   }) {
-    return Expanded(
-      child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-        ),
-        onPressed: onPressed,
-        icon: Icon(icon),
-        label: Text(label),
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
       ),
+      onPressed: onPressed,
+      icon: Icon(icon),
+      label: Text(label),
+    );
+  }
+
+  Widget _outlinedAction({
+    required VoidCallback onPressed,
+    required IconData icon,
+    required String label,
+  }) {
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon),
+      label: Text(label),
     );
   }
 
@@ -69,52 +81,128 @@ class CashierBottomControls extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: onReplay,
-              icon: const Icon(Icons.record_voice_over),
-              label: Text(replayLabel),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: onHint,
-              icon: const Icon(Icons.lightbulb),
-              label: Text(hintLabel),
-            ),
-          ),
-          const SizedBox(width: 8),
-          _primaryAction(
-            onPressed: canOpenRegister ? onOpenRegister : null,
-            icon: Icons.lock_open,
-            label: openRegisterLabel,
-            color: Colors.indigo,
-          ),
-          const SizedBox(width: 8),
-          _primaryAction(
-            onPressed: canCheckChange ? onCheckChange : null,
-            icon: Icons.check_circle,
-            label: checkChangeLabel,
-            color: Colors.blue,
-          ),
-          const SizedBox(width: 8),
-          _primaryAction(
-            onPressed: canNextCustomer ? onNextCustomer : null,
-            icon: Icons.navigate_next,
-            label: nextCustomerLabel,
-            color: Colors.green,
-          ),
-          const SizedBox(width: 8),
-          _primaryAction(
-            onPressed: onRestart,
-            icon: Icons.restart_alt,
-            label: restartLabel,
-            color: Colors.deepOrange,
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final bool compact = constraints.maxWidth < 1000;
+          if (!compact) {
+            return Row(
+              children: [
+                Expanded(
+                  child: _outlinedAction(
+                    onPressed: onReplay,
+                    icon: Icons.record_voice_over,
+                    label: replayLabel,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _outlinedAction(
+                    onPressed: onHint,
+                    icon: Icons.lightbulb,
+                    label: hintLabel,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _primaryAction(
+                    onPressed: canOpenRegister ? onOpenRegister : null,
+                    icon: Icons.lock_open,
+                    label: openRegisterLabel,
+                    color: Colors.indigo,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _primaryAction(
+                    onPressed: canCheckChange ? onCheckChange : null,
+                    icon: Icons.check_circle,
+                    label: checkChangeLabel,
+                    color: Colors.blue,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _primaryAction(
+                    onPressed: canNextCustomer ? onNextCustomer : null,
+                    icon: Icons.navigate_next,
+                    label: nextCustomerLabel,
+                    color: Colors.green,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _primaryAction(
+                    onPressed: onRestart,
+                    icon: Icons.restart_alt,
+                    label: restartLabel,
+                    color: Colors.deepOrange,
+                  ),
+                ),
+              ],
+            );
+          }
+
+          final double buttonWidth =
+              max(140.0, ((constraints.maxWidth - 8) / 2).floorToDouble());
+          return Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              SizedBox(
+                width: buttonWidth,
+                child: _outlinedAction(
+                  onPressed: onReplay,
+                  icon: Icons.record_voice_over,
+                  label: replayLabel,
+                ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                child: _outlinedAction(
+                  onPressed: onHint,
+                  icon: Icons.lightbulb,
+                  label: hintLabel,
+                ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                child: _primaryAction(
+                  onPressed: canOpenRegister ? onOpenRegister : null,
+                  icon: Icons.lock_open,
+                  label: openRegisterLabel,
+                  color: Colors.indigo,
+                ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                child: _primaryAction(
+                  onPressed: canCheckChange ? onCheckChange : null,
+                  icon: Icons.check_circle,
+                  label: checkChangeLabel,
+                  color: Colors.blue,
+                ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                child: _primaryAction(
+                  onPressed: canNextCustomer ? onNextCustomer : null,
+                  icon: Icons.navigate_next,
+                  label: nextCustomerLabel,
+                  color: Colors.green,
+                ),
+              ),
+              SizedBox(
+                width: buttonWidth,
+                child: _primaryAction(
+                  onPressed: onRestart,
+                  icon: Icons.restart_alt,
+                  label: restartLabel,
+                  color: Colors.deepOrange,
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
