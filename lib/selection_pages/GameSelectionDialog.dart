@@ -5,6 +5,7 @@ import 'package:decimals/screens/games/birdgame.dart';
 import 'package:decimals/screens/games/memorygameapp.dart';
 import 'package:decimals/screens/games/PlaceValueScreenState1.dart';
 import 'package:decimals/screens/games/ChooseItGameScreen.dart';
+import 'package:decimals/screens/games/chef_game.dart';
 
 class GameSelectionDialog extends StatelessWidget {
   const GameSelectionDialog({super.key});
@@ -70,6 +71,8 @@ class GameSelectionDialog extends StatelessWidget {
                         const DecimalPopGame(), Colors.teal),
                     _buildGameButton(context, '🛒 Decimal Cashier',
                       const CashierGameScreen(), Colors.deepOrange),
+                    _buildGameButton(context, '🍳 Decimal Chef',
+                        const ChefGameScreen(), Colors.orange),
                     const SizedBox(height: 20),
                     TextButton(
                       onPressed: () {
