@@ -864,10 +864,12 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     }
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
       children: [
         badge(_t('score'), '$_score', Colors.indigo),
+        const SizedBox(width: 8),
         badge(_t('best'), '$_bestScore', Colors.teal),
+        const SizedBox(width: 8),
         badge(_t('streak'), '$_streak', Colors.deepOrange),
       ],
     );
@@ -1096,6 +1098,36 @@ class _CashierGameScreenState extends State<CashierGameScreen>
     );
   }
 
+  Widget _buildTopStatusRow() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 860) {
+          return Column(
+            children: [
+              _buildTopInstructionBanner(),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: _buildTopBadges(),
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(child: _buildTopInstructionBanner()),
+            const SizedBox(width: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: _buildTopBadges(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1146,9 +1178,7 @@ class _CashierGameScreenState extends State<CashierGameScreen>
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
-                _buildTopBadges(),
-                const SizedBox(height: 10),
-                _buildTopInstructionBanner(),
+                _buildTopStatusRow(),
                 const SizedBox(height: 10),
                 Expanded(
                   child: LayoutBuilder(
